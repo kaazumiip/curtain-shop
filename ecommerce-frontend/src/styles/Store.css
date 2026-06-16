@@ -1,0 +1,392 @@
+.store-container {
+  width: 100%;
+  padding: 0 30px; /* Precise 30px side margins */
+}
+
+.nav-header {
+  height: 120px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0; /* Container handles the padding */
+}
+
+.logo {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #000;
+  letter-spacing: -1px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 40px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.hero-section {
+  height: 70vh;
+  margin: 0;
+  background-image: url('/banner.png'); /* Force absolute path */
+  background-size: cover;
+  background-position: center;
+  border-radius: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid #f0f0f0;
+  position: relative;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.1); /* Subtle darkening for text readability */
+}
+
+.hero-overlay {
+  background: white;
+  padding: 60px 80px;
+  border-radius: var(--radius);
+  text-align: center;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.05);
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 40px;
+  padding: 60px 0;
+}
+
+.product-card {
+  background-color: #fff;
+  padding: 25px;
+  border-radius: var(--radius);
+  transition: all 0.3s ease;
+  border: 1px solid #f0f0f0;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.05);
+  border-color: var(--pink-blush);
+}
+
+.product-img {
+  width: 100%;
+  aspect-ratio: 1/1;
+  border-radius: 8px;
+  object-fit: cover;
+  margin-bottom: 25px;
+}
+
+.product-title {
+  font-size: 1.1rem;
+  margin-bottom: 5px;
+  color: #000;
+  text-align: left;
+}
+
+.product-price {
+  text-align: left;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.btn-add {
+  margin-top: 15px;
+  width: 100%;
+  padding: 15px;
+  background-color: #000;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-add:hover {
+  background-color: var(--accent-pink);
+  color: #000;
+}
+
+.btn-proceed:hover {
+  background-color: #000 !important;
+  color: #fff !important;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.menu-item-hover {
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
+}
+
+.menu-item-hover:hover {
+  padding-left: 30px !important;
+  color: var(--accent-pink) !important;
+}
+
+.menu-item-hover:hover .arrow-icon {
+  opacity: 1 !important;
+  transform: translateX(10px);
+}
+
+/* SEARCH REDESIGN */
+.search-takeover-capsule {
+  position: fixed;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  z-index: 1000;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+  border: 1px solid #f0f0f0;
+  opacity: 0;
+  visibility: hidden;
+  width: 0; /* Start at zero width */
+  height: 45px;
+  overflow: hidden; 
+  transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.search-takeover-capsule.active {
+  opacity: 1;
+  visibility: visible;
+  width: 95%;
+  max-width: 800px; 
+}
+
+.search-input-pill {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #333;
+  outline: none;
+  font-family: inherit;
+  margin-left: 20px;
+}
+
+/* MOBILE OPTIMIZATION */
+@media (max-width: 768px) {
+  .store-container {
+    padding: 0 15px; /* Thinner margins on mobile */
+  }
+
+  .nav-header {
+    height: 90px;
+    padding: 0;
+  }
+
+  .logo {
+    font-size: 1.4rem;
+  }
+
+  .nav-links {
+    gap: 15px;
+    font-size: 0.65rem;
+  }
+
+  .hero-section {
+    height: 35vh;
+    border-radius: 12px;
+  }
+
+  .hero-overlay {
+    padding: 30px 20px;
+    width: 90%;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 items per row */
+    gap: 25px; /* More space for mobile thumbs */
+    padding: 20px 0;
+  }
+
+  .product-card {
+    padding: 10px;
+  }
+
+  .product-img {
+    margin-bottom: 15px;
+  }
+
+  .product-title {
+    font-size: 0.9rem;
+  }
+
+  .search-takeover-capsule.active {
+    width: 100%;
+    height: 50px;
+    padding: 0 15px;
+  }
+
+  .search-input-pill {
+    font-size: 0.85rem;
+    margin-left: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-grid {
+    grid-template-columns: 1fr; /* 1 item per row */
+  }
+  
+  .logo {
+    font-size: 1.2rem;
+  }
+
+  .mobile-stack {
+    grid-template-columns: 1fr !important;
+    gap: 30px !important;
+  }
+}
+
+/* NEW RESPONSIVE UTILITIES */
+.nav-lang-toggle {
+  display: block;
+}
+
+.nav-favorites-link {
+  display: flex;
+}
+
+.nav-link-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 25px;
+  text-decoration: none;
+  color: #000;
+}
+
+.category-scroll-bar {
+  display: flex;
+  gap: 30px;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .nav-lang-toggle {
+    display: none !important;
+  }
+
+  .nav-favorites-link {
+    display: none !important;
+  }
+
+  .nav-link-item {
+    margin-left: 15px !important;
+  }
+
+  .category-scroll-bar {
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    gap: 20px !important;
+    padding-bottom: 12px !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Hide scrollbar for standard look */
+  }
+
+  .category-scroll-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .category-scroll-bar button {
+    flex-shrink: 0 !important;
+  }
+  
+  .category-scroll-bar button div {
+    bottom: -13px !important; /* Adjust indicator line position on mobile */
+  }
+
+  /* Responsive Hero typography */
+  .hero-overlay h2 {
+    font-size: 1.8rem !important;
+  }
+  
+  .hero-overlay p {
+    font-size: 0.8rem !important;
+    margin-bottom: 20px !important;
+  }
+
+  /* Responsive generic headers */
+  .serif {
+    font-size: 1.8rem !important;
+  }
+
+  /* General mobile details */
+  .mobile-no-padding {
+    padding: 20px !important;
+  }
+
+  .mobile-gallery-height {
+    height: 350px !important;
+  }
+  
+  .contact-section {
+    margin: 100px 0 60px;
+    padding: 80px;
+    background-color: #fdfdfd;
+    border-radius: 40px;
+    border: 1px solid #f2f2f2;
+    text-align: center;
+  }
+
+  .map-container {
+    margin-top: 50px;
+    border-radius: 30px;
+    overflow: hidden;
+    height: 400px;
+    border: 1px solid #f0f0f0;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+  }
+}
+
+@media (max-width: 768px) {
+  /* ... existing inside 768px media query ... */
+  .contact-section {
+    margin: 40px 0 !important;
+    padding: 30px 15px !important;
+    border-radius: 24px !important;
+  }
+  
+  .map-container {
+    height: 280px !important;
+    margin-top: 30px !important;
+  }
+  
+  .about-container {
+    padding: 60px 15px !important;
+  }
+}
+
+.about-container {
+  padding: 120px 0;
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 480px) {
+  .logo {
+    font-size: 1.1rem !important;
+  }
+  
+  .hero-section {
+    height: 45vh !important;
+  }
+}

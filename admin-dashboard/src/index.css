@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Playfair+Display:wght@700;900&display=swap');
+
+:root {
+  --bg: #FFFFFF;
+  --surface: #fcfcfc;
+  --card: #ffffff;
+  --text: #111111;
+  --text-muted: #777777;
+  --pink-blush: #F4C2C2;
+  --vanguard-pink: #E0115F;
+  --border: #eeeeee;
+  --radius: 20px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  line-height: 1.6;
+}
+
+/* Reverting to Elegant Serif for headings */
+.serif {
+  font-family: 'Playfair Display', serif;
+  letter-spacing: 1px;
+}

@@ -1,0 +1,82 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Playfair+Display:wght@700;900&display=swap');
+
+:root {
+  --bg-blush: #FFFFFF;
+  --text-primary: #000000;
+  --text-muted: #666666;
+  --accent-pink: #F4C2C2;
+  --border: #f0f0f0;
+  --radius: 24px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-blush);
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+}
+
+.serif {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.suggestion-item {
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  padding: 10px !important;
+}
+
+.suggestion-item:hover {
+  background-color: #f9f9f9;
+  padding-left: 15px !important;
+}
+
+.suggestion-description {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  font-size: 0.75rem;
+  color: #777;
+  line-height: 1.4;
+  transition: all 0.3s ease;
+  margin-top: 0;
+}
+
+.suggestion-item:hover .suggestion-description {
+  max-height: 50px;
+  opacity: 1;
+  margin-top: 8px;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-transition {
+  animation: pageFade 0.7s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+@keyframes pageFade {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
