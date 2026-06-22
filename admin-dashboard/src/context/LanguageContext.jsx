@@ -4,23 +4,25 @@ import { translations } from '../utils/translations';
 const LanguageContext = createContext();
 
 export const LanguageProvider = ({ children }) => {
-  const [language, setLanguage] = useState(localStorage.getItem('lang') || 'en');
+  // Always default to Khmer ('kh')
+  const [language, setLanguage] = useState('kh');
 
   useEffect(() => {
-    localStorage.setItem('lang', language);
-  }, [language]);
+    localStorage.setItem('lang', 'kh');
+  }, []);
 
   const t = (key) => {
-    return translations[language][key] || translations['en'][key] || key;
+    // Force Khmer translation lookup, fallback to English translation or key if not found
+    return translations['kh'][key] || translations['en'][key] || key;
   };
 
   const toggleLanguage = () => {
-    setLanguage(prev => prev === 'en' ? 'kh' : 'en');
+    // No-op to disable switching
   };
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t, toggleLanguage }}>
-      <div style={{ fontFamily: language === 'kh' ? "'Kantumruy Pro', sans-serif" : "inherit" }}>
+      <div style={{ fontFamily: "'Kantumruy Pro', sans-serif" }}>
         {children}
       </div>
     </LanguageContext.Provider>

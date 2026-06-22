@@ -126,23 +126,6 @@ function Dashboard() {
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h1 className="serif" style={{ fontSize: '1.5rem', letterSpacing: '-0.5px' }}>Srey Tha Curtain</h1>
-            <div 
-              onClick={toggleLanguage}
-              style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '8px', 
-                fontSize: '0.75rem', 
-                fontWeight: '700', 
-                cursor: 'pointer',
-                padding: '6px 12px',
-                border: '1px solid #eee',
-                borderRadius: '8px'
-              }}
-            >
-              <Globe size={14} />
-              {language === 'en' ? 'KH' : 'EN'}
-            </div>
           </div>
           <div className="tab-header">
             <span 

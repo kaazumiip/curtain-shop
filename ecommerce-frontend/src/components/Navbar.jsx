@@ -106,21 +106,6 @@ const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuer
         </Link>
         
         <div className="nav-links" style={{ justifyContent: 'flex-end', alignItems: 'center' }}>
-          <div 
-            className="nav-lang-toggle"
-            onClick={toggleLanguage}
-            style={{ 
-              fontSize: '0.75rem', 
-              fontWeight: '800', 
-              cursor: 'pointer', 
-              padding: '4px 8px', 
-              border: '1px solid #000', 
-              borderRadius: '4px',
-              marginRight: '20px'
-            }}
-          >
-            {language === 'en' ? 'KH' : 'EN'}
-          </div>
           <Search size={20} onClick={openSearch} style={{ cursor: 'pointer', color: '#000' }} />
           <Link to="/favorites" className="nav-favorites-link nav-link-item">
             <Heart size={20} />
@@ -191,27 +176,6 @@ const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuer
             >
               {t('telegram_support')}
             </a>
-            <div 
-              onClick={() => {
-                toggleLanguage();
-                setIsMenuOpen(false);
-              }}
-              style={{ 
-                color: '#000', 
-                cursor: 'pointer', 
-                fontSize: '0.75rem', 
-                fontWeight: '800', 
-                textTransform: 'uppercase', 
-                letterSpacing: '1px',
-                border: '1px solid #000',
-                padding: '10px 15px',
-                borderRadius: '8px',
-                textAlign: 'center',
-                marginTop: '15px'
-              }}
-            >
-              {language === 'en' ? 'ភាសាខ្មែរ (KH)' : 'ENGLISH (EN)'}
-            </div>
           </div>
 
           <div>
