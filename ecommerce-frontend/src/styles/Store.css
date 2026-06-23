@@ -221,8 +221,8 @@
     margin-bottom: 15px;
   }
 
-  .product-title {
-    font-size: 0.8rem !important;
+  .product-title.serif {
+    font-size: 0.85rem !important;
   }
 
   .search-takeover-capsule.active {
@@ -242,8 +242,8 @@
     grid-template-columns: repeat(2, 1fr); /* 2 items per row */
   }
   
-  .product-title {
-    font-size: 0.5rem !important;
+  .product-title.serif {
+    font-size: 0.75rem !important;
   }
   
   .logo {
