@@ -189,7 +189,7 @@
   }
 
   .logo {
-    font-size: 1.4rem;
+    font-size: 1.0rem;
   }
 
   .nav-links {
@@ -387,10 +387,76 @@
 
 @media (max-width: 480px) {
   .logo {
-    font-size: 1.1rem !important;
+    font-size: 0.75rem !important;
   }
   
   .hero-section {
     height: 45vh !important;
+  }
+}
+
+/* Page Layout Styles */
+.page-container {
+  padding: 40px 0;
+}
+
+.shop-header, .favorites-header {
+  margin-bottom: 60px;
+}
+
+.page-title {
+  font-size: 2.5rem;
+  margin-bottom: 30px;
+}
+
+.showing-count {
+  color: #999;
+  font-size: 0.8rem;
+  margin-top: 30px;
+}
+
+@media (max-width: 768px) {
+  .page-container {
+    padding: 15px 0;
+  }
+  
+  .shop-header, .favorites-header {
+    margin-bottom: 20px;
+  }
+  
+  .page-title {
+    font-size: 1.6rem !important;
+    margin-bottom: 10px;
+  }
+  
+  .showing-count {
+    margin-top: 15px;
+  }
+  
+  .product-grid {
+    padding: 10px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-container {
+    padding: 5px 0;
+  }
+  
+  .shop-header, .favorites-header {
+    margin-bottom: 10px;
+  }
+  
+  .page-title {
+    font-size: 1.3rem !important;
+    margin-bottom: 5px;
+  }
+  
+  .showing-count {
+    margin-top: 10px;
+  }
+  
+  .product-grid {
+    padding: 5px 0;
   }
 }

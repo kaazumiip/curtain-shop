@@ -13,8 +13,8 @@ const SearchResults = ({ products, onAddToCart, favorites, onToggleFavorite }) =
   );
 
   return (
-    <div>
-      <h1 className="serif" style={{ fontSize: '2rem' }}>{t('results_for')} "{query}"</h1>
+    <div className="page-container">
+      <h1 className="serif page-title">{t('results_for')} "{query}"</h1>
       <p style={{ color: '#999', fontSize: '0.9rem', marginTop: '10px' }}>
         {results.length} {t('found_products')}
       </p>

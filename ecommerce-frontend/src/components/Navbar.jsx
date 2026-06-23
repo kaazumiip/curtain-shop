@@ -34,6 +34,18 @@ const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuer
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isExpanded]);
+  
+  // Prevent body scroll when menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMenuOpen]);
 
   // Update suggestions as user types
   useEffect(() => {
@@ -143,6 +155,7 @@ const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuer
           left: isMenuOpen ? 0 : '-350px',
           width: '320px',
           height: '100vh',
+          overflowY: 'auto',
           backgroundColor: '#fff',
           zIndex: 5000,
           transition: 'all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1)',
@@ -199,7 +212,7 @@ const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuer
                     color: '#444'
                   }}
                 >
-                  {t(cat)}
+                  {t(cat.toLowerCase().replace(' ', '_'))}
                   <ArrowRight size={14} className="arrow-icon" style={{ opacity: 0, transition: 'all 0.3s ease' }} />
                 </button>
               ))}

@@ -8,10 +8,10 @@ const Favorites = ({ favorites, onToggleFavorite, onAddToCart }) => {
   const { t } = useLanguage();
 
   return (
-    <div style={{ padding: '40px 0' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '60px' }}>
+    <div className="page-container">
+      <div className="favorites-header" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
         <Heart size={32} color="#000" fill="#000" />
-        <h1 className="serif" style={{ fontSize: '2.5rem' }}>{t('your_favorites')}</h1>
+        <h1 className="serif page-title" style={{ margin: 0 }}>{t('your_favorites')}</h1>
       </div>
 
       {favorites.length === 0 ? (

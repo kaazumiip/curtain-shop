@@ -35,9 +35,9 @@ const Shop = ({ products, onAddToCart, favorites, onToggleFavorite }) => {
   });
 
   return (
-    <div style={{ padding: '40px 0' }}>
-      <div style={{ marginBottom: '60px' }}>
-        <h1 className="serif" style={{ fontSize: '2.5rem', marginBottom: '30px' }}>{t('full_collection')}</h1>
+    <div className="page-container">
+      <div className="shop-header">
+        <h1 className="serif page-title">{t('full_collection')}</h1>
         
         {/* Category Filter Bar */}
         <div className="category-scroll-bar">
@@ -108,7 +108,7 @@ const Shop = ({ products, onAddToCart, favorites, onToggleFavorite }) => {
           </div>
         )}
         
-        <p style={{ color: '#999', fontSize: '0.8rem', marginTop: '30px' }}>
+        <p className="showing-count">
           {t('showing')} {filteredProducts.length} {t('curated_pieces')}
         </p>
       </div>
