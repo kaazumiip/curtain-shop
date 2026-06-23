@@ -22,7 +22,7 @@ const ProductCard = ({ product, onAddToCart, isFavorite, onToggleFavorite }) => 
             </span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <h4 className="product-title serif" style={{ margin: 0, fontSize: '1.1rem' }}>
+            <h4 className="product-title serif" style={{ margin: 0 }}>
               {language === 'kh' && product.nameKh ? product.nameKh : product.name}
             </h4>
             <button 
