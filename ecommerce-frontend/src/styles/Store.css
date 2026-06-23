@@ -239,7 +239,7 @@
 
 @media (max-width: 480px) {
   .product-grid {
-    grid-template-columns: 1fr; /* 1 item per row */
+    grid-template-columns: repeat(2, 1fr); /* 2 items per row */
   }
   
   .logo {
