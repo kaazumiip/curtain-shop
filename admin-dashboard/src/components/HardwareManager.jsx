@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api/axios';
 import { Plus, Trash2, Image as ImageIcon, CheckCircle, ChevronDown, ChevronUp, Package } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 const cardStyles = {
   uploadArea: {
@@ -37,6 +38,7 @@ const cardStyles = {
 };
 
 const HardwareManager = ({ isCompact }) => {
+  const { t } = useLanguage();
   const [hardware, setHardware] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -73,7 +75,7 @@ const HardwareManager = ({ isCompact }) => {
         setNewSet({ ...newSet, poleImageUrl: res.data.imageUrl });
       }
     } catch (err) {
-      alert('Photo failed to upload.');
+      alert(t('photo_upload_failed'));
     } finally {
       setUploading(false);
     }
@@ -81,29 +83,29 @@ const HardwareManager = ({ isCompact }) => {
 
   const handleAddSet = async () => {
     if (!newSet.name || !newSet.ringImageUrl || !newSet.poleImageUrl) {
-      return alert('Please provide a name and both images.');
+      return alert(t('provide_name_both_images'));
     }
     try {
       await api.post('/hardware', newSet);
       setNewSet({ name: '', ringImageUrl: '', poleImageUrl: '' });
       fetchHardware();
     } catch (err) {
-      alert('Failed to save hardware set: ' + (err.response?.data?.message || err.message));
+      alert(t('failed_save_product') + ': ' + (err.response?.data?.message || err.message));
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Delete this hardware set?')) {
+    if (window.confirm(t('delete_hardware_confirm'))) {
       try {
         await api.delete(`/hardware/${id}`);
         fetchHardware();
       } catch (err) {
-        alert('Delete failed.');
+        alert(t('failed_delete_product'));
       }
     }
   };
 
-  if (loading && !isCompact) return <div style={{ padding: '50px', textAlign: 'center', letterSpacing: '2px' }}>LOADING HARDWARE...</div>;
+  if (loading && !isCompact) return <div style={{ padding: '50px', textAlign: 'center', letterSpacing: '2px' }}>{t('loading')}</div>;
 
   return (
     <div>
@@ -114,12 +116,12 @@ const HardwareManager = ({ isCompact }) => {
         <div>
           <h2 style={{ fontSize: '1.1rem', fontWeight: '800', margin: 0, display: 'flex', alignItems: 'center', gap: '10px', color: '#003e6b' }}>
             <Package size={20} />
-            Global Hardware Library
+            {t('global_hardware_library')}
             <span style={{ fontSize: '0.7rem', backgroundColor: '#d0e8ff', padding: '2px 8px', borderRadius: '50px', color: '#005fa3' }}>
-              {hardware.length} Sets
+              {hardware.length} {t('sets_count')}
             </span>
           </h2>
-          <p style={{ color: '#547ea0', fontSize: '0.75rem', marginTop: '4px' }}>Manage pole and ring options for all Curtains & Valances.</p>
+          <p style={{ color: '#547ea0', fontSize: '0.75rem', marginTop: '4px' }}>{t('hardware_library_desc')}</p>
         </div>
         <button style={{ border: 'none', background: 'none', color: '#005fa3', cursor: 'pointer' }}>
           {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
@@ -138,7 +140,7 @@ const HardwareManager = ({ isCompact }) => {
             flexDirection: 'column',
             gap: '15px'
           }}>
-            <h3 style={{ fontSize: '0.85rem', fontWeight: '700' }}>Add New Hardware Color</h3>
+            <h3 style={{ fontSize: '0.85rem', fontWeight: '700' }}>{t('add_new_hardware_color')}</h3>
             
             <div style={{ display: 'flex', gap: '10px' }}>
               <div style={{ flex: 1, textAlign: 'center' }}>
@@ -146,19 +148,19 @@ const HardwareManager = ({ isCompact }) => {
                   {newSet.ringImageUrl ? <img src={newSet.ringImageUrl} style={cardStyles.preview} /> : <ImageIcon size={18} color="#accce8" />}
                   <input type="file" onChange={(e) => handleImageUpload(e, 'ring')} hidden />
                 </label>
-                <span style={{ fontSize: '0.55rem', color: '#999', marginTop: '5px', display: 'block' }}>Ring Image</span>
+                <span style={{ fontSize: '0.65rem', color: '#777', marginTop: '5px', display: 'block' }}>{t('ring_image_label')}</span>
               </div>
               <div style={{ flex: 1, textAlign: 'center' }}>
                 <label style={cardStyles.uploadArea}>
                   {newSet.poleImageUrl ? <img src={newSet.poleImageUrl} style={cardStyles.preview} /> : <ImageIcon size={18} color="#accce8" />}
                   <input type="file" onChange={(e) => handleImageUpload(e, 'pole')} hidden />
                 </label>
-                <span style={{ fontSize: '0.55rem', color: '#999', marginTop: '5px', display: 'block' }}>Pole Image</span>
+                <span style={{ fontSize: '0.65rem', color: '#777', marginTop: '5px', display: 'block' }}>{t('pole_image_label')}</span>
               </div>
             </div>
 
             <input 
-              placeholder="Color Name (e.g. Copper)" 
+              placeholder={t('hardware_color_placeholder')} 
               value={newSet.name}
               onChange={(e) => setNewSet({ ...newSet, name: e.target.value })}
               style={cardStyles.input}
@@ -182,7 +184,7 @@ const HardwareManager = ({ isCompact }) => {
                 gap: '8px'
               }}
             >
-              {uploading ? 'UPLOADING...' : <><Plus size={16} /> SAVE SET</>}
+              {uploading ? t('uploading') : <><Plus size={16} /> {t('save_set')}</>}
             </button>
           </div>
 
@@ -197,7 +199,7 @@ const HardwareManager = ({ isCompact }) => {
               boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
-                <span style={{ fontSize: '0.7rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{set.name}</span>
+                <span style={{ fontSize: '0.8rem', fontWeight: '800' }}>{set.name}</span>
                 <button onClick={() => handleDelete(set._id)} style={{ border: 'none', background: 'none', color: '#ff4d4d', cursor: 'pointer', opacity: 0.6 }}>
                   <Trash2 size={14} />
                 </button>

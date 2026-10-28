@@ -15,6 +15,20 @@
 
 /* MODAL RESPONSIVENESS */
 @media (max-width: 900px) {
+  .wizard-modal-box {
+    height: 95vh !important;
+    max-height: 95vh !important;
+  }
+
+  .wizard-main-body {
+    flex-direction: column !important;
+    overflow-y: auto !important;
+  }
+
+  .wizard-preview-pane {
+    border-top: 1px solid #f3f4f6 !important;
+  }
+
   .social-modal-container {
     height: auto !important;
     max-height: 95vh !important;

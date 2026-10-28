@@ -2,8 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import api from '../api/axios';
 import { MessageCircle, Send, User, ChevronRight, ChevronLeft, Clock, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
 
 const LiveChat = ({ onClose }) => {
+  const { t } = useLanguage();
   const [sessions, setSessions] = useState([]);
   const [activeSession, setActiveSession] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -125,7 +127,7 @@ const LiveChat = ({ onClose }) => {
           flexDirection: 'column' 
         }}>
           <div style={{ padding: '30px', borderBottom: '1px solid #f9f9f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 className="serif" style={{ fontSize: '1.4rem' }}>Conversations</h2>
+            <h2 className="serif" style={{ fontSize: '1.4rem' }}>{t('conversations')}</h2>
             <X 
               size={20} 
               onClick={handleClose} 
@@ -134,7 +136,7 @@ const LiveChat = ({ onClose }) => {
           </div>
           <div style={{ flex: 1, overflowY: 'auto' }}>
           {sessions.length === 0 ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: '#999', fontSize: '0.9rem' }}>No active curations.</div>
+            <div style={{ padding: '40px', textAlign: 'center', color: '#999', fontSize: '0.9rem' }}>{t('no_active_curations')}</div>
           ) : (
             sessions.map(sess => (
               <div 
@@ -154,7 +156,7 @@ const LiveChat = ({ onClose }) => {
                     <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#eee', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center' }}>
                       <User size={20} color="#999" />
                     </div>
-                    <span style={{ fontWeight: '700', fontSize: '0.85rem' }}>Guest Curatee</span>
+                    <span style={{ fontWeight: '700', fontSize: '0.85rem' }}>{t('guest_curatee')}</span>
                   </div>
                   <span style={{ fontSize: '0.7rem', color: '#ccc' }}>{new Date(sess.lastTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
@@ -193,7 +195,7 @@ const LiveChat = ({ onClose }) => {
               )}
               <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#2ecc71', flexShrink: 0 }}></div>
               <div>
-                <h3 style={{ fontSize: '1rem', fontWeight: '800' }}>Active Support Session</h3>
+                <h3 style={{ fontSize: '1rem', fontWeight: '800' }}>{t('active_support_session')}</h3>
                 <p style={{ fontSize: '0.7rem', color: '#999', textTransform: 'uppercase', letterSpacing: '1px' }}>ID: {activeSession}</p>
               </div>
             </div>
@@ -231,7 +233,7 @@ const LiveChat = ({ onClose }) => {
             <form onSubmit={handleSend} style={{ padding: isMobile ? '15px' : '30px 40px', borderTop: '1px solid #f9f9f9', display: 'flex', gap: isMobile ? '10px' : '20px' }}>
               <input 
                 type="text" 
-                placeholder="Type your response to customer..." 
+                placeholder={t('type_response_placeholder')} 
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 style={{ 
@@ -259,7 +261,7 @@ const LiveChat = ({ onClose }) => {
                   gap: '10px'
                 }}
               >
-                {!isMobile && <span>SEND</span>}
+                {!isMobile && <span>{t('send')}</span>}
                 <Send size={18} />
               </button>
             </form>
@@ -267,7 +269,7 @@ const LiveChat = ({ onClose }) => {
         ) : (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#ccc' }}>
             <MessageCircle size={80} style={{ opacity: 0.1, marginBottom: '20px' }} />
-            <p className="serif" style={{ fontSize: '1.2rem' }}>Select a conversation to begin curation.</p>
+            <p className="serif" style={{ fontSize: '1.2rem' }}>{t('select_conv_begin')}</p>
           </div>
         )}
       </div>

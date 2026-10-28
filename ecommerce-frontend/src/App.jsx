@@ -188,17 +188,31 @@ function App() {
             />
           </main>
   
-          <footer style={{ borderTop: '1px solid var(--border)', padding: '60px 0', textAlign: 'center', marginTop: '100px' }}>
-            <h4 className="serif" style={{ fontSize: '1rem', marginBottom: '20px' }}>Srey Tha Curtain</h4>
-            <div className="nav-links" style={{ justifyContent: 'center', marginBottom: '20px', display: 'flex', gap: '30px', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-              <Link to="/about" style={{ color: '#000', textDecoration: 'none' }}>About Us</Link>
-              <Link to="/order-status" style={{ color: '#000', textDecoration: 'none' }}>Track Order</Link>
-              <p style={{ cursor: 'pointer' }}>Privacy</p>
-              <p style={{ cursor: 'pointer' }}>Terms</p>
+          <footer className="editorial-footer">
+            {/* Column 1: Product Types */}
+            <div>
+              <h4 className="editorial-footer-heading">ប្រភេទផលិតផល</h4>
+              <div className="editorial-footer-list">
+                <Link to="/shop?category=All">ទាំងអស់</Link>
+                <Link to="/shop?category=Curtain">វាំងនន</Link>
+                <Link to="/shop?category=Valance">ដក់</Link>
+                <Link to="/shop?category=Fabric">ក្រណាត់ម៉ែត្រ</Link>
+                <Link to="/shop?category=Bed%20Sheet">កម្រាលពូក</Link>
+                <Link to="/shop?category=Pillow%20Case">ស្រោមខ្នើយ</Link>
+                <Link to="/shop?category=Accessories">គ្រឿងបន្លាស់</Link>
+              </div>
             </div>
-            <p style={{ fontSize: '0.6rem', color: 'var(--text-muted)', letterSpacing: '2px' }}>
-              &copy; 2026 ALL RIGHTS RESERVED
-            </p>
+
+            {/* Column 2: Information */}
+            <div>
+              <h4 className="editorial-footer-heading">ព័ត៌មានទូទៅ</h4>
+              <div className="editorial-footer-list">
+                <Link to="/about">អំពីយើង</Link>
+                <Link to="/my-orders">ការបញ្ជាទិញរបស់ខ្ញុំ</Link>
+                <Link to="/order-status">តាមដានការបញ្ជាទិញ</Link>
+                <a href="https://t.me/sreythacurtain" target="_blank" rel="noreferrer">ទំនាក់ទំនងតាម Telegram</a>
+              </div>
+            </div>
           </footer>
         </div>
         <Toast message={toast.message} visible={toast.visible} />

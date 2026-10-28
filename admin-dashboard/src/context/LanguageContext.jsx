@@ -22,7 +22,7 @@ export const LanguageProvider = ({ children }) => {
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t, toggleLanguage }}>
-      <div style={{ fontFamily: "'Kantumruy Pro', sans-serif" }}>
+      <div style={{ fontFamily: "'Poppins', 'Noto Sans Khmer', 'Kdam Thmor Pro', sans-serif" }}>
         {children}
       </div>
     </LanguageContext.Provider>

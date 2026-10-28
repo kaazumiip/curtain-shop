@@ -1,15 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Playfair+Display:wght@700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Kdam+Thmor+Pro&family=Noto+Sans+Khmer:wght@300;400;500;600;700;800;900&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap');
 
 :root {
   --bg: #FFFFFF;
-  --surface: #fcfcfc;
+  --surface: #f8fafc;
   --card: #ffffff;
-  --text: #111111;
-  --text-muted: #777777;
+  --text: #0f172a;
+  --text-muted: #64748b;
   --pink-blush: #F4C2C2;
   --vanguard-pink: #E0115F;
-  --border: #eeeeee;
-  --radius: 20px;
+  --border: #e2e8f0;
+  --radius: 16px;
 }
 
 * {
@@ -18,15 +18,23 @@
   padding: 0;
 }
 
+html {
+  font-size: 17.5px;
+}
+
 body {
   background-color: var(--bg);
   color: var(--text);
-  font-family: 'Inter', sans-serif;
-  line-height: 1.6;
+  font-family: 'Poppins', 'Noto Sans Khmer', 'Kdam Thmor Pro', sans-serif;
+  font-size: 1rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Reverting to Elegant Serif for headings */
+/* Rounded, clean headings */
 .serif {
-  font-family: 'Playfair Display', serif;
-  letter-spacing: 1px;
+  font-family: 'Poppins', 'Noto Sans Khmer', 'Kdam Thmor Pro', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }

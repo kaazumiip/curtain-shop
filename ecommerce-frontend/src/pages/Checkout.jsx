@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CreditCard, CheckCircle } from 'lucide-react';
 import axios from '../api/axios';
 import { useLanguage } from '../context/LanguageContext';
+import LocationPickerMap from '../components/LocationPickerMap';
 
 const Checkout = ({ cart, onOrderPlaced }) => {
   const navigate = useNavigate();
@@ -16,9 +17,13 @@ const Checkout = ({ cart, onOrderPlaced }) => {
     firstName: '',
     lastName: '',
     address: '',
+    additionalAddress: '',
     city: '',
     postcode: '',
     phone: '',
+    latitude: null,
+    longitude: null,
+    googleMapsUrl: '',
     paymentMethod: 'ABA Bank',
     cardNumber: '',
     cardExpiry: '',
@@ -111,7 +116,24 @@ const Checkout = ({ cart, onOrderPlaced }) => {
               <input required placeholder={t('first_name')} style={inputStyle} value={formData.firstName} onChange={(e) => setFormData({...formData, firstName: e.target.value})}/>
               <input required placeholder={t('last_name')} style={inputStyle} value={formData.lastName} onChange={(e) => setFormData({...formData, lastName: e.target.value})}/>
             </div>
+
+            {/* Interactive Draggable Delivery Map */}
+            <LocationPickerMap 
+              initialAddress={formData.address}
+              onLocationSelected={(loc) => {
+                setFormData(prev => ({
+                  ...prev,
+                  address: loc.fullAddress || prev.address,
+                  city: loc.city || prev.city || 'Phnom Penh',
+                  latitude: loc.lat,
+                  longitude: loc.lng,
+                  googleMapsUrl: `https://www.google.com/maps?q=${loc.lat},${loc.lng}`
+                }));
+              }}
+            />
+
             <input required placeholder={t('street_address')} style={{ ...inputStyle, marginBottom: '15px' }} value={formData.address} onChange={(e) => setFormData({...formData, address: e.target.value})}/>
+            <input placeholder={t('additional_address')} style={{ ...inputStyle, marginBottom: '15px' }} value={formData.additionalAddress} onChange={(e) => setFormData({...formData, additionalAddress: e.target.value})}/>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
               <input required placeholder={t('city')} style={inputStyle} value={formData.city} onChange={(e) => setFormData({...formData, city: e.target.value})}/>
               <input required placeholder={t('postcode')} style={inputStyle} value={formData.postcode} onChange={(e) => setFormData({...formData, postcode: e.target.value})}/>

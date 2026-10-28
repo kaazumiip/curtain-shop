@@ -23,11 +23,18 @@ function Dashboard() {
   const navigate = useNavigate();
   const { t, language, toggleLanguage } = useLanguage();
 
-  const productCategories = ['all', 'curtain', 'bed_sheet', 'pillow_case', 'accessories'];
+  const productCategories = ['all', 'curtain', 'valance', 'fabric', 'bed_sheet', 'pillow_case', 'accessories'];
 
   useEffect(() => {
     fetchProducts();
     fetchOrders();
+
+    // Auto-poll orders every 10 seconds so new orders show up live
+    const interval = setInterval(() => {
+      fetchOrders();
+    }, 10000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const fetchProducts = async () => {
@@ -52,13 +59,13 @@ function Dashboard() {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to remove this product?')) {
+    if (window.confirm(t('confirm_delete_product'))) {
       try {
         await api.delete(`/products/${id}`);
         fetchProducts();
       } catch (err) {
         console.error('Error deleting product:', err);
-        alert('Failed to delete item.');
+        alert(t('failed_delete_product'));
       }
     }
   };
@@ -74,8 +81,8 @@ function Dashboard() {
       fetchProducts();
     } catch (err) {
       console.error('Error saving product:', err);
-      const msg = err.response?.data?.message || 'Check your information and try again.';
-      alert('Save Failed: ' + msg);
+      const msg = err.response?.data?.message || t('check_info_try_again');
+      alert(t('failed_save_product') + ': ' + msg);
     }
   };
 
@@ -171,7 +178,7 @@ function Dashboard() {
               }}
             >
               <Clock size={16} />
-              History
+              {t('history_tab')}
             </span>
             <span 
               onClick={() => setIsChatOpen(true)} 
@@ -289,7 +296,7 @@ function Dashboard() {
                 transition: 'all 0.3s ease'
               }}
             >
-              {tab.toUpperCase()} ({getCount(tab)})
+              {tab === 'Pending' ? t('pending_tab') : t('cancelled_tab')} ({getCount(tab)})
             </button>
           ))}
         </div>
@@ -297,14 +304,14 @@ function Dashboard() {
 
       {view === 'history' && (
         <div style={{ marginBottom: '30px' }}>
-          <h2 className="serif" style={{ fontSize: '1.8rem' }}>Order History</h2>
-          <p style={{ fontSize: '0.8rem', color: '#999' }}>All completed orders that have arrived.</p>
+          <h2 className="serif" style={{ fontSize: '1.8rem' }}>{t('order_history')}</h2>
+          <p style={{ fontSize: '0.8rem', color: '#999' }}>{t('all_completed_orders')}</p>
         </div>
       )}
 
       {loading ? (
         <div style={{ textAlign: 'center', marginTop: '100px', letterSpacing: '2px' }}>
-          ACCESSING DATABASE...
+          {t('accessing_database')}
         </div>
       ) : view === 'products' ? (
         <StockTable 
@@ -326,7 +333,7 @@ function Dashboard() {
       {isChatOpen && <LiveChat onClose={() => setIsChatOpen(false)} />}
       
       <footer style={{ marginTop: 'auto', paddingTop: '40px', color: 'var(--border)', fontSize: '0.6rem', textAlign: 'center', letterSpacing: '4px' }}>
-        SREY THA &copy; 2026 COLLECTION MANAGER
+        {t('collection_manager_footer')}
       </footer>
     </div>
   );

@@ -1,43 +1,68 @@
 const express = require('express');
 const router = express.Router();
-const Hardware = require('../models/Hardware');
+const { db } = require('../config/firebase');
 
-// @desc    Get all hardware sets
+const collection = db.collection('hardware');
+
+const formatHardware = (doc) => {
+  const data = doc.data();
+  return {
+    _id: doc.id,
+    id: doc.id,
+    ...data
+  };
+};
+
+// @desc    Get all hardware items
 // @route   GET /api/hardware
 router.get('/', async (req, res) => {
   try {
-    const hardware = await Hardware.find();
-    res.json(hardware);
+    const snapshot = await collection.get();
+    const items = snapshot.docs.map(formatHardware);
+    res.json(items);
   } catch (err) {
+    console.error('Get hardware error:', err);
     res.status(500).json({ message: err.message });
   }
 });
 
-// @desc    Create a new hardware set
+// @desc    Create a new hardware item
 // @route   POST /api/hardware
 router.post('/', async (req, res) => {
-  const hardware = new Hardware({
-    name: req.body.name,
-    ringImageUrl: req.body.ringImageUrl,
-    poleImageUrl: req.body.poleImageUrl,
-    status: req.body.status
-  });
-
   try {
-    const newHardware = await hardware.save();
-    res.status(201).json(newHardware);
+    const { name, ringImageUrl, poleImageUrl } = req.body;
+    if (!name) {
+      return res.status(400).json({ message: 'Name is required' });
+    }
+
+    const docRef = await collection.add({
+      name,
+      ringImageUrl: ringImageUrl || '',
+      poleImageUrl: poleImageUrl || '',
+      createdAt: new Date().toISOString()
+    });
+
+    const doc = await docRef.get();
+    res.status(201).json(formatHardware(doc));
   } catch (err) {
+    console.error('Create hardware error:', err);
     res.status(400).json({ message: err.message });
   }
 });
 
-// @desc    Delete a hardware set
+// @desc    Delete a hardware item
 // @route   DELETE /api/hardware/:id
 router.delete('/:id', async (req, res) => {
   try {
-    await Hardware.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Hardware set deleted' });
+    const docRef = collection.doc(req.params.id);
+    const doc = await docRef.get();
+    if (!doc.exists) {
+      return res.status(404).json({ message: 'Hardware item not found' });
+    }
+    await docRef.delete();
+    res.json({ message: 'Hardware set deleted successfully' });
   } catch (err) {
+    console.error('Delete hardware error:', err);
     res.status(500).json({ message: err.message });
   }
 });

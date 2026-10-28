@@ -3,12 +3,14 @@ import { useParams, Link } from 'react-router-dom';
 import axios from '../api/axios';
 import { ChevronLeft, ShoppingBag, ArrowRight, Heart } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import BookMeasurementModal from '../components/BookMeasurementModal';
 
 const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
   const { id } = useParams();
   const { t, language } = useLanguage();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isMeasurementOpen, setIsMeasurementOpen] = useState(false);
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedColorName, setSelectedColorName] = useState(null);
   const [selectedPoleColor, setSelectedPoleColor] = useState('Gold');
@@ -203,23 +205,50 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
               />
             </button>
           </div>
-          <p style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '10px' }}>
-            £{totalPrice}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '12px' }}>
+            <span style={{ fontSize: '1.65rem', fontWeight: '900', color: Number(product.originalPrice) > Number(product.price) ? '#dc2626' : '#0f172a' }}>
+              ${totalPrice}
+            </span>
+
+            {Number(product.originalPrice) > Number(product.price) && (
+              <>
+                <span style={{ fontSize: '1.1rem', color: '#94a3b8', textDecoration: 'line-through', fontWeight: '600' }}>
+                  ${Number(product.originalPrice).toFixed(2)}
+                </span>
+                <span style={{ backgroundColor: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', padding: '3px 10px', borderRadius: '50px', fontSize: '0.75rem', fontWeight: '800' }}>
+                  បញ្ចុះតម្លៃ -{Math.round(((Number(product.originalPrice) - Number(product.price)) / Number(product.originalPrice)) * 100)}%
+                </span>
+              </>
+            )}
+
             {['Curtain', 'Valance', 'Accessories'].includes(product.category) && (
-              <span style={{ fontSize: '0.9rem', color: '#999', fontWeight: '500', marginLeft: '10px' }}>
-                (£{Number(product.price).toFixed(2)} / {
+              <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: '600' }}>
+                (${Number(product.price).toFixed(2)} / {
                   product.category === 'Accessories' 
-                    ? (product.subCategory?.toLowerCase() === 'pole' ? 'meter' : 'unit')
+                    ? (product.subCategory?.toLowerCase() === 'pole' ? 'ម៉ែត្រ' : 'គ្រឿង')
                     : 'm²'
                 })
               </span>
             )}
             {product.category === 'Fabric' && (
-              <span style={{ fontSize: '0.9rem', color: '#999', fontWeight: '500', marginLeft: '10px' }}>
-                (£{Number(product.price).toFixed(2)} / meter)
+              <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: '600' }}>
+                (${Number(product.price).toFixed(2)} / ម៉ែត្រ)
               </span>
             )}
-          </p>
+          </div>
+
+          {/* Stock Status Indicator */}
+          <div style={{ marginBottom: '14px' }}>
+            {Number(product.stock) > 0 ? (
+              <span style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '50px', backgroundColor: '#f0fdf4', color: '#15803d', border: '1px solid #bbf7d0', fontSize: '0.78rem', fontWeight: '700' }}>
+                ក្នុងស្តុក៖ {product.stock} {t('in_stock')}
+              </span>
+            ) : (
+              <span style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '50px', backgroundColor: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', fontSize: '0.78rem', fontWeight: '800' }}>
+                អស់ពីស្តុក (Out of Stock)
+              </span>
+            )}
+          </div>
           {selectedSize && !['Curtain', 'Valance', 'Accessories'].includes(product.category) && <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '10px' }}>Size: {selectedSize.name}</p>}
           
           <div style={{ width: '100%', height: '1px', backgroundColor: '#f0f0f0', marginBottom: '30px', marginTop: '30px' }}></div>
@@ -359,12 +388,36 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
                   </div>
                 )}
               </div>
-              <p style={{ fontSize: '0.6rem', color: '#999', marginTop: '10px' }}>
+              <p style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '10px' }}>
                 {product.subCategory?.toLowerCase() === 'pole' 
-                  ? `* Price: £${product.price}/m × ${parseFloat(customWidth)||0}m ${quantity > 1 ? `× ${quantity} units` : ''}` 
-                  : `* Price: £${product.price}/m² × ${( (parseFloat(customWidth)||0) * (parseFloat(customHeight)||0) ).toFixed(2)}m² ${quantity > 1 ? `× ${quantity} units` : ''}`
+                  ? `* តម្លៃ: $${product.price}/m × ${parseFloat(customWidth)||0}m ${quantity > 1 ? `× ${quantity} គ្រឿង` : ''}` 
+                  : `* តម្លៃ: $${product.price}/m² × ${( (parseFloat(customWidth)||0) * (parseFloat(customHeight)||0) ).toFixed(2)}m² ${quantity > 1 ? `× ${quantity} គ្រឿង` : ''}`
                 }
               </p>
+
+              {/* Free Home Measurement Booking Button */}
+              <div style={{ marginTop: '14px', padding: '12px 16px', backgroundColor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                <span style={{ fontSize: '0.8rem', color: '#334155', fontWeight: '600' }}>
+                  មិនច្បាស់ទំហំបង្អួចមែនទេ?
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setIsMeasurementOpen(true)}
+                  style={{
+                    backgroundColor: '#0f172a',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '50px',
+                    padding: '7px 16px',
+                    fontSize: '0.76rem',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    fontFamily: "'Poppins', 'Noto Sans Khmer', 'Kdam Thmor Pro', sans-serif"
+                  }}
+                >
+                  ណាត់ជាងចុះវាស់វែងដល់ផ្ទះ (ឥតគិតថ្លៃ) &gt;
+                </button>
+              </div>
             </div>
           )}
 
@@ -381,6 +434,8 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
                 padding: '5px' 
               }}>
                 <button 
+                  type="button"
+                  disabled={Number(product.stock) <= 0}
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
                   style={{ 
                     width: '40px', 
@@ -388,15 +443,19 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
                     borderRadius: '12px', 
                     border: 'none', 
                     backgroundColor: '#fff', 
-                    cursor: 'pointer',
+                    cursor: Number(product.stock) <= 0 ? 'not-allowed' : 'pointer',
                     fontSize: '1.2rem',
                     fontWeight: '700'
                   }}
                 >-</button>
                 <input 
                   type="number"
+                  disabled={Number(product.stock) <= 0}
                   value={quantity}
-                  onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                  onChange={(e) => {
+                    const maxStock = Math.max(1, Number(product.stock) || 1);
+                    setQuantity(Math.min(maxStock, Math.max(1, parseInt(e.target.value) || 1)));
+                  }}
                   style={{ 
                     width: '60px', 
                     border: 'none', 
@@ -407,14 +466,16 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
                   }}
                 />
                 <button 
-                  onClick={() => setQuantity(quantity + 1)}
+                  type="button"
+                  disabled={Number(product.stock) <= 0 || quantity >= Number(product.stock)}
+                  onClick={() => setQuantity(Math.min(Math.max(1, Number(product.stock) || 1), quantity + 1))}
                   style={{ 
                     width: '40px', 
                     height: '40px', 
                     borderRadius: '12px', 
                     border: 'none', 
                     backgroundColor: '#fff', 
-                    cursor: 'pointer',
+                    cursor: (Number(product.stock) <= 0 || quantity >= Number(product.stock)) ? 'not-allowed' : 'pointer',
                     fontSize: '1.2rem',
                     fontWeight: '700'
                   }}
@@ -508,25 +569,40 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
 
           <div style={{ display: 'flex', gap: '15px' }}>
             <button 
+              type="button"
+              disabled={Number(product.stock) <= 0}
               className="btn-add" 
-              onClick={() => onAddToCart({
-                ...product,
-                selectedSize: ['Curtain', 'Valance', 'Accessories'].includes(product.category)
-                  ? (product.subCategory?.toLowerCase() === 'pole' ? { name: `${customWidth}m × ${quantity} Units` } : (product.category === 'Accessories' ? { name: `${quantity} Units` } : { name: `${customWidth}m x ${customHeight}m × ${quantity} Units` }))
-                  : (product.category === 'Fabric' ? { name: `${fabricMeters}m × ${quantity} Units` } : (selectedSize ? { name: `${selectedSize.name} × ${quantity} Units` } : { name: `${quantity} Units` })),
-                selectedColorName,
-                fabricMeters: product.category === 'Fabric' ? (parseFloat(fabricMeters) || 0) : null,
-                customWidth: (['Curtain', 'Valance'].includes(product.category) || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole')) ? (parseFloat(customWidth) || 0) : null,
-                customHeight: (['Curtain', 'Valance'].includes(product.category)) ? (parseFloat(customHeight) || 0) : null,
-                quantity: quantity,
-                poleColor: ['Curtain', 'Valance'].includes(product.category) ? (hardwareOptions.find(rc => rc.name === selectedPoleColor) || { name: selectedPoleColor }) : null,
-                cascadeStyle: product.category === 'Valance' ? selectedCascadeStyle : null,
-                totalPrice
-              })}
-              style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', padding: '20px', borderRadius: 'var(--radius)' }}
+              onClick={() => {
+                if (Number(product.stock) <= 0) return;
+                onAddToCart({
+                  ...product,
+                  selectedSize: ['Curtain', 'Valance', 'Accessories'].includes(product.category)
+                    ? (product.subCategory?.toLowerCase() === 'pole' ? { name: `${customWidth}m × ${quantity} Units` } : (product.category === 'Accessories' ? { name: `${quantity} Units` } : { name: `${customWidth}m x ${customHeight}m × ${quantity} Units` }))
+                    : (product.category === 'Fabric' ? { name: `${fabricMeters}m × ${quantity} Units` } : (selectedSize ? { name: `${selectedSize.name} × ${quantity} Units` } : { name: `${quantity} Units` })),
+                  selectedColorName,
+                  fabricMeters: product.category === 'Fabric' ? (parseFloat(fabricMeters) || 0) : null,
+                  customWidth: (['Curtain', 'Valance'].includes(product.category) || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole')) ? (parseFloat(customWidth) || 0) : null,
+                  customHeight: (['Curtain', 'Valance'].includes(product.category)) ? (parseFloat(customHeight) || 0) : null,
+                  quantity: quantity,
+                  poleColor: ['Curtain', 'Valance'].includes(product.category) ? (hardwareOptions.find(rc => rc.name === selectedPoleColor) || { name: selectedPoleColor }) : null,
+                  cascadeStyle: product.category === 'Valance' ? selectedCascadeStyle : null,
+                  totalPrice
+                });
+              }}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '12px',
+                padding: '20px',
+                borderRadius: 'var(--radius)',
+                opacity: Number(product.stock) <= 0 ? 0.5 : 1,
+                cursor: Number(product.stock) <= 0 ? 'not-allowed' : 'pointer'
+              }}
             >
               <ShoppingBag size={20} />
-              {t('add_to_cart')}
+              {Number(product.stock) <= 0 ? 'អស់ពីស្តុក (Out of Stock)' : t('add_to_cart')}
             </button>
           </div>
           
@@ -563,6 +639,11 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
           </div>
         </div>
       </div>
+
+      <BookMeasurementModal
+        isOpen={isMeasurementOpen}
+        onClose={() => setIsMeasurementOpen(false)}
+      />
     </div>
   );
 };

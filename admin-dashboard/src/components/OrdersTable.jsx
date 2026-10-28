@@ -4,6 +4,19 @@ import { useLanguage } from '../context/LanguageContext';
 const OrdersTable = ({ orders, onSelectOrder }) => {
   const { t } = useLanguage();
 
+  const getStatusLabel = (status) => {
+    const map = {
+      'Preparing': t('status_preparing'),
+      'Finishing Touch': t('status_finishing_touch'),
+      'To Shipping Place': t('status_to_shipping_place'),
+      'Shipping Processing': t('status_shipping_processing'),
+      'Head to Location': t('status_head_to_location'),
+      'Order Arrived': t('status_order_arrived'),
+      'Cancelled': t('status_cancelled')
+    };
+    return map[status] || status || t('status_preparing');
+  };
+
   const getStatusColors = (status) => {
     const s = status || 'Pending';
     if (s === 'Pending' || s === 'Preparing') return { bg: '#fff3cd', text: '#856404' };
@@ -42,46 +55,52 @@ const OrdersTable = ({ orders, onSelectOrder }) => {
                     {new Date(order.createdAt).toLocaleDateString()}
                   </td>
                   <td>
-                    <div style={{ fontWeight: '700' }}>{order.customer.firstName} {order.customer.lastName}</div>
+                    <div style={{ fontWeight: '700' }}>{order.customer?.firstName || ''} {order.customer?.lastName || ''}</div>
                     <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '5px' }}>
-                      {order.customer.phone && <div style={{ fontWeight: '600', color: '#000' }}>{order.customer.phone}</div>}
-                      <div>{order.customer.email}</div>
+                      {order.customer?.phone && <div style={{ fontWeight: '600', color: '#000' }}>{order.customer.phone}</div>}
+                      <div>{order.customer?.email || ''}</div>
                     </div>
                   </td>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
                       <div style={{ fontSize: '0.75rem', lineHeight: '1.5' }}>
                         <div style={{ fontWeight: '700', textTransform: 'uppercase', fontSize: '0.65rem', color: '#999', marginBottom: '4px' }}>{t('shipping_addr')}</div>
-                        <div>{order.customer.address}</div>
-                        <div>{order.customer.city}, {order.customer.postcode}</div>
+                        <div>{order.customer?.address || 'N/A'}</div>
+                        <div>{[order.customer?.city, order.customer?.postcode].filter(Boolean).join(', ')}</div>
                       </div>
                     </div>
                   </td>
                   <td>
                     <div style={{ maxHeight: '120px', overflowY: 'auto' }}>
-                      {order.items.map((item, idx) => (
-                        <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '5px 0', borderBottom: idx < order.items.length - 1 ? '1px solid #f9f9f9' : 'none' }}>
-                          <img 
-                            src={item.imageUrl || (item.images && item.images.length > 0 ? item.images[0].url : 'https://via.placeholder.com/40')} 
-                            style={{ width: '30px', height: '35px', objectFit: 'cover', borderRadius: '4px', backgroundColor: '#f9f9f9', border: '1px solid #eee', flexShrink: 0 }} 
-                            alt=""
-                          />
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: '0.8rem', fontWeight: '700' }}>{item.name}</div>
-                            <div style={{ fontSize: '0.7rem', color: '#999' }}>
-                              {item.selectedSize && `${t('dimension')}: ${item.selectedSize.name}`}
-                              {item.selectedColor && ` • ${t('color')}: ${item.selectedColor.name}`}
-                              {item.poleColor && ` • ${t('pole_ring')}: ${item.poleColor}`}
+                      {(order.items || []).map((item, idx) => {
+                        const pole = typeof item.poleColor === 'object' ? item.poleColor?.name : item.poleColor;
+                        const color = typeof item.selectedColor === 'object' ? item.selectedColor?.name : (item.selectedColorName || item.selectedColor);
+                        const size = typeof item.selectedSize === 'object' ? item.selectedSize?.name : item.selectedSize;
+
+                        return (
+                          <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '5px 0', borderBottom: idx < (order.items || []).length - 1 ? '1px solid #f9f9f9' : 'none' }}>
+                            <img 
+                              src={item.imageUrl || (item.images && item.images.length > 0 ? item.images[0].url : 'https://via.placeholder.com/40')} 
+                              style={{ width: '30px', height: '35px', objectFit: 'cover', borderRadius: '4px', backgroundColor: '#f9f9f9', border: '1px solid #eee', flexShrink: 0 }} 
+                              alt=""
+                            />
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: '0.8rem', fontWeight: '700' }}>{item.name}</div>
+                              <div style={{ fontSize: '0.7rem', color: '#999' }}>
+                                {size && `${t('dimension')}: ${size}`}
+                                {color && ` • ${t('color')}: ${color}`}
+                                {pole && ` • ${t('pole_ring')}: ${pole}`}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </td>
                   <td style={{ fontWeight: '700' }}>
-                    £{order.subtotal?.toFixed(2)}
+                    ${Number(order.subtotal || 0).toFixed(2)}
                     <div style={{ fontSize: '0.7rem', color: '#666', fontWeight: '400', marginTop: '5px' }}>
-                      {order.paymentMethod}
+                      {order.paymentMethod || 'ABA Bank'}
                       {order.cardDetails && <span style={{ color: '#000', fontWeight: '600', display: 'block' }}>• {order.cardDetails.cardNumber}</span>}
                     </div>
                   </td>
@@ -91,12 +110,10 @@ const OrdersTable = ({ orders, onSelectOrder }) => {
                       backgroundColor: colors.bg, 
                       color: colors.text,
                       borderRadius: '12px',
-                      fontSize: '0.65rem',
-                      fontWeight: '700',
-                      textTransform: 'uppercase',
-                      letterSpacing: '1px'
+                      fontSize: '0.7rem',
+                      fontWeight: '700'
                     }}>
-                       {order.status || 'Pending'}
+                       {getStatusLabel(order.status)}
                     </span>
                   </td>
                 </tr>
@@ -126,36 +143,41 @@ const OrdersTable = ({ orders, onSelectOrder }) => {
               
               <div className="card-body">
                 <div className="customer-info">
-                  <strong>{order.customer.firstName} {order.customer.lastName}</strong>
-                  {order.customer.phone && <div style={{ fontWeight: '600', marginTop: '2px' }}>{order.customer.phone}</div>}
-                  <div style={{ color: '#888', fontSize: '0.75rem' }}>{order.customer.email}</div>
+                  <strong>{order.customer?.firstName || ''} {order.customer?.lastName || ''}</strong>
+                  {order.customer?.phone && <div style={{ fontWeight: '600', marginTop: '2px' }}>{order.customer.phone}</div>}
+                  <div style={{ color: '#888', fontSize: '0.75rem' }}>{order.customer?.email || ''}</div>
                 </div>
                 
                 <div className="address-info">
                   <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: '#aaa', fontWeight: '700', marginBottom: '2px' }}>{t('shipping_addr')}</div>
-                  <div>{order.customer.address}</div>
-                  <div>{order.customer.city}, {order.customer.postcode}</div>
+                  <div>{order.customer?.address || 'N/A'}</div>
+                  <div>{[order.customer?.city, order.customer?.postcode].filter(Boolean).join(', ')}</div>
                 </div>
                 
                 <div className="items-summary">
                   <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: '#aaa', fontWeight: '700', marginBottom: '6px' }}>{t('order_items')}</div>
-                  {order.items.map((item, idx) => (
-                    <div key={idx} className="item-row" style={{ display: 'flex', alignItems: 'center', gap: '12px', borderBottom: idx < order.items.length - 1 ? '1px solid #f2f2f2' : 'none', padding: '6px 0' }}>
-                      <img 
-                        src={item.imageUrl || (item.images && item.images.length > 0 ? item.images[0].url : 'https://via.placeholder.com/40')} 
-                        style={{ width: '40px', height: '48px', objectFit: 'cover', borderRadius: '6px', backgroundColor: '#f9f9f9', border: '1px solid #eee', flexShrink: 0 }} 
-                        alt=""
-                      />
-                      <div style={{ flex: 1, textAlign: 'left' }}>
-                        <div style={{ fontWeight: '700', textAlign: 'left' }}>{item.name}</div>
-                        <div style={{ fontSize: '0.65rem', color: '#999', textAlign: 'left' }}>
-                          {item.selectedSize && `${item.selectedSize.name}`}
-                          {item.selectedColor && ` • ${item.selectedColor.name}`}
+                  {(order.items || []).map((item, idx) => {
+                    const color = typeof item.selectedColor === 'object' ? item.selectedColor?.name : (item.selectedColorName || item.selectedColor);
+                    const size = typeof item.selectedSize === 'object' ? item.selectedSize?.name : item.selectedSize;
+
+                    return (
+                      <div key={idx} className="item-row" style={{ display: 'flex', alignItems: 'center', gap: '12px', borderBottom: idx < (order.items || []).length - 1 ? '1px solid #f2f2f2' : 'none', padding: '6px 0' }}>
+                        <img 
+                          src={item.imageUrl || (item.images && item.images.length > 0 ? item.images[0].url : 'https://via.placeholder.com/40')} 
+                          style={{ width: '40px', height: '48px', objectFit: 'cover', borderRadius: '6px', backgroundColor: '#f9f9f9', border: '1px solid #eee', flexShrink: 0 }} 
+                          alt=""
+                        />
+                        <div style={{ flex: 1, textAlign: 'left' }}>
+                          <div style={{ fontWeight: '700', textAlign: 'left' }}>{item.name}</div>
+                          <div style={{ fontSize: '0.65rem', color: '#999', textAlign: 'left' }}>
+                            {size && `${size}`}
+                            {color && ` • ${color}`}
+                          </div>
                         </div>
+                        <span className="item-qty" style={{ flexShrink: 0 }}>x{item.quantity || 1}</span>
                       </div>
-                      <span className="item-qty" style={{ flexShrink: 0 }}>x{item.quantity || 1}</span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
@@ -169,12 +191,10 @@ const OrdersTable = ({ orders, onSelectOrder }) => {
                   backgroundColor: colors.bg, 
                   color: colors.text,
                   borderRadius: '30px',
-                  fontSize: '0.65rem',
-                  fontWeight: '800',
-                  textTransform: 'uppercase',
-                  letterSpacing: '1px'
+                  fontSize: '0.7rem',
+                  fontWeight: '800'
                 }}>
-                   {order.status || 'Pending'}
+                   {getStatusLabel(order.status)}
                 </span>
               </div>
             </div>

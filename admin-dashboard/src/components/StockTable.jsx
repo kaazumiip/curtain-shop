@@ -24,24 +24,39 @@ const StockTable = ({ products, onEdit, onDelete }) => {
                 <img 
                   src={product.imageUrl || (product.images && product.images.length > 0 ? product.images[0].url : '')} 
                   alt="" 
-                  style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '12px', border: '1px solid #efefef', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }} 
+                  style={{ 
+                    width: '80px', 
+                    height: '80px', 
+                    objectFit: 'cover', 
+                    borderRadius: '14px', 
+                    border: '1px solid #e2e8f0', 
+                    boxShadow: '0 4px 14px rgba(0,0,0,0.06)',
+                    flexShrink: 0
+                  }} 
                 />
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontWeight: '700', fontSize: '0.95rem', color: '#000' }}>{product.name}</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  <span style={{ fontWeight: '800', fontSize: '1.05rem', color: '#0f172a' }}>{product.name}</span>
                   {product.nameKh && (
-                    <span style={{ fontSize: '0.8rem', color: '#666', fontFamily: "'Kantumruy Pro', sans-serif" }}>{product.nameKh}</span>
+                    <span style={{ fontSize: '0.9rem', color: '#64748b', fontFamily: "'Poppins', 'Noto Sans Khmer', 'Kdam Thmor Pro', sans-serif" }}>{product.nameKh}</span>
                   )}
-                  <span style={{ fontSize: '0.7rem', color: '#8e8e8e', letterSpacing: '0.5px', marginTop: '2px' }}>
+                  <span style={{ fontSize: '0.75rem', color: '#94a3b8', letterSpacing: '0.5px', marginTop: '2px', fontWeight: '600' }}>
                     {t(product.category.toLowerCase().replace(' ', '_'))}
                     {product.subCategory && ` — ${t(product.subCategory.toLowerCase())}`}
                   </span>
                 </div>
               </td>
-              <td style={{ color: '#000', fontWeight: '500' }}>£{product.price}</td>
+              <td style={{ color: '#0f172a', fontWeight: '700', fontSize: '1.05rem' }}>
+                <div>${Number(product.price).toFixed(2)}</div>
+                {Number(product.originalPrice) > Number(product.price) && (
+                  <div style={{ fontSize: '0.8rem', color: '#94a3b8', textDecoration: 'line-through', fontWeight: '600' }}>
+                    ${Number(product.originalPrice).toFixed(2)}
+                  </div>
+                )}
+              </td>
               <td style={{ color: '#8e8e8e' }}>{product.stock} {t('in_stock')}</td>
               <td>
                 <span className={`stock-badge ${product.status}`}>
-                  {product.status.replace('-', ' ')}
+                  {product.status === 'available' ? t('status_available') : product.status === 'low-stock' ? t('status_low_stock') : t('status_sold_out')}
                 </span>
               </td>
               <td>

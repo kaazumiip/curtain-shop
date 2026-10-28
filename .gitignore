@@ -43,3 +43,7 @@ Thumbs.db
 
 # Project-specific temp/scratch folders
 scratch/
+
+# Firebase Service Account
+serviceAccountKey.json
+*firebase-adminsdk*.json

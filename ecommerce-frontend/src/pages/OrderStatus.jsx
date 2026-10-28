@@ -228,20 +228,89 @@ const OrderStatus = () => {
                                {item.selectedColorName && <span>• {item.selectedColorName}</span>}
                                {item.fabricMeters && <span>• {item.fabricMeters} {t('meters')}</span>}
                                {item.customWidth && <span>• {item.customWidth}m{item.customHeight ? ` x ${item.customHeight}m` : ''}</span>}
-                               {item.poleColor && item.category !== 'Fabric' && <span>• {item.poleColor} {t('hardware')}</span>}
+                               {item.poleColor && item.category !== 'Fabric' && <span>• {typeof item.poleColor === 'object' ? item.poleColor.name : item.poleColor} {t('hardware')}</span>}
                             </div>
                          </div>
-                         <span style={{ fontWeight: '900', fontSize: '0.9rem' }}>£{Number(item.totalPrice || item.price).toFixed(2)}</span>
+                         <span style={{ fontWeight: '900', fontSize: '0.9rem' }}>${Number(item.totalPrice || item.price).toFixed(2)}</span>
                       </div>
                     ))}
                     <div style={{ borderTop: '1px solid #f0f0f0', marginTop: '20px', paddingTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                        <span style={{ fontWeight: '900', fontSize: '1.1rem', letterSpacing: '1px' }}>{t('total_paid')}</span>
-                       <span style={{ fontWeight: '900', fontSize: '1.4rem' }}>£{order.subtotal?.toFixed(2)}</span>
+                       <span style={{ fontWeight: '900', fontSize: '1.4rem' }}>${order.subtotal?.toFixed(2)}</span>
                     </div>
                  </div>
              </div>
 
-             <div style={{ marginTop: '40px', textAlign: 'center' }}>
+             {/* Customer Action Buttons (Request Installer & Cancel Order with Telegram Alert) */}
+             <div style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <button
+                  type="button"
+                  disabled={order.installationRequested}
+                  onClick={async () => {
+                    try {
+                      const res = await axios.put(`/orders/${order._id}`, {
+                        actionType: 'installation_request',
+                        note: 'អតិថិជនស្នើសុំជាងចុះតម្លើងវាំងននដល់ទីតាំង'
+                      });
+                      setOrder(res.data);
+                      alert('សំណើហៅជាងចុះតម្លើងត្រូវបានផ្ញើទៅកាន់ Telegram របស់ហាងរួចរាល់!');
+                    } catch (err) {
+                      alert('បរាជ័យក្នុងការផ្ញើសំណើ សូមព្យាយាមម្តងទៀត។');
+                    }
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '15px 20px',
+                    borderRadius: '50px',
+                    backgroundColor: order.installationRequested ? '#dcfce7' : '#0f172a',
+                    color: order.installationRequested ? '#15803d' : '#ffffff',
+                    border: 'none',
+                    fontSize: '0.88rem',
+                    fontWeight: '800',
+                    cursor: order.installationRequested ? 'default' : 'pointer',
+                    fontFamily: "'Poppins', 'Noto Sans Khmer', 'Kdam Thmor Pro', sans-serif"
+                  }}
+                >
+                  {order.installationRequested
+                    ? '✓ បានស្នើសុំជាងចុះតម្លើងរួចរាល់'
+                    : 'ស្នើសុំជាងចុះតម្លើងវាំងននដល់ផ្ទះ (Request Installer)'}
+                </button>
+
+                {order.status === 'Preparing' && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!window.confirm('តើលោកអ្នកពិតជាចង់បោះបង់ការបញ្ជាទិញនេះមែនទេ?')) return;
+                      try {
+                        await axios.put(`/orders/${order._id}`, {
+                          status: 'Cancelled',
+                          actionType: 'cancelled',
+                          note: 'អតិថិជនបានចុចបោះបង់ការកម្ម៉ង់ដោយខ្លួនឯង'
+                        });
+                        navigate('/order-cancel');
+                      } catch (err) {
+                        alert('បរាជ័យក្នុងការបោះបង់ការកម្ម៉ង់។');
+                      }
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '13px 20px',
+                      borderRadius: '50px',
+                      backgroundColor: '#fff',
+                      color: '#dc2626',
+                      border: '1px solid #fecaca',
+                      fontSize: '0.85rem',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      fontFamily: "'Poppins', 'Noto Sans Khmer', 'Kdam Thmor Pro', sans-serif"
+                    }}
+                  >
+                    បោះបង់ការកម្ម៉ង់ (Cancel Order)
+                  </button>
+                )}
+             </div>
+
+             <div style={{ marginTop: '30px', textAlign: 'center' }}>
                 <p style={{ color: '#ccc', fontSize: '0.75rem' }}>{t('support_question')}</p>
              </div>
           </div>
