@@ -1,8 +1,8 @@
 import React from 'react';
-import { Edit2, Trash2, PlusCircle } from 'lucide-react';
+import { Edit2, Trash2, Copy } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
-const StockTable = ({ products, onEdit, onDelete }) => {
+const StockTable = ({ products, onEdit, onDelete, onDuplicate }) => {
   const { t } = useLanguage();
 
   return (
@@ -60,10 +60,13 @@ const StockTable = ({ products, onEdit, onDelete }) => {
                 </span>
               </td>
               <td>
-                <button className="action-btn" onClick={() => onEdit(product)}>
+                <button className="action-btn" title="Duplicate product" onClick={() => onDuplicate && onDuplicate(product)} style={{ marginRight: '6px' }}>
+                  <Copy size={16} />
+                </button>
+                <button className="action-btn" title="Edit" onClick={() => onEdit(product)}>
                   <Edit2 size={16} />
                 </button>
-                <button className="action-btn" onClick={() => onDelete(product._id)} style={{ color: 'var(--vanguard-pink)' }}>
+                <button className="action-btn" title="Delete" onClick={() => onDelete(product._id)} style={{ color: 'var(--vanguard-pink)' }}>
                   <Trash2 size={16} />
                 </button>
               </td>

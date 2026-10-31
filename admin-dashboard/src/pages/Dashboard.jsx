@@ -5,11 +5,11 @@ import OrdersTable from '../components/OrdersTable';
 import ProductModal from '../components/ProductModal';
 import LiveChat from './LiveChat';
 import HardwareManager from '../components/HardwareManager';
-import { Plus, Package, ChevronRight, Globe, Clock } from 'lucide-react';
+import { Plus, Package, ChevronRight, Globe, Clock, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 
-function Dashboard() {
+function Dashboard({ onLogout }) {
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [view, setView] = useState('products'); // 'products', 'orders', 'history'
@@ -96,6 +96,18 @@ function Dashboard() {
     setIsModalOpen(true);
   };
 
+  const handleDuplicateProduct = (product) => {
+    const duplicated = {
+      ...product,
+      _id: undefined,
+      id: undefined,
+      name: `${product.name} (Copy)`,
+      nameKh: product.nameKh ? `${product.nameKh} (ចម្លង)` : ''
+    };
+    setEditingProduct(duplicated);
+    setIsModalOpen(true);
+  };
+
   const getCount = (tab) => {
     if (tab === 'Pending') return orders.filter(o => o.status !== 'Order Arrived' && o.status !== 'Cancelled').length;
     if (tab === 'Complete') return orders.filter(o => o.status === 'Order Arrived').length;
@@ -133,6 +145,49 @@ function Dashboard() {
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h1 className="serif" style={{ fontSize: '1.5rem', letterSpacing: '-0.5px' }}>Srey Tha Curtain</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <button 
+                className="btn-secondary" 
+                onClick={toggleLanguage} 
+                style={{ 
+                  backgroundColor: '#f5f5f5', 
+                  border: '1px solid #ddd', 
+                  borderRadius: '6px', 
+                  fontSize: '0.8rem', 
+                  padding: '6px 12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  cursor: 'pointer'
+                }}
+              >
+                <Globe size={14} />
+                <span>{language === 'kh' ? 'English' : 'ខ្មែរ'}</span>
+              </button>
+              {onLogout && (
+                <button
+                  type="button"
+                  onClick={onLogout}
+                  title="Logout"
+                  style={{
+                    backgroundColor: '#fff',
+                    border: '1px solid #fecaca',
+                    color: '#dc2626',
+                    borderRadius: '6px',
+                    fontSize: '0.8rem',
+                    padding: '6px 12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    cursor: 'pointer',
+                    fontWeight: '700'
+                  }}
+                >
+                  <LogOut size={14} />
+                  <span>ចាកចេញ</span>
+                </button>
+              )}
+            </div>
           </div>
           <div className="tab-header">
             <span 
@@ -318,6 +373,7 @@ function Dashboard() {
           products={filteredProducts} 
           onEdit={openEditModal} 
           onDelete={handleDelete} 
+          onDuplicate={handleDuplicateProduct}
         />
       ) : (
         <OrdersTable orders={filteredOrders} onSelectOrder={handleSelectOrder} />

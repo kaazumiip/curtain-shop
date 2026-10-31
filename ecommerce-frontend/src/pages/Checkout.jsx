@@ -212,7 +212,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
           </div>
 
           <button type="submit" className="btn-primary" style={{ padding: '20px' }}>
-            {t('complete_order')} — £{subtotal}
+            {t('complete_order')} — ${subtotal}
           </button>
         </form>
 
@@ -228,12 +228,12 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                     <p style={{ fontWeight: '700' }}>{item.name}</p>
                     <p style={{ color: '#999', fontSize: '0.7rem' }}>
                       {item.category === 'Accessories' && item.subCategory?.toLowerCase() === 'pole' 
-                        ? `${item.quantity} x (${item.customWidth}m × £${item.price}/m)` 
+                        ? `${item.quantity} x (${item.customWidth}m × $${item.price}/m)` 
                         : (item.category === 'Curtain' || item.category === 'Valance' 
-                            ? `${item.quantity} x (${item.customWidth}m x ${item.customHeight}m × £${item.price}/m²)`
+                            ? `${item.quantity} x (${item.customWidth}m x ${item.customHeight}m × $${item.price}/m²)`
                             : (item.category === 'Fabric'
-                                ? `${item.quantity} x (${item.fabricMeters}m × £${item.price}/m)`
-                                : (item.quantity ? `${item.quantity} x £${item.price}` : `£${item.totalPrice || item.price}`)
+                                ? `${item.quantity} x (${item.fabricMeters}m × $${item.price}/m)`
+                                : (item.quantity ? `${item.quantity} x $${item.price}` : `$${item.totalPrice || item.price}`)
                               )
                           )}
                     </p>
@@ -243,7 +243,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
             </div>
             <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', fontWeight: '800' }}>
               <span>{t('total_due')}</span>
-              <span>£{subtotal}</span>
+              <span>${subtotal}</span>
             </div>
           </div>
         </div>

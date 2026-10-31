@@ -76,10 +76,42 @@ const AnimatedRoutes = ({ products, addToCart, cart, removeFromCart, updateQuant
 function App() {
   const [products, setProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [cart, setCart] = useState([]);
-  const [favorites, setFavorites] = useState([]);
+  const [cart, setCart] = useState(() => {
+    try {
+      const saved = localStorage.getItem('srey_tha_cart');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+  const [favorites, setFavorites] = useState(() => {
+    try {
+      const saved = localStorage.getItem('srey_tha_favorites');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState({ message: '', visible: false });
+
+  // Persist cart to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('srey_tha_cart', JSON.stringify(cart));
+    } catch (e) {
+      console.error('Failed to save cart to localStorage', e);
+    }
+  }, [cart]);
+
+  // Persist favorites to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('srey_tha_favorites', JSON.stringify(favorites));
+    } catch (e) {
+      console.error('Failed to save favorites to localStorage', e);
+    }
+  }, [favorites]);
 
   const triggerToast = (message) => {
     setToast({ message, visible: true });

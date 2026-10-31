@@ -714,7 +714,7 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                                 fontSize: '0.92rem',
                                 fontWeight: '700'
                               }}>
-                                <span>{sz.name} (£{Number(sz.price).toFixed(2)})</span>
+                                <span>{sz.name} (${Number(sz.price).toFixed(2)})</span>
                                 <X size={13} style={{ cursor: 'pointer' }} onClick={() => removeSizeOption(idx)} />
                               </div>
                             ))}

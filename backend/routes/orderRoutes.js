@@ -84,23 +84,38 @@ router.post('/book-measurement', async (req, res) => {
 });
 
 // @route   POST /api/orders
-// @desc    Create a new order and automatically deduct product stock
+// @desc    Create a new order and automatically deduct product stock with server-verified pricing
 router.post('/', async (req, res) => {
   try {
-    const { customer, items, subtotal, paymentMethod } = req.body;
+    const { customer, items, paymentMethod } = req.body;
     const orderItems = Array.isArray(items) ? items : [];
 
-    // 1. Automatically deduct stock for each ordered item
+    let calculatedSubtotal = 0;
+    const verifiedItems = [];
+
+    // 1. Process items, verify prices with DB, calculate actual subtotal, and deduct stock
     for (const item of orderItems) {
       const prodId = item._id || item.id || item.productId;
-      const qtyToDeduct = Math.max(1, Number(item.quantity) || 1);
+      const qty = Math.max(1, Number(item.quantity) || 1);
+      let verifiedUnitPrice = Number(item.price) || 0;
+      let calculatedItemTotal = 0;
+
       if (prodId) {
         try {
           const prodRef = productsCollection.doc(String(prodId));
           const prodDoc = await prodRef.get();
           if (prodDoc.exists) {
-            const currentStock = Number(prodDoc.data().stock) || 0;
-            const newStock = Math.max(0, currentStock - qtyToDeduct);
+            const pData = prodDoc.data();
+            verifiedUnitPrice = Number(pData.price) || 0;
+
+            // Accurate stock deduction (Curtains/Valance area or Fabric meters if applicable, or unit quantity)
+            let stockUnitsDeduct = qty;
+            if (pData.category === 'Fabric' && item.fabricMeters) {
+              stockUnitsDeduct = Math.ceil((parseFloat(item.fabricMeters) || 1) * qty);
+            }
+            const currentStock = Number(pData.stock) || 0;
+            const newStock = Math.max(0, currentStock - stockUnitsDeduct);
+
             await prodRef.set(
               {
                 stock: newStock,
@@ -111,16 +126,42 @@ router.post('/', async (req, res) => {
             );
           }
         } catch (stockErr) {
-          console.error(`Failed to deduct stock for product ${prodId}:`, stockErr.message);
+          console.error(`Failed to verify product ${prodId}:`, stockErr.message);
         }
       }
+
+      // Calculate server item total based on category rules
+      if (item.category === 'Accessories' && item.subCategory?.toLowerCase() === 'pole') {
+        const w = parseFloat(item.customWidth) || 1;
+        calculatedItemTotal = verifiedUnitPrice * w * qty;
+      } else if (item.category === 'Curtain' || item.category === 'Valance') {
+        const w = parseFloat(item.customWidth) || 1;
+        const h = parseFloat(item.customHeight) || 1;
+        calculatedItemTotal = verifiedUnitPrice * w * h * qty;
+      } else if (item.category === 'Fabric') {
+        const m = parseFloat(item.fabricMeters) || 1;
+        calculatedItemTotal = verifiedUnitPrice * m * qty;
+      } else if (item.selectedSize?.price) {
+        calculatedItemTotal = Number(item.selectedSize.price) * qty;
+      } else {
+        calculatedItemTotal = verifiedUnitPrice * qty;
+      }
+
+      calculatedSubtotal += calculatedItemTotal;
+      verifiedItems.push({
+        ...item,
+        price: verifiedUnitPrice,
+        totalPrice: Number(calculatedItemTotal.toFixed(2))
+      });
     }
 
-    // 2. Save order document
+    const finalSubtotal = Number(calculatedSubtotal.toFixed(2));
+
+    // 2. Save order document with server-verified total
     const newOrderData = {
       customer: customer || {},
-      items: orderItems,
-      subtotal: Number(subtotal) || 0,
+      items: verifiedItems,
+      subtotal: finalSubtotal,
       paymentMethod: paymentMethod || 'ABA Bank',
       status: 'Preparing',
       stockDeducted: true,
