@@ -113,21 +113,22 @@ router.post('/', async (req, res) => {
       const qty = Math.max(1, Number(item.quantity) || 1);
       let verifiedUnitPrice = Number(item.price) || 0;
       let calculatedItemTotal = 0;
+      let prodData = null;
 
       if (prodId) {
         try {
           const prodRef = productsCollection.doc(String(prodId));
           const prodDoc = await prodRef.get();
           if (prodDoc.exists) {
-            const pData = prodDoc.data();
-            verifiedUnitPrice = Number(pData.price) || 0;
+            prodData = prodDoc.data();
+            verifiedUnitPrice = Number(prodData.price) || 0;
 
             // Accurate stock deduction (Curtains/Valance area or Fabric meters if applicable, or unit quantity)
             let stockUnitsDeduct = qty;
-            if (pData.category === 'Fabric' && item.fabricMeters) {
+            if (prodData.category === 'Fabric' && item.fabricMeters) {
               stockUnitsDeduct = Math.ceil((parseFloat(item.fabricMeters) || 1) * qty);
             }
-            const currentStock = Number(pData.stock) || 0;
+            const currentStock = Number(prodData.stock) || 0;
             const newStock = Math.max(0, currentStock - stockUnitsDeduct);
 
             await prodRef.set(
@@ -161,9 +162,14 @@ router.post('/', async (req, res) => {
         calculatedItemTotal = verifiedUnitPrice * qty;
       }
 
+      const prodImg = (prodData?.images && prodData.images.length > 0 ? prodData.images[0].url : '') || prodData?.imageUrl || item.imageUrl || (item.images && item.images[0]?.url) || '';
+
       calculatedSubtotal += calculatedItemTotal;
       verifiedItems.push({
         ...item,
+        name: item.name || prodData?.name || 'Curtain',
+        imageUrl: prodImg,
+        images: prodData?.images || item.images || (prodImg ? [{ url: prodImg }] : []),
         price: verifiedUnitPrice,
         totalPrice: Number(calculatedItemTotal.toFixed(2))
       });
