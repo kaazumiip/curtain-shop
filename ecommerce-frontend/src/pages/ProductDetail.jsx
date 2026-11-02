@@ -25,6 +25,21 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
   const [hardwareOptions, setHardwareOptions] = useState([]);
   const [loadingHardware, setLoadingHardware] = useState(true);
 
+  const combinedHardwareOptions = React.useMemo(() => {
+    const customList = product?.customOptions?.ringColors || [];
+    const merged = [...hardwareOptions];
+    customList.forEach(customItem => {
+      if (customItem?.name && !merged.some(m => m.name === customItem.name)) {
+        merged.push(customItem);
+      }
+    });
+    return merged.length > 0 ? merged : [
+      { name: 'Gold', color: '#d4af37' },
+      { name: 'Silver', color: '#c0c0c0' },
+      { name: 'Black', color: '#000000' }
+    ];
+  }, [hardwareOptions, product]);
+
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -51,7 +66,7 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
         setLoadingHardware(true);
         const res = await axios.get('/hardware');
         
-        // Process Hardware from Library
+        // Process Hardware from Library + Product Custom Ring/Pole Colors
         const libraryHardware = res.data.map(h => ({
           name: h.name,
           imageUrl: h.ringImageUrl,
@@ -490,11 +505,7 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
             <div style={{ marginBottom: '40px' }}>
               <label style={{ fontSize: '0.7rem', fontWeight: '800', display: 'block', marginBottom: '15px' }}>{t('pole_ring_color')}</label>
               <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-                {(hardwareOptions.length > 0 ? hardwareOptions : [
-                  { name: 'Gold', color: '#d4af37' }, 
-                  { name: 'Silver', color: '#c0c0c0' }, 
-                  { name: 'Black', color: '#000000' }
-                ]).map(item => (
+                {combinedHardwareOptions.map(item => (
                   <button 
                     key={item.name}
                     onClick={() => setSelectedPoleColor(item.name)}
@@ -513,11 +524,11 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
                     }}
                   >
                     <div style={{ display: 'flex', gap: '10px' }}>
-                      {item.imageUrl && (
-                        <img src={item.imageUrl} style={{ width: '65px', height: '65px', borderRadius: '12px', objectFit: 'contain', border: '1px solid #eee' }} alt="Ring" title="Ring" />
-                      )}
                       {item.poleImageUrl && (
-                        <img src={item.poleImageUrl} style={{ width: '65px', height: '65px', borderRadius: '12px', objectFit: 'contain', border: '1px solid #eee' }} alt="Pole" title="Pole" />
+                        <img src={item.poleImageUrl} style={{ width: '65px', height: '65px', borderRadius: '12px', objectFit: 'contain', border: '1px solid #eee' }} alt="ដង" title="ដង (Pole)" />
+                      )}
+                      {item.imageUrl && (
+                        <img src={item.imageUrl} style={{ width: '65px', height: '65px', borderRadius: '12px', objectFit: 'contain', border: '1px solid #eee' }} alt="កង" title="កង (Ring)" />
                       )}
                       {!item.imageUrl && !item.poleImageUrl && (
                         <div style={{ 
@@ -584,7 +595,7 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
                   customWidth: (['Curtain', 'Valance'].includes(product.category) || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole')) ? (parseFloat(customWidth) || 0) : null,
                   customHeight: (['Curtain', 'Valance'].includes(product.category)) ? (parseFloat(customHeight) || 0) : null,
                   quantity: quantity,
-                  poleColor: ['Curtain', 'Valance'].includes(product.category) ? (hardwareOptions.find(rc => rc.name === selectedPoleColor) || { name: selectedPoleColor }) : null,
+                  poleColor: ['Curtain', 'Valance'].includes(product.category) ? (combinedHardwareOptions.find(rc => rc.name === selectedPoleColor) || { name: selectedPoleColor }) : null,
                   cascadeStyle: product.category === 'Valance' ? selectedCascadeStyle : null,
                   totalPrice
                 });

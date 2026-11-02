@@ -49,6 +49,15 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
   const [newCascadeStyle, setNewCascadeStyle] = useState({ name: '', imageUrl: '' });
   const [newSizeOption, setNewSizeOption] = useState({ name: '', price: '' });
   const [isDragging, setIsDragging] = useState(false);
+  const [libraryHardware, setLibraryHardware] = useState([]);
+
+  useEffect(() => {
+    if (isOpen) {
+      api.get('/hardware')
+        .then(res => setLibraryHardware(res.data || []))
+        .catch(() => setLibraryHardware([]));
+    }
+  }, [isOpen]);
 
   const steps = [
     { id: 0, label: t('step_general') },
@@ -751,10 +760,23 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                       </div>
                       <div style={styles.rowInputCol}>
                         <div style={{ marginBottom: '10px' }}>
-                          <span style={{ fontSize: '0.94rem', color: '#15803d', backgroundColor: '#ecfdf5', padding: '4px 10px', borderRadius: '50px', fontWeight: '700', border: '1px solid #bbf7d0' }}>
-                            ✓ {t('hardware_sync_active')}
+                          <span style={{ fontSize: '0.88rem', color: '#15803d', backgroundColor: '#ecfdf5', padding: '5px 12px', borderRadius: '50px', fontWeight: '700', border: '1px solid #bbf7d0', display: 'inline-block' }}>
+                            ✓ ភ្ជាប់ឈុតដង និងកងពីបណ្ណាល័យរួចរាល់ ({libraryHardware.length} ឈុត)
                           </span>
                         </div>
+
+                        {libraryHardware.length > 0 && (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px', padding: '10px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                            {libraryHardware.map((hw) => (
+                              <div key={hw._id} style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#fff', padding: '5px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', fontWeight: '700', color: '#1e293b' }}>
+                                {hw.poleImageUrl && <img src={hw.poleImageUrl} alt="ដង" style={{ width: '24px', height: '24px', borderRadius: '4px', objectFit: 'contain', border: '1px solid #f1f5f9' }} />}
+                                {hw.ringImageUrl && <img src={hw.ringImageUrl} alt="កង" style={{ width: '24px', height: '24px', borderRadius: '4px', objectFit: 'contain', border: '1px solid #f1f5f9' }} />}
+                                <span>{hw.name}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
                         <button
                           type="button"
                           onClick={() => setShowCustomHardware(!showCustomHardware)}
