@@ -38,8 +38,15 @@ const Cart = ({ cart, onRemoveFromCart, onUpdateQuantity }) => {
               
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <h4 className="serif" style={{ fontSize: '1.2rem', margin: '0', flex: 1 }}>{item.name}</h4>
-                  <p style={{ fontWeight: '800', fontSize: '1.2rem', marginLeft: '20px' }}>£{Number(item.totalPrice || item.price).toFixed(2)}</p>
+                  <div>
+                    {item.windowLabel && (
+                      <span style={{ display: 'inline-block', backgroundColor: '#e2e8f0', color: '#0f172a', padding: '2px 8px', borderRadius: '4px', fontWeight: '800', fontSize: '0.72rem', marginBottom: '6px' }}>
+                        {item.windowLabel}
+                      </span>
+                    )}
+                    <h4 className="serif" style={{ fontSize: '1.2rem', margin: '0' }}>{item.name}</h4>
+                  </div>
+                  <p style={{ fontWeight: '800', fontSize: '1.2rem', marginLeft: '20px' }}>${Number(item.totalPrice || item.price).toFixed(2)}</p>
                 </div>
                 
                 <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '10px', display: 'grid', gap: '5px' }}>

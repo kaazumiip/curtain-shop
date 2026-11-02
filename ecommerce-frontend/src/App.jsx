@@ -133,18 +133,29 @@ function App() {
     }
   };
 
-  const addToCart = (product) => {
-    // Ensure defaults if added directly from grid
-    const cartItem = {
-      ...product,
-      selectedSize: product.selectedSize || (product.customOptions?.sizeOptions?.length > 0 ? product.customOptions.sizeOptions[0] : null),
-      selectedColor: product.selectedColor || null,
-      poleColor: product.poleColor || (product.customOptions?.ringColors?.length > 0 ? product.customOptions.ringColors[0].name : 'Gold'),
-      totalPrice: product.totalPrice || product.price
-    };
-    
-    setCart([...cart, cartItem]);
-    triggerToast(`${product.name} added to cart`);
+  const addToCart = (productOrItems) => {
+    if (Array.isArray(productOrItems)) {
+      if (productOrItems.length === 0) return;
+      const newItems = productOrItems.map(p => ({
+        ...p,
+        selectedSize: p.selectedSize || (p.customOptions?.sizeOptions?.length > 0 ? p.customOptions.sizeOptions[0] : null),
+        selectedColor: p.selectedColor || null,
+        poleColor: p.poleColor || (p.customOptions?.ringColors?.length > 0 ? p.customOptions.ringColors[0].name : 'Gold'),
+        totalPrice: p.totalPrice || p.price
+      }));
+      setCart(prev => [...prev, ...newItems]);
+      triggerToast(`បានដាក់ ${newItems.length} ទំហំបង្អួចចូលកន្ត្រកទំនិញជោគជ័យ!`);
+    } else {
+      const cartItem = {
+        ...productOrItems,
+        selectedSize: productOrItems.selectedSize || (productOrItems.customOptions?.sizeOptions?.length > 0 ? productOrItems.customOptions.sizeOptions[0] : null),
+        selectedColor: productOrItems.selectedColor || null,
+        poleColor: productOrItems.poleColor || (productOrItems.customOptions?.ringColors?.length > 0 ? productOrItems.customOptions.ringColors[0].name : 'Gold'),
+        totalPrice: productOrItems.totalPrice || productOrItems.price
+      };
+      setCart(prev => [...prev, cartItem]);
+      triggerToast(`${productOrItems.name} added to cart`);
+    }
   };
 
   const removeFromCart = (index) => {

@@ -7,6 +7,7 @@ const BookMeasurementModal = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
+    phone2: '',
     preferredDate: '',
     windowNotes: '',
     address: '',
@@ -163,7 +164,7 @@ const BookMeasurementModal = ({ isOpen, onClose }) => {
           </div>
         ) : (
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: '700', marginBottom: '6px', color: '#334155' }}>
                   ឈ្មោះរបស់អ្នក *
@@ -176,6 +177,9 @@ const BookMeasurementModal = ({ isOpen, onClose }) => {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 />
               </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: '700', marginBottom: '6px', color: '#334155' }}>
                   លេខទូរស័ព្ទ (Telegram) *
@@ -187,6 +191,18 @@ const BookMeasurementModal = ({ isOpen, onClose }) => {
                   style={inputStyle}
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: '700', marginBottom: '6px', color: '#64748b' }}>
+                  លេខទូរស័ព្ទទី ២ (ជាជម្រើស)
+                </label>
+                <input
+                  type="tel"
+                  placeholder="098 765 432 (បើមាន)"
+                  style={inputStyle}
+                  value={formData.phone2}
+                  onChange={(e) => setFormData({ ...formData, phone2: e.target.value })}
                 />
               </div>
             </div>

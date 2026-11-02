@@ -13,14 +13,13 @@ const Checkout = ({ cart, onOrderPlaced }) => {
   const subtotal = cart.reduce((acc, item) => acc + Number(item.totalPrice || item.price), 0).toFixed(2);
 
   const [formData, setFormData] = useState({
-    email: '',
     firstName: '',
     lastName: '',
+    phone: '',
+    phone2: '',
     address: '',
     additionalAddress: '',
     city: '',
-    postcode: '',
-    phone: '',
     latitude: null,
     longitude: null,
     googleMapsUrl: '',
@@ -99,14 +98,31 @@ const Checkout = ({ cart, onOrderPlaced }) => {
           <div style={{ marginBottom: '40px' }}>
             <h3 style={{ fontSize: '0.8rem', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '20px' }}>{t('contact_info')}</h3>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-              <input 
-                required type="email" placeholder={t('email_address')} 
-                style={inputStyle} value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})}
-              />
-              <input 
-                required type="tel" placeholder={t('phone_number')} 
-                style={inputStyle} value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})}
-              />
+              <div>
+                <label style={{ display: 'block', fontSize: '0.74rem', fontWeight: '700', color: '#475569', marginBottom: '6px' }}>
+                  {language === 'kh' ? 'លេខទូរស័ព្ទ (ចាំបាច់) *' : 'Phone Number (Required) *'}
+                </label>
+                <input 
+                  required 
+                  type="tel" 
+                  placeholder={language === 'kh' ? 'ឧ. 012 345 678' : t('phone_number')} 
+                  style={inputStyle} 
+                  value={formData.phone} 
+                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.74rem', fontWeight: '700', color: '#64748b', marginBottom: '6px' }}>
+                  {language === 'kh' ? 'លេខទូរស័ព្ទទី ២ (ជាជម្រើស)' : 'Secondary Phone (Optional)'}
+                </label>
+                <input 
+                  type="tel" 
+                  placeholder={language === 'kh' ? 'ឧ. 098 765 432 (បើមាន)' : 'Secondary phone (optional)'} 
+                  style={inputStyle} 
+                  value={formData.phone2} 
+                  onChange={(e) => setFormData({...formData, phone2: e.target.value})}
+                />
+              </div>
             </div>
           </div>
 
@@ -134,10 +150,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
 
             <input required placeholder={t('street_address')} style={{ ...inputStyle, marginBottom: '15px' }} value={formData.address} onChange={(e) => setFormData({...formData, address: e.target.value})}/>
             <input placeholder={t('additional_address')} style={{ ...inputStyle, marginBottom: '15px' }} value={formData.additionalAddress} onChange={(e) => setFormData({...formData, additionalAddress: e.target.value})}/>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-              <input required placeholder={t('city')} style={inputStyle} value={formData.city} onChange={(e) => setFormData({...formData, city: e.target.value})}/>
-              <input required placeholder={t('postcode')} style={inputStyle} value={formData.postcode} onChange={(e) => setFormData({...formData, postcode: e.target.value})}/>
-            </div>
+            <input required placeholder={language === 'kh' ? 'រាជធានី / ខេត្ត' : t('city')} style={inputStyle} value={formData.city} onChange={(e) => setFormData({...formData, city: e.target.value})}/>
           </div>
 
           <div style={{ marginBottom: '40px' }}>

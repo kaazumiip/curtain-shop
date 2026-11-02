@@ -198,7 +198,7 @@ const OrderDetails = () => {
             <div style="font-size:13px;line-height:1.7;">
               <div style="font-weight:800;margin-bottom:4px;">ព័ត៌មានអតិថិជន និងទីតាំងដឹកជញ្ជូន:</div>
               <div><strong>ឈ្មោះ:</strong> ${customerFullName}</div>
-              <div><strong>ទូរស័ព្ទ:</strong> ${customer.phone || 'N/A'}</div>
+              <div><strong>ទូរស័ព្ទ:</strong> ${customer.phone || 'N/A'}${customer.phone2 ? ` / ${customer.phone2}` : ''}</div>
               <div><strong>អាសយដ្ឋាន:</strong> ${addressFull || 'N/A'}</div>
             </div>
             <div style="font-size:13px;line-height:1.7;text-align:right;">
@@ -352,8 +352,10 @@ const OrderDetails = () => {
 
           <div style={{ marginBottom: '20px' }}>
             <p style={{ fontSize: '1.15rem', fontWeight: '800', color: '#0f172a', margin: '0 0 4px 0' }}>{customer.firstName || ''} {customer.lastName || ''}</p>
-            <p style={{ fontSize: '0.9rem', color: '#64748b', margin: '0 0 4px 0' }}>{customer.email || 'N/A'}</p>
-            <p style={{ fontSize: '0.95rem', fontWeight: '700', color: '#16a34a', margin: 0 }}>📞 {customer.phone || 'N/A'}</p>
+            <p style={{ fontSize: '0.95rem', fontWeight: '700', color: '#16a34a', margin: '0 0 4px 0' }}>
+              📞 {customer.phone || 'N/A'}{customer.phone2 ? ` / ${customer.phone2}` : ''}
+            </p>
+            {customer.email && <p style={{ fontSize: '0.85rem', color: '#64748b', margin: 0 }}>✉️ {customer.email}</p>}
           </div>
 
           <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '18px' }}>
@@ -366,7 +368,7 @@ const OrderDetails = () => {
               {customer.additionalAddress && (
                 <span style={{ color: '#0f172a', fontWeight: '700' }}>{customer.additionalAddress}<br /></span>
               )}
-              {[customer.city, customer.postcode].filter(Boolean).join(', ')}
+              {customer.city || ''}
             </p>
 
             {mapLink && (

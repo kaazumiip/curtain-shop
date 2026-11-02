@@ -1,6 +1,55 @@
 const https = require('https');
 
 /**
+ * Sends a photo message with caption to Telegram
+ */
+const sendTelegramPhoto = (photoUrl, caption = '') => {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+
+  if (!token || !chatId || !photoUrl) {
+    return;
+  }
+
+  const payload = JSON.stringify({
+    chat_id: chatId,
+    photo: photoUrl,
+    caption: caption.slice(0, 1000),
+    parse_mode: 'HTML'
+  });
+
+  const options = {
+    hostname: 'api.telegram.org',
+    port: 443,
+    path: `/bot${token}/sendPhoto`,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(payload)
+    }
+  };
+
+  const req = https.request(options, (res) => {
+    let data = '';
+    res.on('data', (chunk) => { data += chunk; });
+    res.on('end', () => {
+      if (res.statusCode >= 200 && res.statusCode < 300) {
+        console.log('[Telegram Photo Alert]: Product photo sent successfully.');
+      } else {
+        console.error('[Telegram Photo Alert Failed]:', data);
+      }
+    });
+  });
+
+  req.on('error', (err) => {
+    console.error('[Telegram Photo Error]:', err.message);
+  });
+
+  req.write(payload);
+  req.end();
+};
+
+/**
  * Sends a Telegram notification message to the configured bot and chat
  * @param {string} text - Message text (HTML formatted)
  */
@@ -96,6 +145,11 @@ const formatOrderMessage = (order) => {
       specs.push(`▫️ <b>Size Spec:</b> <code>${item.selectedSize.name}</code>`);
     }
 
+    const itemImg = item.imageUrl || (item.images && item.images[0]?.url);
+    if (itemImg) {
+      specs.push(`▫️ <b>Photo:</b> <a href="${itemImg}">🖼️ មើលរូបថតផលិតផល (Product Image)</a>`);
+    }
+
     return `
 📌 <b>ITEM #${index + 1}: ${item.name || 'Custom Product'}</b>
    Category: <i>${category}</i>
@@ -117,9 +171,6 @@ ${specs.join('\n')}
   if (customer.city) {
     addressLines.push(`  ▫️ <b>City / Province:</b> ${customer.city}`);
   }
-  if (customer.postcode) {
-    addressLines.push(`  ▫️ <b>Postcode:</b> <code>${customer.postcode}</code>`);
-  }
 
   const mapLink = customer.googleMapsUrl || (customer.latitude && customer.longitude ? `https://www.google.com/maps?q=${customer.latitude},${customer.longitude}` : null);
   if (mapLink) {
@@ -130,7 +181,12 @@ ${specs.join('\n')}
   const addressDisplay = addressLines.length > 0 ? addressLines.join('\n') : '  ▫️ <i>No address provided</i>';
   const orderTime = new Date(order.createdAt || Date.now()).toLocaleString('en-US', { timeZone: 'Asia/Phnom_Penh' });
 
-  return `
+  // Find first product image for inline Telegram preview
+  const firstItemImg = items.find(it => it.imageUrl || (it.images && it.images[0]?.url));
+  const previewImg = firstItemImg ? (firstItemImg.imageUrl || firstItemImg.images?.[0]?.url) : null;
+  const imagePreviewTag = previewImg ? `<a href="${previewImg}">&#8205;</a>` : '';
+
+  return `${imagePreviewTag}
 🔔 <b>NEW ORDER PLACED!</b>
 ━━━━━━━━━━━━━━━━━━━━
 🆔 <b>Order ID:</b> <code>${order._id || order.id}</code>
@@ -139,9 +195,8 @@ ${specs.join('\n')}
 
 👤 <b>CUSTOMER & DELIVERY INFORMATION</b>
 • <b>Customer:</b> ${customerName}
-• <b>Phone:</b> <code>${customer.phone || 'N/A'}</code>
-• <b>Email:</b> ${customer.email || 'N/A'}
-• <b>Delivery Address & Map:</b>
+• <b>Phone:</b> <code>${customer.phone || 'N/A'}${customer.phone2 ? ` / ${customer.phone2}` : ''}</code>
+${customer.email ? `• <b>Email:</b> ${customer.email}\n` : ''}• <b>Delivery Address & Map:</b>
 ${addressDisplay}
 • <b>Payment Method:</b> 💳 <b>${order.paymentMethod || 'ABA Bank'}</b>
 
@@ -182,7 +237,7 @@ ${headerTitle}
 ${note ? `📝 <b>ចំណាំ / មូលហេតុ:</b> ${note}\n` : ''}
 👤 <b>ព័ត៌មានអតិថិជន</b>
 • <b>ឈ្មោះ:</b> ${customerName}
-• <b>លេខទូរស័ព្ទ:</b> <code>${customer.phone || 'N/A'}</code>
+• <b>លេខទូរស័ព្ទ:</b> <code>${customer.phone || 'N/A'}${customer.phone2 ? ` / ${customer.phone2}` : ''}</code>
 • <b>អាសយដ្ឋាន:</b> ${customer.address || 'N/A'}${customer.city ? `, ${customer.city}` : ''}
 ${mapLink ? `• <b>Google Maps:</b> <a href="${mapLink}">📍 បើកផែនទីទីតាំង</a>\n` : ''}💰 <b>តម្លៃសរុប:</b> <b>$${Number(order.subtotal || 0).toFixed(2)}</b>
 ━━━━━━━━━━━━━━━━━━━━
@@ -201,7 +256,7 @@ const formatMeasurementMessage = (booking) => {
 ━━━━━━━━━━━━━━━━━━━━
 📅 <b>កាលបរិច្ឆេទស្នើសុំ:</b> ${timeStr}
 👤 <b>ឈ្មោះអតិថិជន:</b> <b>${booking.name || 'N/A'}</b>
-📞 <b>លេខទូរស័ព្ទ:</b> <code>${booking.phone || 'N/A'}</code>
+📞 <b>លេខទូរស័ព្ទ:</b> <code>${booking.phone || 'N/A'}${booking.phone2 ? ` / ${booking.phone2}` : ''}</code>
 🗓️ <b>ថ្ងៃ/ម៉ោងណាត់វាស់វែង:</b> <b>${booking.preferredDate || 'ពេលណាក៏បាន'}</b>
 🪟 <b>ប្រភេទ និងចំនួនបង្អួច:</b> ${booking.windowNotes || 'មិនបានបញ្ជាក់'}
 
@@ -215,6 +270,7 @@ ${booking.additionalAddress ? `• <b>ចំណាំទីតាំង:</b> ${b
 
 module.exports = {
   sendTelegramNotification,
+  sendTelegramPhoto,
   formatOrderMessage,
   formatStatusUpdateMessage,
   formatMeasurementMessage

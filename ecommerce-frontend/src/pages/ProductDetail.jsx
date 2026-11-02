@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from '../api/axios';
-import { ChevronLeft, ShoppingBag, ArrowRight, Heart } from 'lucide-react';
+import { ChevronLeft, ShoppingBag, ArrowRight, Heart, Plus, Trash2 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import BookMeasurementModal from '../components/BookMeasurementModal';
 
@@ -20,7 +20,27 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
   const [customWidth, setCustomWidth] = useState("1");
   const [customHeight, setCustomHeight] = useState("2.5");
   const [quantity, setQuantity] = useState(1);
+  const [windowSizes, setWindowSizes] = useState([
+    { id: 1, label: 'បង្អួចទី ១', width: '1.5', height: '2.5', quantity: 1 }
+  ]);
   const galleryRef = React.useRef(null);
+
+  const addWindowSize = () => {
+    const nextIdx = windowSizes.length + 1;
+    setWindowSizes(prev => [
+      ...prev,
+      { id: Date.now(), label: `បង្អួចទី ${nextIdx}`, width: '1.5', height: '2.5', quantity: 1 }
+    ]);
+  };
+
+  const removeWindowSize = (id) => {
+    if (windowSizes.length <= 1) return;
+    setWindowSizes(prev => prev.filter(w => w.id !== id));
+  };
+
+  const updateWindowSize = (id, field, value) => {
+    setWindowSizes(prev => prev.map(w => w.id === id ? { ...w, [field]: value } : w));
+  };
 
   const [hardwareOptions, setHardwareOptions] = useState([]);
   const [loadingHardware, setLoadingHardware] = useState(true);
@@ -94,23 +114,32 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
     fetchHardware();
   }, [id]);
 
+  const totalWindowsSubtotal = React.useMemo(() => {
+    if (!product) return 0;
+    const basePrice = Number(product.price) || 0;
+    const isPole = product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole';
+
+    return windowSizes.reduce((sum, w) => {
+      const widthVal = parseFloat(w.width) || 0;
+      const heightVal = parseFloat(w.height) || 0;
+      const q = Math.max(1, parseInt(w.quantity) || 1);
+      const itemCost = isPole
+        ? (basePrice * widthVal * q)
+        : (basePrice * widthVal * heightVal * q);
+      return sum + itemCost;
+    }, 0);
+  }, [product, windowSizes]);
+
+  const totalWindowsQuantity = React.useMemo(() => {
+    return windowSizes.reduce((sum, w) => sum + (Math.max(1, parseInt(w.quantity) || 1)), 0);
+  }, [windowSizes]);
+
   useEffect(() => {
     if (!product) return;
     let basePrice = Number(product.price);
     
-    if (['Curtain', 'Valance', 'Accessories'].includes(product.category)) {
-      const w = parseFloat(customWidth) || 0;
-      const h = parseFloat(customHeight) || 0;
-      if (product.category === 'Accessories') {
-        if (product.subCategory?.toLowerCase() === 'pole') {
-          setTotalPrice((basePrice * w * quantity).toFixed(2));
-        } else {
-          setTotalPrice((basePrice * quantity).toFixed(2));
-        }
-      } else {
-        // Curtains and Valances are area based * quantity
-        setTotalPrice((basePrice * w * h * quantity).toFixed(2));
-      }
+    if (['Curtain', 'Valance'].includes(product.category) || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole')) {
+      setTotalPrice(totalWindowsSubtotal.toFixed(2));
     } else if (product.category === 'Fabric') {
       const meters = parseFloat(fabricMeters) || 0;
       setTotalPrice((basePrice * meters * quantity).toFixed(2));
@@ -119,7 +148,7 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
     } else {
       setTotalPrice((basePrice * quantity).toFixed(2));
     }
-  }, [product, selectedSize, fabricMeters, customWidth, customHeight, quantity]);
+  }, [product, selectedSize, fabricMeters, quantity, totalWindowsSubtotal]);
 
   if (loading) return <div style={{ padding: '100px', textAlign: 'center', letterSpacing: '4px' }}>LOADING PRODUCT...</div>;
   if (!product) return <div style={{ padding: '100px', textAlign: 'center' }}>Item not found.</div>;
@@ -372,47 +401,222 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
 
           {(['Curtain', 'Valance'].includes(product.category) || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole')) && (
             <div style={{ marginBottom: '40px' }}>
-              <label style={{ fontSize: '0.75rem', fontWeight: '800', display: 'block', marginBottom: '15px' }}>
-                {language === 'kh' ? 'បញ្ចូលទំហំ (ម៉ែត្រ)' : (t('custom_dimensions') || 'Enter Dimensions (Meters)')}
-              </label>
-              <div style={{ display: 'flex', gap: '20px' }}>
-                <div style={{ flex: 1 }}>
-                  <span style={{ fontSize: '0.75rem', color: '#475569', fontWeight: '700', display: 'block', marginBottom: '6px' }}>
-                    {product.subCategory?.toLowerCase() === 'pole' 
-                      ? (language === 'kh' ? 'ប្រវែង (ម៉ែត្រ)' : 'Length (m)') 
-                      : (language === 'kh' ? 'ទទឹង (ម៉ែត្រ)' : 'Width (m)')}
-                  </span>
-                  <input 
-                    type="number" 
-                    min="0.1" 
-                    step="0.1"
-                    value={customWidth}
-                    onChange={(e) => setCustomWidth(e.target.value)}
-                    style={{ width: '100%', padding: '15px', borderRadius: '15px', border: '1px solid #eee', outline: 'none', fontWeight: '800', textAlign: 'center' }}
-                  />
-                </div>
-                {product.subCategory?.toLowerCase() !== 'pole' && (
-                  <div style={{ flex: 1 }}>
-                    <span style={{ fontSize: '0.75rem', color: '#475569', fontWeight: '700', display: 'block', marginBottom: '6px' }}>
-                      {language === 'kh' ? 'កម្ពស់ (ម៉ែត្រ)' : 'Height (m)'}
-                    </span>
-                    <input 
-                      type="number" 
-                      min="0.1" 
-                      step="0.1"
-                      value={customHeight}
-                      onChange={(e) => setCustomHeight(e.target.value)}
-                      style={{ width: '100%', padding: '15px', borderRadius: '15px', border: '1px solid #eee', outline: 'none', fontWeight: '800', textAlign: 'center' }}
-                    />
-                  </div>
-                )}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+                <label style={{ fontSize: '0.85rem', fontWeight: '800', margin: 0, color: '#0f172a' }}>
+                  {language === 'kh' ? 'បញ្ជីទំហំតាមបង្អួចនីមួយៗ' : 'Window Dimensions List'}
+                </label>
+                <button
+                  type="button"
+                  onClick={addWindowSize}
+                  style={{
+                    backgroundColor: '#0f172a',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '6px 14px',
+                    fontSize: '0.78rem',
+                    fontWeight: '700',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <Plus size={14} />
+                  <span>{language === 'kh' ? '+ បន្ថែមទំហំបង្អួចមួយទៀត' : '+ Add Another Window'}</span>
+                </button>
               </div>
-              <p style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '10px' }}>
-                {product.subCategory?.toLowerCase() === 'pole' 
-                  ? `* តម្លៃ: $${product.price}/m × ${parseFloat(customWidth)||0}m ${quantity > 1 ? `× ${quantity} គ្រឿង` : ''}` 
-                  : `* តម្លៃ: $${product.price}/m² × ${( (parseFloat(customWidth)||0) * (parseFloat(customHeight)||0) ).toFixed(2)}m² ${quantity > 1 ? `× ${quantity} គ្រឿង` : ''}`
-                }
-              </p>
+
+              {/* Window Cards List */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                {windowSizes.map((win, idx) => {
+                  const widthVal = parseFloat(win.width) || 0;
+                  const heightVal = parseFloat(win.height) || 0;
+                  const q = Math.max(1, parseInt(win.quantity) || 1);
+                  const isPole = product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole';
+                  const winCost = isPole
+                    ? (Number(product.price) * widthVal * q).toFixed(2)
+                    : (Number(product.price) * widthVal * heightVal * q).toFixed(2);
+                  const area = (widthVal * heightVal).toFixed(2);
+
+                  return (
+                    <div
+                      key={win.id}
+                      style={{
+                        backgroundColor: '#f8fafc',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '16px',
+                        padding: '16px',
+                        position: 'relative'
+                      }}
+                    >
+                      {/* Window Header Row */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontSize: '0.78rem', backgroundColor: '#0f172a', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontWeight: '800' }}>
+                            #{idx + 1}
+                          </span>
+                          <input
+                            value={win.label}
+                            onChange={(e) => updateWindowSize(win.id, 'label', e.target.value)}
+                            placeholder={`បង្អួចទី ${idx + 1}`}
+                            style={{
+                              border: 'none',
+                              background: 'transparent',
+                              fontWeight: '700',
+                              fontSize: '0.88rem',
+                              color: '#0f172a',
+                              outline: 'none',
+                              width: '180px'
+                            }}
+                          />
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <span style={{ fontSize: '0.92rem', fontWeight: '800', color: '#0f172a' }}>
+                            ${winCost}
+                          </span>
+                          {windowSizes.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeWindowSize(win.id)}
+                              title="លុបទំហំនេះ"
+                              style={{
+                                border: 'none',
+                                background: '#fee2e2',
+                                color: '#ef4444',
+                                borderRadius: '6px',
+                                padding: '4px 8px',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center'
+                              }}
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Inputs Row: Width, Height, Quantity */}
+                      <div style={{ display: 'grid', gridTemplateColumns: isPole ? '1fr 1fr' : '1fr 1fr 1fr', gap: '12px' }}>
+                        <div>
+                          <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: '700', display: 'block', marginBottom: '4px' }}>
+                            {isPole ? (language === 'kh' ? 'ប្រវែង (ម៉ែត្រ)' : 'Length (m)') : (language === 'kh' ? 'ទទឹង (ម៉ែត្រ)' : 'Width (m)')}
+                          </span>
+                          <input
+                            type="number"
+                            min="0.1"
+                            step="0.1"
+                            value={win.width}
+                            onChange={(e) => updateWindowSize(win.id, 'width', e.target.value)}
+                            style={{
+                              width: '100%',
+                              padding: '10px',
+                              borderRadius: '10px',
+                              border: '1px solid #cbd5e1',
+                              backgroundColor: '#fff',
+                              textAlign: 'center',
+                              fontWeight: '700',
+                              fontSize: '0.9rem',
+                              outline: 'none',
+                              boxSizing: 'border-box'
+                            }}
+                          />
+                        </div>
+
+                        {!isPole && (
+                          <div>
+                            <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: '700', display: 'block', marginBottom: '4px' }}>
+                              {language === 'kh' ? 'កម្ពស់ (ម៉ែត្រ)' : 'Height (m)'}
+                            </span>
+                            <input
+                              type="number"
+                              min="0.1"
+                              step="0.1"
+                              value={win.height}
+                              onChange={(e) => updateWindowSize(win.id, 'height', e.target.value)}
+                              style={{
+                                width: '100%',
+                                padding: '10px',
+                                borderRadius: '10px',
+                                border: '1px solid #cbd5e1',
+                                backgroundColor: '#fff',
+                                textAlign: 'center',
+                                fontWeight: '700',
+                                fontSize: '0.9rem',
+                                outline: 'none',
+                                boxSizing: 'border-box'
+                              }}
+                            />
+                          </div>
+                        )}
+
+                        <div>
+                          <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: '700', display: 'block', marginBottom: '4px' }}>
+                            {language === 'kh' ? 'ចំនួន (គ្រឿង)' : 'Qty'}
+                          </span>
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            backgroundColor: '#fff',
+                            borderRadius: '10px',
+                            border: '1px solid #cbd5e1',
+                            height: '42px',
+                            overflow: 'hidden'
+                          }}>
+                            <button
+                              type="button"
+                              onClick={() => updateWindowSize(win.id, 'quantity', Math.max(1, (win.quantity || 1) - 1))}
+                              style={{ width: '32px', height: '100%', border: 'none', background: 'transparent', cursor: 'pointer', fontWeight: '800' }}
+                            >-</button>
+                            <input
+                              type="number"
+                              min="1"
+                              value={win.quantity}
+                              onChange={(e) => updateWindowSize(win.id, 'quantity', Math.max(1, parseInt(e.target.value) || 1))}
+                              style={{ width: '100%', border: 'none', background: 'transparent', textAlign: 'center', fontWeight: '800', outline: 'none', fontSize: '0.88rem' }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => updateWindowSize(win.id, 'quantity', (win.quantity || 1) + 1)}
+                              style={{ width: '32px', height: '100%', border: 'none', background: 'transparent', cursor: 'pointer', fontWeight: '800' }}
+                            >+</button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Item sub-calc note */}
+                      <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '8px' }}>
+                        {isPole
+                          ? `* ${widthVal}m × $${product.price}/m ${q > 1 ? `× ${q} គ្រឿង` : ''} = $${winCost}`
+                          : `* ${widthVal}m × ${heightVal}m = ${area}m² × $${product.price}/m² ${q > 1 ? `× ${q} គ្រឿង` : ''} = $${winCost}`
+                        }
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Subtotal Summary of all windows */}
+              <div style={{
+                marginTop: '12px',
+                padding: '12px 16px',
+                backgroundColor: '#f1f5f9',
+                borderRadius: '12px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '8px'
+              }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: '700', color: '#334155' }}>
+                  {language === 'kh' ? `សរុបទាំងអស់៖ ${windowSizes.length} បង្អួច (${totalWindowsQuantity} គ្រឿង)` : `Total: ${windowSizes.length} Windows (${totalWindowsQuantity} Units)`}
+                </span>
+                <span style={{ fontSize: '1.05rem', fontWeight: '800', color: '#0f172a' }}>
+                  ${totalWindowsSubtotal.toFixed(2)}
+                </span>
+              </div>
 
               {/* Free Home Measurement Booking Button */}
               <div style={{ marginTop: '14px', padding: '12px 16px', backgroundColor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
@@ -440,69 +644,72 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
             </div>
           )}
 
-          <div style={{ marginBottom: '40px' }}>
-            <label style={{ fontSize: '0.7rem', fontWeight: '800', display: 'block', marginBottom: '15px', letterSpacing: '1px', textTransform: 'uppercase' }}>
-              {t('quantity') || 'Quantity'}
-            </label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                backgroundColor: '#f9f9f9', 
-                borderRadius: '15px', 
-                padding: '5px' 
-              }}>
-                <button 
-                  type="button"
-                  disabled={Number(product.stock) <= 0}
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  style={{ 
-                    width: '40px', 
-                    height: '40px', 
-                    borderRadius: '12px', 
-                    border: 'none', 
-                    backgroundColor: '#fff', 
-                    cursor: Number(product.stock) <= 0 ? 'not-allowed' : 'pointer',
-                    fontSize: '1.2rem',
-                    fontWeight: '700'
-                  }}
-                >-</button>
-                <input 
-                  type="number"
-                  disabled={Number(product.stock) <= 0}
-                  value={quantity}
-                  onChange={(e) => {
-                    const maxStock = Math.max(1, Number(product.stock) || 1);
-                    setQuantity(Math.min(maxStock, Math.max(1, parseInt(e.target.value) || 1)));
-                  }}
-                  style={{ 
-                    width: '60px', 
-                    border: 'none', 
-                    background: 'none', 
-                    textAlign: 'center', 
-                    fontWeight: '800',
-                    fontSize: '1.1rem'
-                  }}
-                />
-                <button 
-                  type="button"
-                  disabled={Number(product.stock) <= 0 || quantity >= Number(product.stock)}
-                  onClick={() => setQuantity(Math.min(Math.max(1, Number(product.stock) || 1), quantity + 1))}
-                  style={{ 
-                    width: '40px', 
-                    height: '40px', 
-                    borderRadius: '12px', 
-                    border: 'none', 
-                    backgroundColor: '#fff', 
-                    cursor: (Number(product.stock) <= 0 || quantity >= Number(product.stock)) ? 'not-allowed' : 'pointer',
-                    fontSize: '1.2rem',
-                    fontWeight: '700'
-                  }}
-                >+</button>
+          {/* Standalone Quantity Selector for non-Curtain products */}
+          {!['Curtain', 'Valance'].includes(product.category) && !(product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole') && (
+            <div style={{ marginBottom: '40px' }}>
+              <label style={{ fontSize: '0.7rem', fontWeight: '800', display: 'block', marginBottom: '15px', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                {t('quantity') || 'Quantity'}
+              </label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  backgroundColor: '#f9f9f9', 
+                  borderRadius: '15px', 
+                  padding: '5px' 
+                }}>
+                  <button 
+                    type="button"
+                    disabled={Number(product.stock) <= 0}
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    style={{ 
+                      width: '40px', 
+                      height: '40px', 
+                      borderRadius: '12px', 
+                      border: 'none', 
+                      backgroundColor: '#fff', 
+                      cursor: Number(product.stock) <= 0 ? 'not-allowed' : 'pointer',
+                      fontSize: '1.2rem',
+                      fontWeight: '700'
+                    }}
+                  >-</button>
+                  <input 
+                    type="number"
+                    disabled={Number(product.stock) <= 0}
+                    value={quantity}
+                    onChange={(e) => {
+                      const maxStock = Math.max(1, Number(product.stock) || 1);
+                      setQuantity(Math.min(maxStock, Math.max(1, parseInt(e.target.value) || 1)));
+                    }}
+                    style={{ 
+                      width: '60px', 
+                      border: 'none', 
+                      background: 'none', 
+                      textAlign: 'center', 
+                      fontWeight: '800',
+                      fontSize: '1.1rem'
+                    }}
+                  />
+                  <button 
+                    type="button"
+                    disabled={Number(product.stock) <= 0 || quantity >= Number(product.stock)}
+                    onClick={() => setQuantity(Math.min(Math.max(1, Number(product.stock) || 1), quantity + 1))}
+                    style={{ 
+                      width: '40px', 
+                      height: '40px', 
+                      borderRadius: '12px', 
+                      border: 'none', 
+                      backgroundColor: '#fff', 
+                      cursor: (Number(product.stock) <= 0 || quantity >= Number(product.stock)) ? 'not-allowed' : 'pointer',
+                      fontSize: '1.2rem',
+                      fontWeight: '700'
+                    }}
+                  >+</button>
+                </div>
+                <span style={{ fontSize: '0.8rem', color: '#666', fontWeight: '600' }}>{language === 'kh' ? 'គ្រឿង' : 'Units'}</span>
               </div>
-              <span style={{ fontSize: '0.8rem', color: '#666', fontWeight: '600' }}>{language === 'kh' ? 'គ្រឿង' : 'Units'}</span>
             </div>
-          </div>
+          )}
 
 
           {(product.category === 'Curtain' || product.category === 'Valance') && (
@@ -589,20 +796,43 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
               className="btn-add" 
               onClick={() => {
                 if (Number(product.stock) <= 0) return;
-                onAddToCart({
-                  ...product,
-                  selectedSize: ['Curtain', 'Valance', 'Accessories'].includes(product.category)
-                    ? (product.subCategory?.toLowerCase() === 'pole' ? { name: `${customWidth}m × ${quantity} Units` } : (product.category === 'Accessories' ? { name: `${quantity} Units` } : { name: `${customWidth}m x ${customHeight}m × ${quantity} Units` }))
-                    : (product.category === 'Fabric' ? { name: `${fabricMeters}m × ${quantity} Units` } : (selectedSize ? { name: `${selectedSize.name} × ${quantity} Units` } : { name: `${quantity} Units` })),
-                  selectedColorName,
-                  fabricMeters: product.category === 'Fabric' ? (parseFloat(fabricMeters) || 0) : null,
-                  customWidth: (['Curtain', 'Valance'].includes(product.category) || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole')) ? (parseFloat(customWidth) || 0) : null,
-                  customHeight: (['Curtain', 'Valance'].includes(product.category)) ? (parseFloat(customHeight) || 0) : null,
-                  quantity: quantity,
-                  poleColor: ['Curtain', 'Valance'].includes(product.category) ? (combinedHardwareOptions.find(rc => rc.name === selectedPoleColor) || { name: selectedPoleColor }) : null,
-                  cascadeStyle: product.category === 'Valance' ? selectedCascadeStyle : null,
-                  totalPrice
-                });
+
+                if (['Curtain', 'Valance'].includes(product.category) || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole')) {
+                  const isPole = product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole';
+                  const itemsToAdd = windowSizes.map((w, idx) => {
+                    const widthVal = parseFloat(w.width) || 0;
+                    const heightVal = parseFloat(w.height) || 0;
+                    const q = Math.max(1, parseInt(w.quantity) || 1);
+                    const itemCost = isPole
+                      ? (Number(product.price) * widthVal * q).toFixed(2)
+                      : (Number(product.price) * widthVal * heightVal * q).toFixed(2);
+
+                    return {
+                      ...product,
+                      windowLabel: w.label || `បង្អួចទី ${idx + 1}`,
+                      selectedSize: isPole
+                        ? { name: `${w.label || `បង្អួចទី ${idx + 1}`}: ${widthVal}m × ${q} គ្រឿង` }
+                        : { name: `${w.label || `បង្អួចទី ${idx + 1}`}: ${widthVal}m × ${heightVal}m × ${q} គ្រឿង` },
+                      selectedColorName,
+                      customWidth: widthVal,
+                      customHeight: isPole ? null : heightVal,
+                      quantity: q,
+                      poleColor: ['Curtain', 'Valance'].includes(product.category) ? (combinedHardwareOptions.find(rc => rc.name === selectedPoleColor) || { name: selectedPoleColor }) : null,
+                      cascadeStyle: product.category === 'Valance' ? selectedCascadeStyle : null,
+                      totalPrice: itemCost
+                    };
+                  });
+                  onAddToCart(itemsToAdd);
+                } else {
+                  onAddToCart({
+                    ...product,
+                    selectedSize: product.category === 'Fabric' ? { name: `${fabricMeters}m × ${quantity} គ្រឿង` } : (selectedSize ? { name: `${selectedSize.name} × ${quantity} គ្រឿង` } : { name: `${quantity} គ្រឿង` }),
+                    selectedColorName,
+                    fabricMeters: product.category === 'Fabric' ? (parseFloat(fabricMeters) || 0) : null,
+                    quantity: quantity,
+                    totalPrice
+                  });
+                }
               }}
               style={{
                 flex: 1,
@@ -617,7 +847,14 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
               }}
             >
               <ShoppingBag size={20} />
-              {Number(product.stock) <= 0 ? 'អស់ពីស្តុក (Out of Stock)' : t('add_to_cart')}
+              {Number(product.stock) <= 0 
+                ? 'អស់ពីស្តុក (Out of Stock)' 
+                : (['Curtain', 'Valance'].includes(product.category) || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole'))
+                  ? (windowSizes.length > 1 
+                      ? (language === 'kh' ? `ដាក់ចូលកន្ត្រកទាំងអស់ (${windowSizes.length} បង្អួច) — $${totalWindowsSubtotal.toFixed(2)}` : `Add All to Cart (${windowSizes.length} Windows) — $${totalWindowsSubtotal.toFixed(2)}`)
+                      : (language === 'kh' ? `ដាក់ចូលកន្ត្រក — $${totalWindowsSubtotal.toFixed(2)}` : `Add to Cart — $${totalWindowsSubtotal.toFixed(2)}`))
+                  : t('add_to_cart')
+              }
             </button>
           </div>
           

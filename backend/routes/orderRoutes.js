@@ -3,6 +3,7 @@ const router = express.Router();
 const { db } = require('../config/firebase');
 const {
   sendTelegramNotification,
+  sendTelegramPhoto,
   formatOrderMessage,
   formatStatusUpdateMessage,
   formatMeasurementMessage
@@ -175,6 +176,16 @@ router.post('/', async (req, res) => {
 
     // 3. Trigger instant Telegram notification to Admin/Group
     try {
+      // Send product photo if available
+      const firstItemWithImg = verifiedItems.find(it => it.imageUrl || (it.images && it.images[0]?.url));
+      const photoUrl = firstItemWithImg?.imageUrl || firstItemWithImg?.images?.[0]?.url;
+      if (photoUrl) {
+        sendTelegramPhoto(
+          photoUrl,
+          `🖼️ <b>រូបថតផលិតផល៖ ${firstItemWithImg.name || 'វាំងនន'}</b>\n📦 កម្ម៉ង់ថ្មី #${formattedOrder._id || formattedOrder.id}`
+        );
+      }
+
       const msg = formatOrderMessage(formattedOrder);
       sendTelegramNotification(msg);
     } catch (telegramErr) {
