@@ -277,11 +277,11 @@ function Dashboard({ onLogout }) {
         <>
           {/* Global Hardware Library Section on Top */}
           <div style={{ 
-            marginTop: '30px', 
-            padding: '25px', 
-            backgroundColor: '#f8fbff', 
-            borderRadius: '24px', 
-            border: '1px solid #e1f0ff' 
+            marginTop: '24px', 
+            padding: '18px 22px', 
+            backgroundColor: '#fafafa', 
+            borderRadius: '16px', 
+            border: '1px solid #eaeaea' 
           }}>
             <HardwareManager isCompact={true} />
           </div>
