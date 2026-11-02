@@ -198,7 +198,7 @@ ${specs.join('\n')}
 • <b>Phone:</b> <code>${customer.phone || 'N/A'}${customer.phone2 ? ` / ${customer.phone2}` : ''}</code>
 ${customer.email ? `• <b>Email:</b> ${customer.email}\n` : ''}• <b>Delivery Address & Map:</b>
 ${addressDisplay}
-• <b>Payment Method:</b> 💳 <b>${order.paymentMethod === 'ABA Bank' ? 'ABA Bank (Merchant: 14463116 - LIM SITHA)' : (order.paymentMethod || 'ABA Bank')}</b>${order.paymentDetails?.transactionRef ? `\n• <b>ABA Ref / Code:</b> <code>${order.paymentDetails.transactionRef}</code>` : ''}
+• <b>Payment Method:</b> ${order.paymentMethod === 'Cash on Delivery' ? '🚚 <b>Cash on Delivery (ទូទាត់ពេលដឹកដល់)</b>\n• <b>Collection Status:</b> ⚠️ <b>Collect $' + Number(order.subtotal || 0).toFixed(2) + ' upon delivery</b>' : (order.paymentMethod === 'ABA Bank' ? '💳 <b>ABA Bank (Merchant: 14463116 - LIM SITHA)</b>' : '💳 <b>' + (order.paymentMethod || 'ABA Bank') + '</b>')}${order.paymentDetails?.transactionRef ? `\n• <b>ABA Ref / Code:</b> <code>${order.paymentDetails.transactionRef}</code>` : ''}
 
 📦 <b>ORDER SPECIFICATIONS (${items.length} Item${items.length > 1 ? 's' : ''})</b>
 ━━━━━━━━━━━━━━━━━━━━

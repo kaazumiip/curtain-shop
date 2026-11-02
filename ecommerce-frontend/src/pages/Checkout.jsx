@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CreditCard, CheckCircle, Copy, Check } from 'lucide-react';
+import { CreditCard, CheckCircle, Copy, Check, Truck } from 'lucide-react';
 import axios from '../api/axios';
 import { useLanguage } from '../context/LanguageContext';
 import LocationPickerMap from '../components/LocationPickerMap';
@@ -205,29 +205,57 @@ const Checkout = ({ cart, onOrderPlaced }) => {
           <div style={{ marginBottom: '40px' }}>
             <h3 style={{ fontSize: '0.8rem', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '20px' }}>{t('payment_method')}</h3>
             <div style={{ display: 'grid', gap: '15px', marginBottom: '30px' }}>
-              {['ABA Bank', 'Wing Bank', 'Credit Card'].map((method) => (
+              {[
+                {
+                  id: 'ABA Bank',
+                  label: language === 'kh' ? 'ABA Bank (ទូទាត់ប្រាក់ជាមុន / Pay Upfront)' : 'ABA Bank (Pay Upfront)',
+                  sub: language === 'kh' ? 'ផ្ទេរប្រាក់តាម ABA Mobile Merchant ID: 14463116' : 'Transfer via ABA Mobile Merchant ID: 14463116'
+                },
+                {
+                  id: 'Cash on Delivery',
+                  label: language === 'kh' ? 'ទូទាត់ពេលដឹកជញ្ជូនដល់ (Pay on Delivery / COD)' : 'Cash on Delivery (Pay on Delivery / COD)',
+                  sub: language === 'kh' ? 'ទូទាត់ប្រាក់សុទ្ធ ឬ ស្កេន ABA ពេលទំនិញដឹកដល់ដៃអ្នក' : 'Pay in cash or scan ABA when curtains arrive at your door'
+                },
+                {
+                  id: 'Wing Bank',
+                  label: language === 'kh' ? 'Wing Bank (ទូទាត់ជាមុន / Pay Upfront)' : 'Wing Bank (Pay Upfront)',
+                  sub: language === 'kh' ? 'ផ្ទេរប្រាក់ជាមុនតាមគណនីវីង' : 'Transfer upfront via Wing Bank'
+                },
+                {
+                  id: 'Credit Card',
+                  label: language === 'kh' ? 'កាតឥណទាន (Credit / Debit Card)' : 'Credit / Debit Card',
+                  sub: 'Visa, MasterCard, UnionPay'
+                }
+              ].map((opt) => (
                 <label 
-                  key={method} 
+                  key={opt.id} 
                   style={{ 
                     ...inputStyle, 
                     display: 'flex', 
                     alignItems: 'center', 
                     gap: '15px', 
                     cursor: 'pointer',
-                    border: formData.paymentMethod === method ? '2px solid black' : '1px solid #eeeeee' 
+                    padding: '16px 20px',
+                    border: formData.paymentMethod === opt.id ? '2px solid black' : '1px solid #eeeeee',
+                    backgroundColor: formData.paymentMethod === opt.id ? '#fafafa' : '#fff'
                   }}
                 >
                   <input 
                     type="radio" 
                     name="paymentMethod" 
-                    value={method} 
-                    checked={formData.paymentMethod === method}
+                    value={opt.id} 
+                    checked={formData.paymentMethod === opt.id}
                     onChange={(e) => setFormData({...formData, paymentMethod: e.target.value})}
-                    style={{ accentColor: 'black', width: '18px', height: '18px' }}
+                    style={{ accentColor: 'black', width: '18px', height: '18px', cursor: 'pointer' }}
                   />
-                  <span style={{ fontWeight: formData.paymentMethod === method ? '700' : '400' }}>
-                    {method}
-                  </span>
+                  <div>
+                    <span style={{ fontWeight: formData.paymentMethod === opt.id ? '700' : '500', fontSize: '0.95rem', display: 'block', color: '#111' }}>
+                      {opt.label}
+                    </span>
+                    <span style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px', display: 'block' }}>
+                      {opt.sub}
+                    </span>
+                  </div>
                 </label>
               ))}
             </div>
@@ -387,6 +415,61 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                       }}
                     />
                   </div>
+                </div>
+              </div>
+            )}
+
+            {formData.paymentMethod === 'Cash on Delivery' && (
+              <div className="page-transition" style={{
+                backgroundColor: '#fff',
+                border: '2px solid #16a34a',
+                borderRadius: '24px',
+                overflow: 'hidden',
+                boxShadow: '0 12px 32px rgba(22,163,74,0.08)',
+                marginBottom: '25px'
+              }}>
+                <div style={{
+                  backgroundColor: '#16a34a',
+                  color: '#fff',
+                  padding: '16px 24px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <Truck size={20} />
+                    <span style={{ fontWeight: '700', fontSize: '1.05rem', letterSpacing: '0.5px' }}>
+                      {language === 'kh' ? 'ទូទាត់ពេលដឹកជញ្ជូនដល់ (PAY ON DELIVERY)' : 'CASH ON DELIVERY (COD)'}
+                    </span>
+                  </div>
+                  <span style={{ fontSize: '0.75rem', backgroundColor: 'rgba(255,255,255,0.2)', padding: '4px 10px', borderRadius: '12px', fontWeight: '700' }}>
+                    {language === 'kh' ? 'បង់លុយពេលទំនិញដល់ដៃ' : 'Pay Upon Delivery'}
+                  </span>
+                </div>
+
+                <div style={{ padding: '24px' }}>
+                  <div style={{
+                    backgroundColor: '#f0fdf4',
+                    border: '1px solid #bbf7d0',
+                    borderRadius: '16px',
+                    padding: '18px',
+                    marginBottom: '16px'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: '700', color: '#166534' }}>
+                        {language === 'kh' ? 'ទឹកប្រាក់ត្រូវទូទាត់ពេលដឹកដល់:' : 'Amount to pay on delivery:'}
+                      </span>
+                      <span style={{ fontSize: '1.45rem', fontWeight: '900', color: '#15803d' }}>
+                        ${subtotal}
+                      </span>
+                    </div>
+                  </div>
+
+                  <p style={{ margin: 0, fontSize: '0.9rem', color: '#334155', lineHeight: '1.7' }}>
+                    {language === 'kh' 
+                      ? '👉 អ្នកអាចទូទាត់ជាសាច់ប្រាក់សុទ្ធ ឬ ស្កេន ABA ផ្ទាល់ជាមួយអ្នកដឹកជញ្ជូន នៅពេលទំនិញត្រូវបានដឹកជញ្ជូនដល់គេហដ្ឋានរបស់អ្នក។ ខាងហាងនឹងទាក់ទងទូរស័ព្ទទៅកាន់អ្នកមុនពេលចេញដំណើរដឹកជញ្ជូន។'
+                      : '👉 You can pay in cash or scan ABA directly with the courier when your package arrives at your address. We will call your phone before heading out for delivery.'}
+                  </p>
                 </div>
               </div>
             )}
