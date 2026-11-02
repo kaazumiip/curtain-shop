@@ -141,55 +141,59 @@ function Dashboard({ onLogout }) {
 
   return (
     <div className="dashboard-container">
-      <header className="dashboard-header" style={{ borderBottom: '1px solid #efefef', paddingBottom: '20px' }}>
-        <div style={{ flex: 1 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h1 className="serif" style={{ fontSize: '1.5rem', letterSpacing: '-0.5px' }}>Srey Tha Curtain</h1>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <button 
-                className="btn-secondary" 
-                onClick={toggleLanguage} 
-                style={{ 
-                  backgroundColor: '#f5f5f5', 
-                  border: '1px solid #ddd', 
-                  borderRadius: '6px', 
-                  fontSize: '0.8rem', 
+      <header className="dashboard-header" style={{ borderBottom: '1px solid #efefef', paddingBottom: '18px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        {/* Top Row: Store Title (Left) & Language + Logout (Top Right) */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+          <h1 className="serif" style={{ fontSize: '1.5rem', letterSpacing: '-0.5px', margin: 0 }}>Srey Tha Curtain</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <button 
+              className="btn-secondary" 
+              onClick={toggleLanguage} 
+              style={{ 
+                backgroundColor: '#f5f5f5', 
+                border: '1px solid #ddd', 
+                borderRadius: '8px', 
+                fontSize: '0.8rem', 
+                padding: '6px 12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                cursor: 'pointer',
+                fontWeight: '600'
+              }}
+            >
+              <Globe size={14} />
+              <span>{language === 'kh' ? 'English' : 'ខ្មែរ'}</span>
+            </button>
+            {onLogout && (
+              <button
+                type="button"
+                onClick={onLogout}
+                title="Logout"
+                style={{
+                  backgroundColor: '#fff',
+                  border: '1px solid #fecaca',
+                  color: '#dc2626',
+                  borderRadius: '8px',
+                  fontSize: '0.8rem',
                   padding: '6px 12px',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  fontWeight: '700'
                 }}
               >
-                <Globe size={14} />
-                <span>{language === 'kh' ? 'English' : 'ខ្មែរ'}</span>
+                <LogOut size={14} />
+                <span>ចាកចេញ</span>
               </button>
-              {onLogout && (
-                <button
-                  type="button"
-                  onClick={onLogout}
-                  title="Logout"
-                  style={{
-                    backgroundColor: '#fff',
-                    border: '1px solid #fecaca',
-                    color: '#dc2626',
-                    borderRadius: '6px',
-                    fontSize: '0.8rem',
-                    padding: '6px 12px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    cursor: 'pointer',
-                    fontWeight: '700'
-                  }}
-                >
-                  <LogOut size={14} />
-                  <span>ចាកចេញ</span>
-                </button>
-              )}
-            </div>
+            )}
           </div>
-          <div className="tab-header">
+        </div>
+
+        {/* Second Row: Navigation Tabs (Left) & Add Product Button (Right) */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', flexWrap: 'wrap', gap: '14px' }}>
+          <div className="tab-header" style={{ marginTop: 0 }}>
             <span 
               onClick={() => setView('products')} 
               style={{ 
@@ -251,26 +255,27 @@ function Dashboard({ onLogout }) {
               {t('messages')}
             </span>
           </div>
+
+          {view === 'products' && (
+            <button 
+              className="btn-primary" 
+              onClick={openAddModal} 
+              style={{ 
+                backgroundColor: '#000', 
+                borderRadius: '8px', 
+                fontSize: '0.85rem', 
+                padding: '8px 16px',
+                textTransform: 'none',
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '8px' 
+              }}
+            >
+              <Plus size={18} />
+              <span>{t('add_product')}</span>
+            </button>
+          )}
         </div>
-        {view === 'products' && (
-          <button 
-            className="btn-primary" 
-            onClick={openAddModal} 
-            style={{ 
-              backgroundColor: '#000', 
-              borderRadius: '8px', 
-              fontSize: '0.85rem', 
-              padding: '8px 16px',
-              textTransform: 'none',
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '8px' 
-            }}
-          >
-            <Plus size={18} />
-            <span>{t('add_product')}</span>
-          </button>
-        )}
       </header>
       
       {view === 'products' && (
