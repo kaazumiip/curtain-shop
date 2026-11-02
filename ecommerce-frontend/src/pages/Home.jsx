@@ -21,7 +21,7 @@ const Home = ({ products, onAddToCart, favorites, onToggleFavorite }) => {
 
   const accessorySubCategories = [
     { id: 'All', name: 'ទាំងអស់' },
-    { id: 'Pole', name: 'បង្គោល' },
+    { id: 'Pole', name: 'ដង' },
     { id: 'Ring', name: 'កង' },
     { id: 'Bracket', name: 'ជើងទម្រ' },
     { id: 'Hook', name: 'ទំពក់' },

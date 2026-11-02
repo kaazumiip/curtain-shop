@@ -85,7 +85,7 @@ const formatOrderMessage = (order) => {
 
     if (item.poleColor && category !== 'Fabric') {
       const hardware = typeof item.poleColor === 'object' ? item.poleColor.name : item.poleColor;
-      specs.push(`▫️ <b>Hardware (Pole/Ring):</b> <b>${hardware}</b>`);
+      specs.push(`▫️ <b>គ្រឿងបង្គុំ (ដង/កង):</b> <b>${hardware}</b>`);
     }
 
     if (item.cascadeStyle?.name) {

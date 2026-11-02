@@ -268,6 +268,12 @@ export const translations = {
     valance: 'ដក់',
     cascade_style: 'ស្ទីលកាត់ថ្នាក់',
     fabric: 'ក្រណាត់ម៉ែត្រ',
+    pole: 'ដង',
+    ring: 'កង',
+    bracket: 'ជើងទម្រ',
+    hook: 'ទំពក់',
+    tassel: 'រំយោល',
+    other: 'ផ្សេងៗ',
     
     // Home/Shop
     explore_collection: 'ស្វែងរកការប្រមូលទំនិញ',
@@ -293,10 +299,10 @@ export const translations = {
     
     // Product Detail
     back_to_collection: 'ត្រឡប់ទៅការប្រមូលទំនិញ',
-    pole_included: 'រួមបញ្ចូលបង្គោល កង និងជើងចាប់',
+    pole_included: 'រួមបញ្ចូលដង កង និងជើងទម្រ',
     product_color: 'ពណ៌ផលិតផល',
     select_dimensions: 'ជ្រើសរើសទំហំ',
-    pole_ring_color: 'ពណ៌បង្គោល និងកង',
+    pole_ring_color: 'ពណ៌ដង និងកង',
     proceed_to_cart: 'ទៅកាន់កន្ត្រកទំនិញ',
     default_desc: 'ផលិតឡើងដោយវត្ថុធាតុដើមល្អបំផុត...',
     hand_finished: 'សម្រិតសម្រាំងដោយដៃនៅក្នុងសិក្ខាសាលារបស់យើង',
@@ -318,7 +324,7 @@ export const translations = {
     order_summary: 'សេចក្តីសង្ខេបនៃការបញ្ជាទិញ',
     dimension: 'ទំហំ',
     color: 'ពណ៌',
-    pole_ring: 'បង្គោល និងកង',
+    pole_ring: 'ដង និងកង',
     
     // Favorites
     favorites: 'ការចូលចិត្ត',
@@ -484,7 +490,7 @@ export const translations = {
     photo_upload_failed: 'ការផ្ទុករូបថតឡើងបានបរាជ័យ។',
     name_required_alert: 'ត្រូវការឈ្មោះ និងរូបថតយ៉ាងតិចមួយសន្លឹក',
     ring_upload_failed: 'ការផ្ទុករូបថតកងបានបរាជ័យ។',
-    pole_upload_failed: 'ការផ្ទុករូបថតបង្គោលបានបរាជ័យ។',
+    pole_upload_failed: 'ការផ្ទុករូបថតដងបានបរាជ័យ។',
     cascade_upload_failed: 'ការផ្ទុករូបថតម៉ូដជាថ្នាក់ៗបានបរាជ័យ។',
     cascade_required_alert: 'ត្រូវការឈ្មោះ និងរូបថតសម្រាប់ម៉ូដជាថ្នាក់ៗ',
     confirm_delete_product: 'តើអ្នកប្រាកដជាចង់លុបផលិតផលនេះមែនទេ?',

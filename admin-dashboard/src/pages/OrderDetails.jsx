@@ -106,7 +106,7 @@ const OrderDetails = () => {
         specs.push(`ទំហំ: ${sizeName}`);
       }
       if (colorName) specs.push(`ពណ៌: ${colorName}`);
-      if (hardwareName && item.category !== 'Fabric') specs.push(`បង្គោល/កង: ${hardwareName}`);
+      if (hardwareName && item.category !== 'Fabric') specs.push(`ដង/កង: ${hardwareName}`);
       if (cascadeName) specs.push(`ម៉ូតរំយោល: ${cascadeName}`);
 
       return `
