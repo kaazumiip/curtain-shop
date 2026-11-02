@@ -123,6 +123,10 @@ export const translations = {
     // Custom Additions
     contact_location: 'Contact & Location',
     phone: 'Phone',
+    address: 'Address',
+    store_address: 'Street 204, Phnom Penh, Kandal Province',
+    open_in_maps: 'Open in Google Maps',
+    directions: 'Get Directions',
     cellcard: 'Cellcard',
     smart: 'Smart',
     available_hours: 'Available 10:00 - 18:00',
@@ -375,6 +379,10 @@ export const translations = {
     // Custom Additions
     contact_location: 'ទំនាក់ទំនង និងទីតាំង',
     phone: 'ទូរស័ព្ទ',
+    address: 'អាសយដ្ឋាន',
+    store_address: 'ផ្លូវលេខ ២០៤, Phnom Penh, Kandal Province',
+    open_in_maps: 'បើកមើលក្នុង Google Maps',
+    directions: 'មើលផ្លូវធ្វើដំណើរ',
     cellcard: 'សែលកាត',
     smart: 'ស្មាត',
     available_hours: 'រង់ចាំបម្រើជូន ១០:០០ - ១៨:០០',
