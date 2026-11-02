@@ -7,9 +7,10 @@ import LocationPickerMap from '../components/LocationPickerMap';
 
 const Checkout = ({ cart, onOrderPlaced }) => {
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [isSuccess, setIsSuccess] = useState(false);
   const [orderDetails, setOrderDetails] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
   const subtotal = cart.reduce((acc, item) => acc + Number(item.totalPrice || item.price), 0).toFixed(2);
 
   const [formData, setFormData] = useState({
@@ -32,6 +33,18 @@ const Checkout = ({ cart, onOrderPlaced }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (formData.paymentMethod === 'Credit Card') {
+      const cleanNum = formData.cardNumber.replace(/\D/g, '');
+      if (cleanNum.length < 15) {
+        alert(language === 'kh' ? 'សូមបញ្ចូលលេខកាតធនាគារឱ្យបានត្រឹមត្រូវ (១៦ ខ្ទង់)!' : 'Please enter a valid credit card number');
+        return;
+      }
+      if (!formData.cardExpiry || !formData.cardCvv || formData.cardCvv.length < 3) {
+        alert(language === 'kh' ? 'សូមបញ្ចូលថ្ងៃផុតកំណត់ និងលេខកូដ CVV ឱ្យបានត្រឹមត្រូវ!' : 'Please enter valid expiry date and CVV');
+        return;
+      }
+    }
     
     const { paymentMethod, cardNumber, cardExpiry, cardCvv, cardName, ...customerData } = formData;
     const orderData = {
@@ -44,6 +57,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
     };
     
     try {
+      setSubmitting(true);
       const res = await axios.post('/orders', orderData);
       
       // Save order to history
@@ -57,33 +71,61 @@ const Checkout = ({ cart, onOrderPlaced }) => {
       
       setOrderDetails(res.data);
       setIsSuccess(true);
-      onOrderPlaced(); // Clear cart immediately
+      if (onOrderPlaced) onOrderPlaced(); // Clear cart immediately
     } catch (err) {
       console.error('Failed to place order:', err);
-      alert(t('order_failed_alert'));
+      const msg = err.response?.data?.error || t('order_failed_alert');
+      alert(msg);
+    } finally {
+      setSubmitting(false);
     }
   };
 
   if (isSuccess) {
     return (
-      <div style={{ padding: '150px 0', textAlign: 'center' }}>
-        <CheckCircle size={80} color="#000" style={{ marginBottom: '30px' }} />
-        <h2 className="serif" style={{ fontSize: '2.5rem', marginBottom: '20px' }}>{t('order_placed')}</h2>
-        <p style={{ color: '#666', maxWidth: '400px', margin: '0 auto', lineHeight: '1.8' }}>
+      <div style={{ padding: '100px 20px', textAlign: 'center' }}>
+        <CheckCircle size={80} color="#16a34a" style={{ marginBottom: '25px' }} />
+        <h2 className="serif" style={{ fontSize: '2.2rem', marginBottom: '16px' }}>{t('order_placed')}</h2>
+        <p style={{ color: '#64748b', maxWidth: '440px', margin: '0 auto', lineHeight: '1.8', fontSize: '0.95rem' }}>
           {t('order_placed_desc')}
         </p>
-        <div style={{ marginTop: '40px', padding: '20px', backgroundColor: '#f9f9f9', borderRadius: '15px', display: 'inline-block' }}>
-          <p style={{ fontSize: '0.7rem', color: '#999', marginBottom: '5px' }}>{t('transaction_id').toUpperCase()}</p>
-          <p style={{ fontWeight: '800', fontSize: '1.2rem', letterSpacing: '1px' }}>{orderDetails?._id}</p>
+        <div style={{ marginTop: '35px', padding: '18px 24px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px', display: 'inline-block' }}>
+          <p style={{ fontSize: '0.72rem', color: '#64748b', marginBottom: '4px', fontWeight: '700' }}>
+            {String(t('transaction_id') || 'លេខកូដបញ្ជាទិញ').toUpperCase()}
+          </p>
+          <p style={{ fontWeight: '800', fontSize: '1.25rem', letterSpacing: '1px', margin: 0, color: '#0f172a' }}>
+            #{orderDetails?._id || orderDetails?.id}
+          </p>
         </div>
         <div style={{ marginTop: '30px' }}>
           <button 
+            type="button"
             onClick={() => navigate('/')}
-            style={{ padding: '15px 40px', borderRadius: '30px', border: '1px solid #000', backgroundColor: '#fff', cursor: 'pointer', fontWeight: '700' }}
+            style={{ padding: '14px 36px', borderRadius: '50px', border: '1px solid #0f172a', backgroundColor: '#0f172a', color: '#fff', cursor: 'pointer', fontWeight: '700', fontSize: '0.9rem' }}
           >
-            {t('return_to_shop').toUpperCase()}
+            {String(t('return_to_shop') || 'ត្រឡប់ទៅទំព័រដើម')}
           </button>
         </div>
+      </div>
+    );
+  }
+
+  if (cart.length === 0) {
+    return (
+      <div style={{ padding: '120px 20px', textAlign: 'center' }}>
+        <h2 className="serif" style={{ fontSize: '1.8rem', marginBottom: '14px' }}>
+          {language === 'kh' ? 'កន្ត្រកទំនិញរបស់អ្នកទទេស្អាត' : 'Your cart is empty'}
+        </h2>
+        <p style={{ color: '#64748b', marginBottom: '30px', fontSize: '0.9rem' }}>
+          {language === 'kh' ? 'សូមជ្រើសរើសទំនិញមុននឹងបន្តការទូទាត់' : 'Please add items to your cart before proceeding to checkout.'}
+        </p>
+        <button
+          type="button"
+          onClick={() => navigate('/')}
+          style={{ padding: '12px 30px', borderRadius: '50px', border: 'none', backgroundColor: '#0f172a', color: '#fff', cursor: 'pointer', fontWeight: '700' }}
+        >
+          {language === 'kh' ? 'ទស្សនាទំនិញទាំងអស់' : 'Browse Products'}
+        </button>
       </div>
     );
   }

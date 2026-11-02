@@ -91,6 +91,19 @@ router.post('/', async (req, res) => {
     const { customer, items, paymentMethod } = req.body;
     const orderItems = Array.isArray(items) ? items : [];
 
+    if (orderItems.length === 0) {
+      return res.status(400).json({ error: 'កន្ត្រកទំនិញរបស់អ្នកទទេស្អាត' });
+    }
+
+    // Payment validation check
+    if (paymentMethod === 'Credit Card') {
+      const card = req.body.cardDetails || customer?.cardDetails;
+      const cleanCard = String(card?.cardNumber || '').replace(/\D/g, '');
+      if (cleanCard.length < 4) {
+        return res.status(400).json({ error: 'ការទូទាត់កាតមិនជោគជ័យ សូមពិនិត្យព័ត៌មានកាតឡើងវិញ' });
+      }
+    }
+
     let calculatedSubtotal = 0;
     const verifiedItems = [];
 
