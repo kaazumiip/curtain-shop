@@ -268,9 +268,74 @@ ${booking.additionalAddress ? `• <b>ចំណាំទីតាំង:</b> ${b
 `;
 };
 
+/**
+ * Sends a single order notification to Telegram (combining photo + full order details in 1 message)
+ */
+const sendOrderNotification = (order) => {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+
+  if (!token || !chatId) {
+    console.log('[Telegram Alert Skipped]: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not configured');
+    return;
+  }
+
+  const items = order.items || [];
+  const firstItemWithImg = items.find(it => it.imageUrl || (it.images && it.images[0]?.url));
+  const photoUrl = firstItemWithImg?.imageUrl || firstItemWithImg?.images?.[0]?.url;
+  const msgText = formatOrderMessage(order);
+
+  // If photo is present and message fits in caption (<= 1024 chars), send 1 single sendPhoto
+  if (photoUrl && msgText.length <= 1020) {
+    const payload = JSON.stringify({
+      chat_id: chatId,
+      photo: photoUrl,
+      caption: msgText,
+      parse_mode: 'HTML'
+    });
+
+    const options = {
+      hostname: 'api.telegram.org',
+      port: 443,
+      path: `/bot${token}/sendPhoto`,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(payload)
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          console.log('[Telegram Single Notification]: Order photo with text sent successfully in 1 message.');
+        } else {
+          console.error('[Telegram Photo Caption Fallback]:', data);
+          // If caption rejected, fallback to 1 single sendMessage with rich photo tag
+          sendTelegramNotification(msgText);
+        }
+      });
+    });
+
+    req.on('error', (err) => {
+      console.error('[Telegram Order Error]:', err.message);
+      sendTelegramNotification(msgText);
+    });
+
+    req.write(payload);
+    req.end();
+  } else {
+    // If no photo or message > 1020 chars: send 1 single message with embedded photo link
+    sendTelegramNotification(msgText);
+  }
+};
+
 module.exports = {
   sendTelegramNotification,
   sendTelegramPhoto,
+  sendOrderNotification,
   formatOrderMessage,
   formatStatusUpdateMessage,
   formatMeasurementMessage
