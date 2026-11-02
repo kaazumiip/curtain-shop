@@ -345,8 +345,8 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
 
           {product.category === 'Fabric' && (
             <div style={{ marginBottom: '30px' }}>
-              <label style={{ fontSize: '0.7rem', fontWeight: '800', display: 'block', marginBottom: '10px' }}>
-                {t('meters_needed') || 'Meters Needed'}
+              <label style={{ fontSize: '0.75rem', fontWeight: '800', display: 'block', marginBottom: '10px' }}>
+                {language === 'kh' ? 'ចំនួនម៉ែត្រដែលត្រូវការ' : (t('meters_needed') || 'Meters Needed')}
               </label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                 <input 
@@ -365,20 +365,22 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
                     outline: 'none'
                   }}
                 />
-                <span style={{ fontWeight: '700', fontSize: '0.9rem' }}>Meters</span>
+                <span style={{ fontWeight: '700', fontSize: '0.9rem' }}>{language === 'kh' ? 'ម៉ែត្រ' : 'Meters'}</span>
               </div>
             </div>
           )}
 
           {(['Curtain', 'Valance'].includes(product.category) || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole')) && (
             <div style={{ marginBottom: '40px' }}>
-              <label style={{ fontSize: '0.7rem', fontWeight: '800', display: 'block', marginBottom: '15px' }}>
-                {t('custom_dimensions') || 'Enter Dimensions (Meters)'}
+              <label style={{ fontSize: '0.75rem', fontWeight: '800', display: 'block', marginBottom: '15px' }}>
+                {language === 'kh' ? 'បញ្ចូលទំហំ (ម៉ែត្រ)' : (t('custom_dimensions') || 'Enter Dimensions (Meters)')}
               </label>
               <div style={{ display: 'flex', gap: '20px' }}>
                 <div style={{ flex: 1 }}>
-                  <span style={{ fontSize: '0.6rem', color: '#999', textTransform: 'uppercase', display: 'block', marginBottom: '5px' }}>
-                    {product.subCategory?.toLowerCase() === 'pole' ? 'Length (m)' : 'Width (m)'}
+                  <span style={{ fontSize: '0.75rem', color: '#475569', fontWeight: '700', display: 'block', marginBottom: '6px' }}>
+                    {product.subCategory?.toLowerCase() === 'pole' 
+                      ? (language === 'kh' ? 'ប្រវែង (ម៉ែត្រ)' : 'Length (m)') 
+                      : (language === 'kh' ? 'ទទឹង (ម៉ែត្រ)' : 'Width (m)')}
                   </span>
                   <input 
                     type="number" 
@@ -391,7 +393,9 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
                 </div>
                 {product.subCategory?.toLowerCase() !== 'pole' && (
                   <div style={{ flex: 1 }}>
-                    <span style={{ fontSize: '0.6rem', color: '#999', textTransform: 'uppercase', display: 'block', marginBottom: '5px' }}>Height (m)</span>
+                    <span style={{ fontSize: '0.75rem', color: '#475569', fontWeight: '700', display: 'block', marginBottom: '6px' }}>
+                      {language === 'kh' ? 'កម្ពស់ (ម៉ែត្រ)' : 'Height (m)'}
+                    </span>
                     <input 
                       type="number" 
                       min="0.1" 
@@ -496,7 +500,7 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
                   }}
                 >+</button>
               </div>
-              <span style={{ fontSize: '0.8rem', color: '#666', fontWeight: '600' }}>Units</span>
+              <span style={{ fontSize: '0.8rem', color: '#666', fontWeight: '600' }}>{language === 'kh' ? 'គ្រឿង' : 'Units'}</span>
             </div>
           </div>
 
