@@ -37,7 +37,26 @@ if (serviceAccount && !admin.getApps().length) {
   console.error('⚠️ WARNING: No Firebase credentials found! Please set FIREBASE_SERVICE_ACCOUNT in your Render environment variables or add Secret File serviceAccountKey.json.');
 }
 
-const db = admin.getApps().length ? getFirestore() : null;
+const fallbackDb = {
+  collection: (colName) => ({
+    get: async () => {
+      console.error(`Attempted to query '${colName}', but Firebase is not initialized yet. Set FIREBASE_SERVICE_ACCOUNT in Render.`);
+      return { docs: [], empty: true, size: 0, forEach: () => {} };
+    },
+    doc: (docId) => ({
+      get: async () => ({ exists: false, data: () => null }),
+      set: async () => { throw new Error('Firebase credentials missing'); },
+      update: async () => { throw new Error('Firebase credentials missing'); },
+      delete: async () => { throw new Error('Firebase credentials missing'); }
+    }),
+    add: async () => { throw new Error('Firebase credentials missing'); },
+    where: function() { return this; },
+    orderBy: function() { return this; },
+    limit: function() { return this; }
+  })
+};
+
+const db = admin.getApps().length ? getFirestore() : fallbackDb;
 
 module.exports = { admin, db };
 
