@@ -24,15 +24,30 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT) {
 if (!serviceAccount) {
   const localKeyPath = path.join(__dirname, '..', 'serviceAccountKey.json');
   if (fs.existsSync(localKeyPath)) {
-    serviceAccount = require(localKeyPath);
+    try {
+      serviceAccount = require(localKeyPath);
+    } catch (err) {
+      console.error('Failed to load local serviceAccountKey.json:', err.message);
+    }
   }
 }
 
-if (serviceAccount && !admin.getApps().length) {
-  admin.initializeApp({
-    credential: admin.cert(serviceAccount)
-  });
-  console.log('>>> Firebase Firestore Connected: ' + (serviceAccount.project_id || 'sreythacurtain'));
+if (serviceAccount) {
+  // Fix escaped newlines in private_key if passed via env var
+  if (serviceAccount.private_key && typeof serviceAccount.private_key === 'string') {
+    serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+  }
+
+  try {
+    if (!admin.getApps().length) {
+      admin.initializeApp({
+        credential: admin.cert(serviceAccount)
+      });
+      console.log('>>> Firebase Firestore Connected: ' + (serviceAccount.project_id || 'sreythacurtain'));
+    }
+  } catch (err) {
+    console.error('❌ Failed to initialize Firebase Admin SDK:', err.message);
+  }
 } else if (!admin.getApps().length) {
   console.error('⚠️ WARNING: No Firebase credentials found! Please set FIREBASE_SERVICE_ACCOUNT in your Render environment variables or add Secret File serviceAccountKey.json.');
 }

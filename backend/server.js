@@ -20,21 +20,30 @@ app.use('/api/chat', require('./routes/chatRoutes'));
 app.use('/api/hardware', require('./routes/hardwareRoutes'));
 
 // Basic Health Check Route
-app.get('/', (req, res) => {
+app.get(['/', '/health'], (req, res) => {
   res.json({ 
     brand: "Srey Tha Curtain",
     message: "Core API is active (Powered by Firebase Firestore)",
     database: "Firebase Firestore",
-    status: "vanguard-active"
+    status: "vanguard-active",
+    uptime: process.uptime()
   });
 });
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`-------------------------------------------`);
   console.log(` SREY THA CURTAIN - CORE API `);
   console.log(` Database: Firebase Firestore `);
-  console.log(` Server running on port: ${PORT} `);
+  console.log(` Server running on port: ${PORT} (0.0.0.0) `);
   console.log(`-------------------------------------------`);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('CRITICAL: Uncaught Exception:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('CRITICAL: Unhandled Rejection at:', promise, 'reason:', reason);
 });
