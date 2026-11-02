@@ -183,6 +183,7 @@ router.post('/', async (req, res) => {
       items: verifiedItems,
       subtotal: finalSubtotal,
       paymentMethod: paymentMethod || 'ABA Bank',
+      paymentDetails: req.body.paymentDetails || (paymentMethod === 'ABA Bank' ? { merchantId: '14463116', accountName: 'LIM SITHA' } : null),
       status: 'Preparing',
       stockDeducted: true,
       createdAt: new Date().toISOString(),

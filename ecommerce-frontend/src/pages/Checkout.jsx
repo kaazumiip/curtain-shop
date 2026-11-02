@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CreditCard, CheckCircle } from 'lucide-react';
+import { CreditCard, CheckCircle, Copy, Check } from 'lucide-react';
 import axios from '../api/axios';
 import { useLanguage } from '../context/LanguageContext';
 import LocationPickerMap from '../components/LocationPickerMap';
@@ -11,6 +11,8 @@ const Checkout = ({ cart, onOrderPlaced }) => {
   const [isSuccess, setIsSuccess] = useState(false);
   const [orderDetails, setOrderDetails] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [abaTxRef, setAbaTxRef] = useState('');
   const subtotal = cart.reduce((acc, item) => acc + Number(item.totalPrice || item.price), 0).toFixed(2);
 
   const [formData, setFormData] = useState({
@@ -50,6 +52,11 @@ const Checkout = ({ cart, onOrderPlaced }) => {
     const orderData = {
       customer: customerData,
       paymentMethod: paymentMethod,
+      paymentDetails: paymentMethod === 'ABA Bank' ? {
+        merchantId: '14463116',
+        accountName: 'LIM SITHA',
+        transactionRef: abaTxRef.trim() || null
+      } : null,
       cardDetails: paymentMethod === 'Credit Card' ? { cardNumber: '**** **** **** ' + cardNumber.slice(-4), cardName } : null,
       items: cart,
       subtotal: subtotal,
@@ -224,6 +231,165 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                 </label>
               ))}
             </div>
+
+            {formData.paymentMethod === 'ABA Bank' && (
+              <div className="page-transition" style={{
+                backgroundColor: '#fff',
+                border: '2px solid #004B6E',
+                borderRadius: '24px',
+                overflow: 'hidden',
+                boxShadow: '0 12px 32px rgba(0,75,110,0.08)',
+                marginBottom: '25px'
+              }}>
+                {/* ABA Brand Header */}
+                <div style={{
+                  backgroundColor: '#004B6E',
+                  color: '#fff',
+                  padding: '16px 24px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{
+                      backgroundColor: '#fff',
+                      color: '#004B6E',
+                      fontWeight: '900',
+                      fontSize: '0.9rem',
+                      padding: '3px 9px',
+                      borderRadius: '8px',
+                      letterSpacing: '1px'
+                    }}>
+                      ABA
+                    </div>
+                    <span style={{ fontWeight: '700', fontSize: '1.05rem', letterSpacing: '0.5px' }}>
+                      ABA PAY / MERCHANT
+                    </span>
+                  </div>
+                  <span style={{ fontSize: '0.75rem', backgroundColor: 'rgba(255,255,255,0.15)', padding: '4px 10px', borderRadius: '12px' }}>
+                    {language === 'kh' ? 'ផ្ទេរប្រាក់ផ្ទាល់' : 'Direct Transfer'}
+                  </span>
+                </div>
+
+                {/* Merchant Details Box */}
+                <div style={{ padding: '24px' }}>
+                  <div style={{
+                    backgroundColor: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '18px',
+                    padding: '20px',
+                    marginBottom: '20px'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', borderBottom: '1px dashed #cbd5e1', paddingBottom: '12px' }}>
+                      <div>
+                        <span style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', fontWeight: '800', letterSpacing: '1px' }}>
+                          {language === 'kh' ? 'ឈ្មោះគណនី (ACCOUNT NAME)' : 'ACCOUNT NAME'}
+                        </span>
+                        <p style={{ margin: '2px 0 0', fontSize: '1.25rem', fontWeight: '800', color: '#0f172a' }}>
+                          LIM SITHA
+                        </p>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <span style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', fontWeight: '800', letterSpacing: '1px' }}>
+                          {language === 'kh' ? 'ចំនួនទឹកប្រាក់' : 'AMOUNT TO PAY'}
+                        </span>
+                        <p style={{ margin: '2px 0 0', fontSize: '1.35rem', fontWeight: '900', color: '#004B6E' }}>
+                          ${subtotal}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <span style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', fontWeight: '800', letterSpacing: '1px' }}>
+                        {language === 'kh' ? 'លេខសម្គាល់អាជីវករ (MERCHANT ID)' : 'MERCHANT ID'}
+                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '6px' }}>
+                        <span style={{ fontSize: '1.75rem', fontWeight: '900', letterSpacing: '3px', color: '#004B6E', fontFamily: 'monospace' }}>
+                          14463116
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText('14463116');
+                            setCopied(true);
+                            setTimeout(() => setCopied(false), 2000);
+                          }}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '8px 18px',
+                            borderRadius: '10px',
+                            backgroundColor: copied ? '#16a34a' : '#004B6E',
+                            color: '#fff',
+                            border: 'none',
+                            fontWeight: '700',
+                            fontSize: '0.85rem',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          {copied ? <Check size={14} /> : <Copy size={14} />}
+                          {copied ? (language === 'kh' ? 'បានចម្លង!' : 'Copied!') : (language === 'kh' ? 'ចម្លងលេខ' : 'Copy ID')}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Step by Step Instruction */}
+                  <div style={{ marginBottom: '20px' }}>
+                    <h4 style={{ fontSize: '0.8rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px', color: '#475569', marginBottom: '10px' }}>
+                      {language === 'kh' ? 'របៀបបង់ប្រាក់តាម ABA Mobile' : 'How to Pay via ABA Mobile'}
+                    </h4>
+                    <ol style={{ margin: 0, paddingLeft: '20px', color: '#334155', fontSize: '0.88rem', lineHeight: '1.8' }}>
+                      <li>
+                        {language === 'kh' ? 'បើកកម្មវិធី ' : 'Open the '}
+                        <b>ABA Mobile</b>
+                        {language === 'kh' ? ' នៅលើទូរស័ព្ទដៃរបស់អ្នក' : ' app on your phone'}
+                      </li>
+                      <li>
+                        {language === 'kh' ? 'ចូលទៅកាន់ ' : 'Go to '}
+                        <b>Payments / ការទូទាត់</b>
+                        {language === 'kh' ? ' ហើយបញ្ចូល Merchant ID: ' : ' and enter Merchant ID: '}
+                        <code style={{ backgroundColor: '#e2e8f0', padding: '2px 6px', borderRadius: '4px', fontWeight: '700', color: '#004B6E' }}>14463116</code>
+                      </li>
+                      <li>
+                        {language === 'kh' ? 'ផ្ទៀងផ្ទាត់ឈ្មោះអ្នកទទួល: ' : 'Verify recipient name: '}
+                        <b>LIM SITHA</b>
+                      </li>
+                      <li>
+                        {language === 'kh' ? 'បញ្ចូលចំនួនទឹកប្រាក់ ' : 'Transfer the total amount of '}
+                        <b>${subtotal}</b>
+                        {language === 'kh' ? ' ហើយចុចបញ្ជាក់ការផ្ទេរ' : ' and confirm transfer'}
+                      </li>
+                    </ol>
+                  </div>
+
+                  {/* Optional Transaction Ref Input */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', color: '#475569', marginBottom: '6px' }}>
+                      {language === 'kh' 
+                        ? 'លេខកូដប្រតិបត្តិការ ឬ ៤ខ្ទង់ចុងក្រោយ (ប្រសិនបើមាន / ជាជម្រើស)' 
+                        : 'ABA Transaction ID or Last 4 Digits (Optional)'}
+                    </label>
+                    <input
+                      type="text"
+                      placeholder={language === 'kh' ? 'ឧ. TRX-123456 ឬ ៤ខ្ទង់ចុងក្រោយ...' : 'e.g. TRX-123456 or last 4 digits...'}
+                      value={abaTxRef}
+                      onChange={(e) => setAbaTxRef(e.target.value)}
+                      style={{
+                        ...inputStyle,
+                        backgroundColor: '#f8fafc',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '12px',
+                        fontSize: '0.9rem',
+                        padding: '12px 16px'
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
             {formData.paymentMethod === 'Credit Card' && (
               <div className="page-transition" style={{ padding: '30px', backgroundColor: '#fdfdfd', border: '1px solid #f0f0f0', borderRadius: '20px' }}>
