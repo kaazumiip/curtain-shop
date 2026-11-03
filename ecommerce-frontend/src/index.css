@@ -16,7 +16,21 @@
 }
 
 html {
-  font-size: 17.5px;
+  font-size: 16px;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (min-width: 1024px) {
+  html {
+    font-size: 17px;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 14.5px;
+  }
 }
 
 body {
@@ -27,7 +41,9 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   letter-spacing: -0.01em;
-  line-height: 1.65;
+  line-height: 1.6;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 .serif {

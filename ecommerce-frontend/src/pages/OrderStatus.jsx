@@ -100,26 +100,26 @@ const OrderStatus = () => {
   const currentIdx = getStatusIndex(order.status);
 
   return (
-    <div style={{ padding: '60px 0', minHeight: '80vh' }}>
-      <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+    <div style={{ padding: '30px 16px 80px', minHeight: '80vh', maxWidth: '1050px', margin: '0 auto', boxSizing: 'border-box' }}>
+      <div>
         
         {/* Modern Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '60px', borderBottom: '1px solid #f0f0f0', paddingBottom: '40px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '40px', borderBottom: '1px solid #f0f0f0', paddingBottom: '28px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-             <Link to="/my-orders" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#999', fontSize: '0.8rem', textDecoration: 'none', fontWeight: '800', marginBottom: '20px' }}>
+             <Link to="/my-orders" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#999', fontSize: '0.8rem', textDecoration: 'none', fontWeight: '800', marginBottom: '16px' }}>
                <ArrowLeft size={14} /> {t('back_to_orders').toUpperCase()}
              </Link>
-             <h1 className="serif" style={{ fontSize: '2.5rem' }}>{t('order_status')}</h1>
-             <p style={{ color: '#999', letterSpacing: '2px', fontSize: '0.7rem', textTransform: 'uppercase', marginTop: '10px' }}>{t('order_ref')}: {order._id}</p>
+             <h1 className="serif" style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', margin: 0 }}>{t('order_status')}</h1>
+             <p style={{ color: '#999', letterSpacing: '1px', fontSize: '0.75rem', textTransform: 'uppercase', marginTop: '8px', wordBreak: 'break-all' }}>{t('order_ref')}: {order._id}</p>
           </div>
-          <div style={{ textAlign: 'right' }}>
-             <span style={{ padding: '8px 20px', borderRadius: '50px', backgroundColor: '#000', color: '#fff', fontSize: '0.8rem', fontWeight: '800' }}>
+          <div>
+             <span style={{ padding: '8px 20px', borderRadius: '50px', backgroundColor: '#000', color: '#fff', fontSize: '0.8rem', fontWeight: '800', display: 'inline-block' }}>
                {getStatusLabel(order.status)?.toUpperCase()}
              </span>
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '80px' }} className="mobile-stack">
+        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '36px' }} className="mobile-stack">
           
           {/* Vertical Timeline */}
           <div>

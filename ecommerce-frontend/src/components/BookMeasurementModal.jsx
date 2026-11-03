@@ -73,7 +73,7 @@ const BookMeasurementModal = ({ isOpen, onClose }) => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '20px'
+        padding: '12px'
       }}
     >
       <div
@@ -82,10 +82,10 @@ const BookMeasurementModal = ({ isOpen, onClose }) => {
           backgroundColor: '#ffffff',
           width: '100%',
           maxWidth: '580px',
-          maxHeight: '90vh',
+          maxHeight: '92vh',
           overflowY: 'auto',
-          borderRadius: '18px',
-          padding: '28px',
+          borderRadius: '20px',
+          padding: '24px 20px',
           boxSizing: 'border-box',
           boxShadow: '0 24px 60px rgba(0, 0, 0, 0.25)',
           fontFamily: "'Poppins', 'Noto Sans Khmer', 'Kdam Thmor Pro', sans-serif"
@@ -179,7 +179,7 @@ const BookMeasurementModal = ({ isOpen, onClose }) => {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div className="responsive-inputs-2col">
               <div>
                 <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: '700', marginBottom: '6px', color: '#334155' }}>
                   លេខទូរស័ព្ទ (Telegram) *
@@ -207,7 +207,7 @@ const BookMeasurementModal = ({ isOpen, onClose }) => {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div className="responsive-inputs-2col">
               <div>
                 <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: '700', marginBottom: '6px', color: '#334155' }}>
                   ថ្ងៃ និងម៉ោងណាត់វាស់វែង

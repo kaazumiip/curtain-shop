@@ -114,23 +114,23 @@ const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuer
               padding: '8px 0', 
               display: 'flex', 
               alignItems: 'center', 
-              gap: '8px',
+              gap: '6px',
               fontFamily: "'Poppins', 'Noto Sans Khmer', 'Kdam Thmor Pro', sans-serif"
             }}
           >
             <Menu size={22} color="#0f172a" />
-            <span style={{ fontSize: '0.85rem', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase', color: '#0f172a' }}>
+            <span className="desktop-menu-label" style={{ fontSize: '0.82rem', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase', color: '#0f172a' }}>
               {t('menu')}
             </span>
           </button>
         </div>
         
         {/* Center: Branding */}
-        <Link to="/" style={{ textDecoration: 'none', position: 'absolute', left: '50%', transform: 'translateX(-50%)', width: 'max-content', textAlign: 'center' }}>
-          <div style={{ fontSize: '1.45rem', fontWeight: '900', letterSpacing: '-0.5px', color: '#0f172a', lineHeight: 1 }}>
+        <Link to="/" style={{ textDecoration: 'none', position: 'absolute', left: '50%', transform: 'translateX(-50%)', maxWidth: 'calc(100% - 150px)', textAlign: 'center' }}>
+          <div style={{ fontSize: 'clamp(0.95rem, 3.8vw, 1.45rem)', fontWeight: '900', letterSpacing: '-0.5px', color: '#0f172a', lineHeight: 1.1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             SREY THA CURTAIN
           </div>
-          <span style={{ fontSize: '0.68rem', fontWeight: '700', letterSpacing: '1px', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.65rem', fontWeight: '700', letterSpacing: '0.5px', color: '#94a3b8', display: 'block' }}>
             ស្រីថា វាំងនន
           </span>
         </Link>

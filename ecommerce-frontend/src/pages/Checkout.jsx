@@ -138,15 +138,15 @@ const Checkout = ({ cart, onOrderPlaced }) => {
   }
 
   return (
-    <div style={{ padding: '40px 0' }}>
-      <h1 className="serif" style={{ fontSize: '2.5rem', marginBottom: '60px' }}>{t('shipping_details')}</h1>
+    <div style={{ padding: '30px 16px 80px', maxWidth: '1200px', margin: '0 auto', boxSizing: 'border-box' }}>
+      <h1 className="serif" style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', marginBottom: '32px' }}>{t('shipping_details')}</h1>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '80px' }} className="mobile-stack">
+      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '36px' }} className="mobile-stack">
         {/* Shipping Form */}
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '40px' }}>
             <h3 style={{ fontSize: '0.8rem', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '20px' }}>{t('contact_info')}</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+            <div className="responsive-inputs-2col">
               <div>
                 <label style={{ display: 'block', fontSize: '0.74rem', fontWeight: '700', color: '#475569', marginBottom: '6px' }}>
                   {language === 'kh' ? 'លេខទូរស័ព្ទ (ចាំបាច់) *' : 'Phone Number (Required) *'}
@@ -177,7 +177,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
 
           <div style={{ marginBottom: '40px' }}>
             <h3 style={{ fontSize: '0.8rem', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '20px' }}>{t('shipping_addr')}</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
+            <div className="responsive-inputs-2col" style={{ marginBottom: '15px' }}>
               <input required placeholder={t('first_name')} style={inputStyle} value={formData.firstName} onChange={(e) => setFormData({...formData, firstName: e.target.value})}/>
               <input required placeholder={t('last_name')} style={inputStyle} value={formData.lastName} onChange={(e) => setFormData({...formData, lastName: e.target.value})}/>
             </div>
@@ -331,8 +331,8 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                       <span style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', fontWeight: '800', letterSpacing: '1px' }}>
                         {language === 'kh' ? 'លេខសម្គាល់អាជីវករ (MERCHANT ID)' : 'MERCHANT ID'}
                       </span>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '6px' }}>
-                        <span style={{ fontSize: '1.75rem', fontWeight: '900', letterSpacing: '3px', color: '#004B6E', fontFamily: 'monospace' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '6px', flexWrap: 'wrap', gap: '10px' }}>
+                        <span style={{ fontSize: 'clamp(1.35rem, 5vw, 1.75rem)', fontWeight: '900', letterSpacing: '2px', color: '#004B6E', fontFamily: 'monospace' }}>
                           14463116
                         </span>
                         <button

@@ -91,16 +91,16 @@ const MyOrders = () => {
   }
 
   return (
-    <div style={{ padding: '80px 0', minHeight: '70vh' }}>
-      <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-        <h1 className="serif" style={{ fontSize: '3rem', marginBottom: '20px' }}>{t('my_orders')}</h1>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '30px' }}>
+    <div style={{ padding: '40px 16px 80px', minHeight: '70vh', maxWidth: '850px', margin: '0 auto', boxSizing: 'border-box' }}>
+      <div style={{ textAlign: 'center', marginBottom: '36px' }}>
+        <h1 className="serif" style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', marginBottom: '16px' }}>{t('my_orders')}</h1>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '20px' }}>
           <button 
             onClick={() => setActiveTab('Active')}
             style={{ 
               background: 'none', 
               border: 'none', 
-              fontSize: '0.9rem', 
+              fontSize: '0.88rem', 
               fontWeight: '800', 
               color: activeTab === 'Active' ? '#000' : '#ccc',
               cursor: 'pointer',
@@ -118,7 +118,7 @@ const MyOrders = () => {
             style={{ 
               background: 'none', 
               border: 'none', 
-              fontSize: '0.9rem', 
+              fontSize: '0.88rem', 
               fontWeight: '800', 
               color: activeTab === 'History' ? '#000' : '#ccc',
               cursor: 'pointer',
@@ -134,7 +134,7 @@ const MyOrders = () => {
         </div>
       </div>
 
-      <div style={{ maxWidth: '800px', margin: '0 auto', display: 'grid', gap: '20px' }}>
+      <div style={{ maxWidth: '800px', margin: '0 auto', display: 'grid', gap: '16px' }}>
         {displayOrders.length > 0 ? (
           displayOrders.map((order, idx) => (
             <Link 
@@ -143,32 +143,34 @@ const MyOrders = () => {
               style={{ 
                 backgroundColor: '#fff', 
                 border: '1px solid #f0f0f0', 
-                borderRadius: '24px', 
-                padding: '30px',
+                borderRadius: '20px', 
+                padding: '20px',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
+                gap: '12px',
                 transition: 'all 0.3s ease',
                 textDecoration: 'none',
-                color: 'inherit'
+                color: 'inherit',
+                boxSizing: 'border-box'
               }} 
               className="menu-item-hover"
             >
-              <div style={{ display: 'flex', gap: '25px', alignItems: 'center' }}>
-                 <div style={{ width: '50px', height: '50px', borderRadius: '15px', backgroundColor: '#f9f9f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap', flex: 1, minWidth: 0 }}>
+                 <div style={{ width: '44px', height: '44px', borderRadius: '12px', backgroundColor: '#f9f9f9', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <Package size={20} color="#000" />
                  </div>
-                 <div>
-                    <h4 style={{ fontSize: '1rem', marginBottom: '5px' }}>{t('order_number')} #{order._id.slice(-8)}</h4>
-                    <div style={{ display: 'flex', gap: '20px', fontSize: '0.8rem', color: '#999' }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                 <div style={{ minWidth: 0 }}>
+                    <h4 style={{ fontSize: '0.95rem', margin: '0 0 4px', wordBreak: 'break-all' }}>{t('order_number')} #{order._id.slice(-8)}</h4>
+                    <div style={{ display: 'flex', gap: '14px', fontSize: '0.78rem', color: '#999', flexWrap: 'wrap' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                         <Calendar size={12} /> {new Date(order.createdAt).toLocaleDateString()}
                       </span>
-                      <span style={{ fontWeight: '700', color: '#000' }}>£{order.subtotal?.toFixed(2)}</span>
+                      <span style={{ fontWeight: '800', color: '#000' }}>${order.subtotal?.toFixed(2)}</span>
                       <span style={{ 
-                        color: order.status === 'Order Arrived' ? '#2ecc71' : order.status === 'Cancelled' ? '#e74c3c' : '#f39c12',
+                        color: order.status === 'Order Arrived' ? '#16a34a' : order.status === 'Cancelled' ? '#dc2626' : '#d97706',
                         fontWeight: '800',
-                        fontSize: '0.7rem'
+                        fontSize: '0.72rem'
                       }}>
                         {getStatusLabel(order.status).toUpperCase()}
                       </span>
@@ -176,8 +178,8 @@ const MyOrders = () => {
                  </div>
               </div>
               
-              <div style={{ color: '#ccc' }}>
-                <ExternalLink size={20} />
+              <div style={{ color: '#ccc', flexShrink: 0 }}>
+                <ExternalLink size={18} />
               </div>
             </Link>
           ))
