@@ -183,8 +183,8 @@ const OrdersTable = ({ orders, onSelectOrder }) => {
 
               <div className="card-footer">
                 <div className="price-details">
-                  <span className="payment-method">{order.paymentMethod}</span>
-                  <span className="total-price">£{order.subtotal?.toFixed(2)}</span>
+                  <span className="payment-method">{order.paymentMethod || 'ABA Bank'}</span>
+                  <span className="total-price">${Number(order.subtotal || 0).toFixed(2)}</span>
                 </div>
                 <span style={{ 
                   padding: '6px 14px', 

@@ -101,18 +101,18 @@ const LiveChat = ({ onClose }) => {
       zIndex: 2000,
       display: 'flex',
       justifyContent: 'flex-end', 
-      padding: '20px',
+      padding: isMobile ? '0' : '20px',
       opacity: isClosing ? 0 : 1,
       transition: 'opacity 0.35s ease'
     }} onClick={(e) => e.target === e.currentTarget && handleClose()}>
       <div style={{ 
         width: '100%',
         maxWidth: '1200px',
-        height: 'calc(100vh - 40px)', 
+        height: isMobile ? '100dvh' : 'calc(100vh - 40px)', 
         display: 'flex', 
         gap: '2px', 
         backgroundColor: '#f0f0f0', 
-        borderRadius: '24px', 
+        borderRadius: isMobile ? '0' : '24px', 
         overflow: 'hidden',
         boxShadow: '-30px 40px 100px rgba(0,0,0,0.1)',
         animation: isClosing ? 'slideOutRight 0.4s ease-in forwards' : 'slideInRight 0.4s ease-out'
@@ -184,7 +184,7 @@ const LiveChat = ({ onClose }) => {
         {activeSession ? (
           <>
             {/* Header */}
-            <div style={{ padding: isMobile ? '20px' : '25px 40px', borderBottom: '1px solid #f9f9f9', display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <div style={{ padding: isMobile ? '16px 20px' : '25px 40px', borderBottom: '1px solid #f9f9f9', display: 'flex', alignItems: 'center', gap: '15px' }}>
               {isMobile && (
                 <button 
                   onClick={() => setActiveSession(null)}
@@ -194,10 +194,17 @@ const LiveChat = ({ onClose }) => {
                 </button>
               )}
               <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#2ecc71', flexShrink: 0 }}></div>
-              <div>
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <h3 style={{ fontSize: '1rem', fontWeight: '800' }}>{t('active_support_session')}</h3>
-                <p style={{ fontSize: '0.7rem', color: '#999', textTransform: 'uppercase', letterSpacing: '1px' }}>ID: {activeSession}</p>
+                <p style={{ fontSize: '0.7rem', color: '#999', textTransform: 'uppercase', letterSpacing: '1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>ID: {activeSession}</p>
               </div>
+              {isMobile && (
+                <X 
+                  size={20} 
+                  onClick={handleClose} 
+                  style={{ cursor: 'pointer', color: '#999', flexShrink: 0 }} 
+                />
+              )}
             </div>
 
             {/* Messages */}

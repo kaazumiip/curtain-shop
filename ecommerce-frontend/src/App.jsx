@@ -22,24 +22,25 @@ import './styles/Store.css';
 const Toast = ({ message, visible }) => (
   <div style={{
     position: 'fixed',
-    bottom: '40px',
-    right: '40px',
-    backgroundColor: '#000',
+    bottom: '24px',
+    left: '50%',
+    maxWidth: 'calc(100vw - 32px)',
+    backgroundColor: '#0f172a',
     color: '#fff',
-    padding: '15px 30px',
+    padding: '12px 22px',
     borderRadius: '50px',
     display: 'flex',
     alignItems: 'center',
-    gap: '15px',
+    gap: '10px',
     boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
     zIndex: 9999,
-    transform: visible ? 'translateY(0)' : 'translateY(150%)',
+    transform: visible ? 'translate(-50%, 0)' : 'translate(-50%, 150%)',
     opacity: visible ? 1 : 0,
     transition: 'all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
     pointerEvents: 'none'
   }}>
-    <CheckCircle size={20} color="var(--accent-pink)" />
-    <span style={{ fontSize: '0.85rem', fontWeight: '700', letterSpacing: '1px' }}>{message.toUpperCase()}</span>
+    <CheckCircle size={18} color="#22c55e" style={{ flexShrink: 0 }} />
+    <span style={{ fontSize: '0.8rem', fontWeight: '700', letterSpacing: '0.5px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{message.toUpperCase()}</span>
   </div>
 );
 

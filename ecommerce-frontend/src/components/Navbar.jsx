@@ -379,15 +379,16 @@ const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuer
         className={`search-takeover-capsule ${isExpanded ? 'active' : ''}`}
         style={{ 
           flexDirection: 'column', 
-          height: suggestions.length > 0 ? 'auto' : '45px',
+          height: suggestions.length > 0 ? 'auto' : '46px',
           padding: '0',
-          top: isExpanded ? '40px' : '0', 
+          top: isExpanded ? '12px' : '0', 
           left: '50%',
           transform: 'translateX(-50%)',
+          borderRadius: '14px',
           zIndex: 6000
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', width: '100%', height: '45px', padding: '0 15px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', width: '100%', height: '46px', padding: '0 15px' }}>
           <Search size={16} color="#666" style={{ flexShrink: 0 }} />
           <input 
             ref={inputRef}
@@ -418,32 +419,40 @@ const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuer
                   onMouseEnter={() => setHoveredProduct(p)}
                   className="suggestion-item"
                   style={{
-                    padding: '8px 20px',
+                    padding: '8px 16px',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
+                    gap: '10px',
                     backgroundColor: hoveredProduct?._id === p._id ? '#f9f9f9' : 'transparent'
                   }}
                 >
-                  <div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: '700', color: '#000' }}>
-                      {language === 'kh' && p.nameKh ? p.nameKh : p.name}
-                    </div>
-                    <div style={{ fontSize: '0.7rem', color: '#999', textTransform: 'uppercase' }}>
-                      {t(p.category.toLowerCase().replace(' ', '_'))}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+                    <img
+                      src={p.imageUrl || (p.images && p.images.length > 0 ? p.images[0].url : '')}
+                      alt=""
+                      style={{ width: '36px', height: '42px', objectFit: 'cover', borderRadius: '6px', flexShrink: 0, backgroundColor: '#f1f5f9' }}
+                    />
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: '0.85rem', fontWeight: '700', color: '#000', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {language === 'kh' && p.nameKh ? p.nameKh : p.name}
+                      </div>
+                      <div style={{ fontSize: '0.7rem', color: '#999', textTransform: 'uppercase' }}>
+                        {t(p.category.toLowerCase().replace(' ', '_'))}
+                      </div>
                     </div>
                   </div>
-                  <div style={{ fontSize: '0.85rem', fontWeight: '800', color: '#000' }}>
+                  <div style={{ fontSize: '0.85rem', fontWeight: '800', color: '#000', flexShrink: 0 }}>
                     ${p.price}
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* Hover Image Preview */}
+            {/* Hover Image Preview (Desktop Only) */}
             {hoveredProduct && (
-              <div style={{ width: '120px', padding: '10px', borderLeft: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#fafafa' }}>
+              <div className="desktop-quick-links" style={{ width: '120px', padding: '10px', borderLeft: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#fafafa' }}>
                 <img 
                   src={hoveredProduct.imageUrl || (hoveredProduct.images && hoveredProduct.images.length > 0 ? hoveredProduct.images[0].url : '')} 
                   alt="" 

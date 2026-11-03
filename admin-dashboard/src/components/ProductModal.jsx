@@ -367,8 +367,8 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
       <div style={styles.modalBox} className="wizard-modal-box">
         
         {/* 1. TOP HEADER BAR */}
-        <div style={styles.topHeader}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+        <div style={styles.topHeader} className="wizard-top-header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
             <span style={styles.brandBadge}>SREY THA</span>
             <div style={{ width: '1px', height: '20px', backgroundColor: '#e5e7eb' }} />
             <h2 style={styles.topTitle}>
@@ -376,7 +376,7 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
             </h2>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
             <button type="button" onClick={onClose} style={styles.cancelBtn}>
               <X size={15} />
               <span>{t('cancel_btn')}</span>
@@ -389,7 +389,7 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
         </div>
 
         {/* 2. STEPPER NAVIGATION BAR */}
-        <div style={styles.stepperBar}>
+        <div style={styles.stepperBar} className="wizard-stepper-bar">
           {steps.map((step, idx) => {
             const isActive = activeStep === idx;
             const isDone = isStepCompleted(idx) && !isActive;
@@ -430,8 +430,8 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
         <div style={styles.mainBody} className="wizard-main-body">
           
           {/* LEFT PANE: FORM STEPS */}
-          <div style={styles.leftFormPane}>
-            <div style={styles.formScrollArea}>
+          <div style={styles.leftFormPane} className="wizard-left-pane">
+            <div style={styles.formScrollArea} className="wizard-form-scroll">
 
               {/* ==================== STEP 0: GENERAL INFO ==================== */}
               {activeStep === 0 && (
@@ -442,7 +442,7 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                   </div>
 
                   {/* Row 1: Product Name */}
-                  <div style={styles.formRow}>
+                  <div style={styles.formRow} className="wizard-form-row">
                     <div style={styles.rowLabelCol}>
                       <div style={styles.rowTitle}>{t('product_name_label')}</div>
                       <div style={styles.rowSub}>{t('product_name_sub')}</div>
@@ -462,7 +462,7 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                   </div>
 
                   {/* Row 2: Category & Sub-Category */}
-                  <div style={styles.formRow}>
+                  <div style={styles.formRow} className="wizard-form-row">
                     <div style={styles.rowLabelCol}>
                       <div style={styles.rowTitle}>{t('category_label')}</div>
                       <div style={styles.rowSub}>{t('category_sub')}</div>
@@ -508,7 +508,7 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                   </div>
 
                   {/* Row 3: Quick Color Variants List (Just like screenshot!) */}
-                  <div style={{ ...styles.formRow, borderBottom: 'none' }}>
+                  <div style={{ ...styles.formRow, borderBottom: 'none' }} className="wizard-form-row">
                     <div style={styles.rowLabelCol}>
                       <div style={styles.rowTitle}>{t('color_variants_label')}</div>
                       <div style={styles.rowSub}>{t('color_variants_sub')}</div>
@@ -651,7 +651,7 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                   </div>
 
                   {/* Row 1: Price & Stock */}
-                  <div style={styles.formRow}>
+                  <div style={styles.formRow} className="wizard-form-row">
                     <div style={styles.rowLabelCol}>
                       <div style={styles.rowTitle}>{getPriceLabel()}</div>
                       <div style={styles.rowSub}>{t('price_stock_sub')}</div>
@@ -702,7 +702,7 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
 
                   {/* Row 2: Bed Sheet / Pillow Case Sizes */}
                   {(formData.category === 'Bed Sheet' || formData.category === 'Pillow Case') && (
-                    <div style={styles.formRow}>
+                    <div style={styles.formRow} className="wizard-form-row">
                       <div style={styles.rowLabelCol}>
                         <div style={styles.rowTitle}>{t('size_options_title')}</div>
                         <div style={styles.rowSub}>{t('size_options_desc')}</div>
@@ -753,7 +753,7 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
 
                   {/* Row 3: Curtain / Valance Hardware */}
                   {(formData.category === 'Curtain' || formData.category === 'Valance') && (
-                    <div style={{ ...styles.formRow, borderBottom: formData.category === 'Valance' ? '1px dashed #e5e7eb' : 'none' }}>
+                    <div style={{ ...styles.formRow, borderBottom: formData.category === 'Valance' ? '1px dashed #e5e7eb' : 'none' }} className="wizard-form-row">
                       <div style={styles.rowLabelCol}>
                         <div style={styles.rowTitle}>{t('pole_ring_color')}</div>
                         <div style={styles.rowSub}>{t('hardware_sync_desc')}</div>
@@ -835,7 +835,7 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
 
                   {/* Row 4: Valance Cascade Style */}
                   {formData.category === 'Valance' && (
-                    <div style={{ ...styles.formRow, borderBottom: 'none' }}>
+                    <div style={{ ...styles.formRow, borderBottom: 'none' }} className="wizard-form-row">
                       <div style={styles.rowLabelCol}>
                         <div style={styles.rowTitle}>{t('cascade_style')}</div>
                       </div>
@@ -880,7 +880,7 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                     <h3 style={styles.sectionHeading}>{t('step_description')}</h3>
                   </div>
 
-                  <div style={{ ...styles.formRow, borderBottom: 'none' }}>
+                  <div style={{ ...styles.formRow, borderBottom: 'none' }} className="wizard-form-row">
                     <div style={styles.rowLabelCol}>
                       <div style={styles.rowTitle}>{t('description_label')}</div>
                       <div style={styles.rowSub}>{t('description_placeholder')}</div>
@@ -909,7 +909,7 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
             </div>
 
             {/* BOTTOM WIZARD FOOTER (Previous / Next) */}
-            <div style={styles.bottomNavFooter}>
+            <div style={styles.bottomNavFooter} className="wizard-bottom-footer">
               <button
                 type="button"
                 disabled={activeStep === 0}
@@ -1115,7 +1115,7 @@ const styles = {
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 2000,
-    padding: '20px',
+    padding: 'clamp(8px, 2vw, 20px)',
     fontFamily: "'Poppins', 'Noto Sans Khmer', 'Kdam Thmor Pro', sans-serif"
   },
   modalBox: {

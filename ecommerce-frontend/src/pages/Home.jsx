@@ -161,12 +161,12 @@ const Home = ({ products, onAddToCart, favorites, onToggleFavorite }) => {
       <section
         style={{
           width: '100%',
-          padding: '18px 24px 12px 24px',
+          padding: '16px clamp(12px, 3vw, 24px) 10px',
           boxSizing: 'border-box',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          gap: '16px',
+          gap: '12px',
           borderBottom: '1px solid #f1f1f1'
         }}
       >
@@ -174,7 +174,7 @@ const Home = ({ products, onAddToCart, favorites, onToggleFavorite }) => {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '26px',
+            gap: 'clamp(16px, 3vw, 26px)',
             overflowX: 'auto',
             scrollbarWidth: 'none',
             msOverflowStyle: 'none'
@@ -271,7 +271,7 @@ const Home = ({ products, onAddToCart, favorites, onToggleFavorite }) => {
       )}
 
       {/* 3. Full-Width 5-Column Product Grid */}
-      <section style={{ width: '100%', padding: '16px 24px 36px 24px', boxSizing: 'border-box' }}>
+      <section style={{ width: '100%', padding: '14px clamp(12px, 3vw, 24px) 36px', boxSizing: 'border-box' }}>
         <div className="editorial-product-grid">
           {filteredProducts.map(product => (
             <ProductCard

@@ -32,7 +32,7 @@ const Login = ({ onLoginSuccess }) => {
         maxWidth: '420px',
         backgroundColor: '#ffffff',
         borderRadius: '24px',
-        padding: '40px 32px',
+        padding: 'clamp(24px, 5vw, 40px) clamp(18px, 4vw, 32px)',
         boxShadow: '0 10px 40px rgba(0,0,0,0.06)',
         border: '1px solid #e2e8f0'
       }}>

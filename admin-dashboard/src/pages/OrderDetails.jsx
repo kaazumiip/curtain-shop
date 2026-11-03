@@ -334,10 +334,10 @@ const OrderDetails = () => {
       </div>
 
       {/* Customer & Payment Top Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', marginBottom: '40px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '20px', marginBottom: '32px' }}>
         {/* Customer & Shipping Card */}
         <div style={{
-          padding: '28px',
+          padding: 'clamp(18px, 3vw, 28px)',
           borderRadius: '20px',
           backgroundColor: '#ffffff',
           border: '1px solid #e2e8f0',
@@ -399,7 +399,7 @@ const OrderDetails = () => {
 
         {/* Payment & Order Summary Card */}
         <div style={{
-          padding: '28px',
+          padding: 'clamp(18px, 3vw, 28px)',
           borderRadius: '20px',
           backgroundColor: '#ffffff',
           border: '1px solid #e2e8f0',
@@ -475,6 +475,7 @@ const OrderDetails = () => {
           return (
             <div 
               key={idx} 
+              className="admin-order-item-row"
               style={{
                 display: 'flex',
                 gap: '24px',
@@ -494,8 +495,8 @@ const OrderDetails = () => {
                   src={itemImg} 
                   alt=""
                   style={{ 
-                    width: '100px', 
-                    height: '115px', 
+                    width: '88px', 
+                    height: '105px', 
                     objectFit: 'cover', 
                     borderRadius: '12px',
                     border: '1px solid #e2e8f0',
@@ -519,7 +520,7 @@ const OrderDetails = () => {
               </div>
 
               {/* Main Product Info & Unified Specs */}
-              <div style={{ flex: '1 1 320px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ flex: '1 1 200px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                   <span style={{
                     fontSize: '0.72rem',
@@ -596,13 +597,16 @@ const OrderDetails = () => {
               </div>
 
               {/* Price Block */}
-              <div style={{ 
-                flexShrink: 0, 
-                textAlign: 'right', 
-                paddingLeft: '20px', 
-                borderLeft: '1px solid #f1f5f9',
-                minWidth: '140px' 
-              }}>
+              <div 
+                className="admin-order-item-price"
+                style={{ 
+                  flexShrink: 0, 
+                  textAlign: 'right', 
+                  paddingLeft: '20px', 
+                  borderLeft: '1px solid #f1f5f9',
+                  minWidth: '140px' 
+                }}
+              >
                 <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase' }}>
                   {t('item_total')}
                 </span>

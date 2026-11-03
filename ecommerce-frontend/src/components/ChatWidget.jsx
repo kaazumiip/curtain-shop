@@ -66,14 +66,14 @@ const ChatWidget = () => {
   };
 
   return (
-    <div style={{ position: 'fixed', bottom: '30px', right: '30px', zIndex: 1000 }}>
+    <div style={{ position: 'fixed', bottom: '18px', right: '16px', zIndex: 1000 }}>
       {/* Chat Button */}
       {!isOpen && (
         <button 
           onClick={() => setIsOpen(true)}
           style={{ 
-            width: '60px', 
-            height: '60px', 
+            width: '54px', 
+            height: '54px', 
             borderRadius: '50%', 
             backgroundColor: '#000', 
             color: '#fff', 
@@ -88,18 +88,18 @@ const ChatWidget = () => {
           onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
           onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
         >
-          <MessageCircle size={28} />
+          <MessageCircle size={24} />
         </button>
       )}
 
       {/* Chat Window */}
       {isOpen && (
         <div style={{ 
-          width: '350px', 
-          height: '500px', 
+          width: 'min(350px, calc(100vw - 32px))', 
+          height: 'min(480px, calc(100vh - 100px))', 
           backgroundColor: '#fff', 
-          borderRadius: '24px', 
-          boxShadow: '0 20px 50px rgba(0,0,0,0.15)',
+          borderRadius: '20px', 
+          boxShadow: '0 20px 50px rgba(0,0,0,0.18)',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
