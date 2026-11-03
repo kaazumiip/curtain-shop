@@ -103,7 +103,7 @@ const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuer
         transition: 'opacity 0.3s ease'
       }}>
         {/* Left: Menu Hamburger Button */}
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
           <button 
             type="button"
             onClick={() => setIsMenuOpen(true)}
@@ -111,7 +111,7 @@ const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuer
               background: 'none', 
               border: 'none', 
               cursor: 'pointer', 
-              padding: '8px 0', 
+              padding: '6px 0', 
               display: 'flex', 
               alignItems: 'center', 
               gap: '6px',
@@ -125,21 +125,45 @@ const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuer
           </button>
         </div>
         
-        {/* Center: Branding */}
-        <Link to="/" style={{ textDecoration: 'none', position: 'absolute', left: '50%', transform: 'translateX(-50%)', maxWidth: 'calc(100% - 150px)', textAlign: 'center' }}>
-          <div style={{ fontSize: 'clamp(0.95rem, 3.8vw, 1.45rem)', fontWeight: '900', letterSpacing: '-0.5px', color: '#0f172a', lineHeight: 1.1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        {/* Center: Branding (Natural Flex Flow - Zero Overlap!) */}
+        <Link 
+          to="/" 
+          style={{ 
+            textDecoration: 'none', 
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flex: 1,
+            minWidth: 0,
+            padding: '0 8px',
+            textAlign: 'center'
+          }}
+        >
+          <div style={{ 
+            fontSize: 'clamp(0.85rem, 3.4vw, 1.45rem)', 
+            fontWeight: '900', 
+            letterSpacing: '-0.4px', 
+            color: '#0f172a', 
+            lineHeight: 1.15, 
+            whiteSpace: 'nowrap', 
+            overflow: 'hidden', 
+            textOverflow: 'ellipsis',
+            maxWidth: '100%'
+          }}>
             SREY THA CURTAIN
           </div>
-          <span style={{ fontSize: '0.65rem', fontWeight: '700', letterSpacing: '0.5px', color: '#94a3b8', display: 'block' }}>
+          <span style={{ fontSize: '0.62rem', fontWeight: '700', letterSpacing: '0.5px', color: '#94a3b8', display: 'block', lineHeight: 1, marginTop: '2px' }}>
             ស្រីថា វាំងនន
           </span>
         </Link>
         
         {/* Right: Actions */}
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'flex-end' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'flex-end', flexShrink: 0 }}>
           <button 
             type="button"
             onClick={openSearch} 
+            className="nav-action-btn"
             style={{ 
               display: 'flex', 
               alignItems: 'center', 
@@ -159,6 +183,7 @@ const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuer
 
           <Link 
             to="/favorites" 
+            className="nav-action-btn"
             style={{ 
               position: 'relative', 
               display: 'flex', 
@@ -198,6 +223,7 @@ const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuer
 
           <Link 
             to="/cart" 
+            className="nav-action-btn"
             style={{ 
               position: 'relative', 
               display: 'flex', 

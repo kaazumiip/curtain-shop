@@ -291,6 +291,23 @@
   .desktop-menu-label {
     display: none !important;
   }
+  .nav-header {
+    padding: 0 10px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-action-btn {
+    width: 34px !important;
+    height: 34px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .nav-action-btn {
+    width: 31px !important;
+    height: 31px !important;
+  }
 }
 
 /* NEW RESPONSIVE UTILITIES */
