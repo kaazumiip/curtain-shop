@@ -139,7 +139,36 @@ const Checkout = ({ cart, onOrderPlaced }) => {
 
   return (
     <div style={{ padding: '30px 16px 80px', maxWidth: '1200px', margin: '0 auto', boxSizing: 'border-box' }}>
-      <h1 className="serif" style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', marginBottom: '32px' }}>{t('shipping_details')}</h1>
+      <h1 className="serif" style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', marginBottom: '18px' }}>{t('shipping_details')}</h1>
+
+      {/* 3-Step Checkout Guide Banner */}
+      <div style={{
+        backgroundColor: '#f8fafc',
+        border: '1px solid #e2e8f0',
+        borderRadius: '16px',
+        padding: '12px 18px',
+        marginBottom: '26px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '10px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', fontWeight: '700', color: '#0f172a' }}>
+          <span style={{ backgroundColor: '#0f172a', color: '#fff', width: '22px', height: '22px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: '800' }}>1</span>
+          <span>{language === 'kh' ? 'បំពេញព័ត៌មាន និងទីតាំង' : 'Enter Info & Address'}</span>
+        </div>
+        <span style={{ color: '#cbd5e1', fontWeight: '900' }}>→</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', fontWeight: '700', color: '#0f172a' }}>
+          <span style={{ backgroundColor: '#0f172a', color: '#fff', width: '22px', height: '22px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: '800' }}>2</span>
+          <span>{language === 'kh' ? 'ជ្រើសរើស ABA ឬ ទូទាត់ពេលដឹកដល់' : 'Choose Payment'}</span>
+        </div>
+        <span style={{ color: '#cbd5e1', fontWeight: '900' }}>→</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', fontWeight: '700', color: '#16a34a' }}>
+          <span style={{ backgroundColor: '#16a34a', color: '#fff', width: '22px', height: '22px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: '800' }}>3</span>
+          <span>{language === 'kh' ? 'ចុច "បំពេញការបញ្ជាទិញ" ខាងក្រោម' : 'Click "Complete Order" Below'}</span>
+        </div>
+      </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '36px' }} className="mobile-stack">
         {/* Shipping Form */}

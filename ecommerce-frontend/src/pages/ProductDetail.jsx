@@ -409,6 +409,55 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
 
           {(['Curtain', 'Valance'].includes(product.category) || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole')) && (
             <div style={{ marginBottom: '40px' }}>
+              {/* Clear Pricing Instruction Callout Banner */}
+              {['Curtain', 'Valance'].includes(product.category) && (
+                <div style={{
+                  backgroundColor: '#f0fdf4',
+                  border: '1.5px solid #86efac',
+                  borderRadius: '14px',
+                  padding: '14px 16px',
+                  marginBottom: '16px',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '12px',
+                  boxShadow: '0 2px 8px rgba(34, 197, 94, 0.08)'
+                }}>
+                  <div style={{
+                    width: '30px',
+                    height: '30px',
+                    borderRadius: '50%',
+                    backgroundColor: '#dcfce7',
+                    color: '#15803d',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1rem',
+                    fontWeight: '900',
+                    flexShrink: 0
+                  }}>
+                    💡
+                  </div>
+                  <div style={{ fontSize: '0.82rem', lineHeight: '1.6', color: '#166534' }}>
+                    <strong style={{ display: 'block', fontSize: '0.88rem', marginBottom: '2px', color: '#14532d' }}>
+                      {language === 'kh' ? 'របៀបគិតតម្លៃកាត់ដេរវាំងនន (Curtain Pricing Guide):' : 'How Curtain Pricing Works:'}
+                    </strong>
+                    {language === 'kh' ? (
+                      <>
+                        • <strong>តម្លៃគិតតាមម៉ែត្រទទឹង៖</strong> កម្ពស់ស្តង់ដារក្រោម ឬស្មើ <strong>2.5 ម៉ែត្រ គឺឥតគិតថ្លៃកម្ពស់ (Free Height)</strong>!
+                        <br />
+                        • ប្រសិនបើបង្អួចរបស់អ្នកមានកម្ពស់ខ្ពស់លើសពី 2.5 ម៉ែត្រ ទើបប្រព័ន្ធគិតតម្លៃបន្ថែមតាមចំនួនម៉ែត្រដែលលើសជាក់ស្តែង។
+                      </>
+                    ) : (
+                      <>
+                        • <strong>Price is calculated per meter of width:</strong> Standard height up to <strong>2.5 meters is completely FREE (Included)</strong>!
+                        <br />
+                        • If your window height exceeds 2.5 meters, only the extra height above 2.5m is added proportionally.
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
                 <label style={{ fontSize: '0.85rem', fontWeight: '800', margin: 0, color: '#0f172a' }}>
                   {language === 'kh' ? 'បញ្ជីទំហំតាមបង្អួចនីមួយៗ' : 'Window Dimensions List'}
@@ -539,9 +588,20 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
 
                         {!isPole && (
                           <div>
-                            <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: '700', display: 'block', marginBottom: '4px' }}>
-                              {language === 'kh' ? 'កម្ពស់ (ម៉ែត្រ)' : 'Height (m)'}
-                            </span>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px', flexWrap: 'wrap', gap: '4px' }}>
+                              <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: '700' }}>
+                                {language === 'kh' ? 'កម្ពស់ (ម៉ែត្រ)' : 'Height (m)'}
+                              </span>
+                              {heightVal <= 2.5 ? (
+                                <span style={{ fontSize: '0.65rem', fontWeight: '800', color: '#16a34a', backgroundColor: '#dcfce7', padding: '1px 6px', borderRadius: '4px' }}>
+                                  {language === 'kh' ? 'ឥតគិតថ្លៃ (≤2.5m)' : 'Free (≤2.5m)'}
+                                </span>
+                              ) : (
+                                <span style={{ fontSize: '0.65rem', fontWeight: '800', color: '#b45309', backgroundColor: '#fef3c7', padding: '1px 6px', borderRadius: '4px' }}>
+                                  {language === 'kh' ? `+លើស ${(heightVal - 2.5).toFixed(2)}m` : `+${(heightVal - 2.5).toFixed(2)}m`}
+                                </span>
+                              )}
+                            </div>
                             <input
                               type="number"
                               min="0.1"
