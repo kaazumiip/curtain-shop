@@ -515,8 +515,40 @@ const Checkout = ({ cart, onOrderPlaced }) => {
             )}
           </div>
 
-          <button type="submit" className="btn-primary" style={{ padding: '20px' }}>
-            {t('complete_order')} — ${subtotal}
+          <button 
+            type="submit" 
+            disabled={submitting}
+            className="btn-primary" 
+            style={{ 
+              width: '100%', 
+              padding: '18px 24px', 
+              fontSize: '1.08rem', 
+              fontWeight: '800', 
+              backgroundColor: submitting ? '#64748b' : '#0f172a', 
+              color: '#ffffff', 
+              border: 'none', 
+              borderRadius: '16px', 
+              cursor: submitting ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '12px',
+              boxShadow: '0 10px 25px rgba(15, 23, 42, 0.25)',
+              marginTop: '15px',
+              fontFamily: "'Poppins', 'Noto Sans Khmer', 'Kdam Thmor Pro', sans-serif",
+              transition: 'all 0.2s ease'
+            }}
+          >
+            {submitting ? (
+              <span>{language === 'kh' ? 'កំពុងដំណើរការបញ្ជាទិញ...' : 'Processing Order...'}</span>
+            ) : (
+              <>
+                <span>{t('complete_order')}</span>
+                <span style={{ opacity: 0.5 }}>—</span>
+                <span style={{ fontSize: '1.2rem', fontWeight: '900' }}>${subtotal}</span>
+                <Check size={20} />
+              </>
+            )}
           </button>
         </form>
 

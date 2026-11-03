@@ -111,6 +111,27 @@
   color: var(--text-muted);
 }
 
+.btn-primary {
+  background-color: #0f172a;
+  color: #ffffff;
+  padding: 16px 28px;
+  border-radius: 14px;
+  border: none;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.btn-primary:hover {
+  background-color: #000000;
+  transform: translateY(-1px);
+}
+
 .btn-add {
   margin-top: 15px;
   width: 100%;
