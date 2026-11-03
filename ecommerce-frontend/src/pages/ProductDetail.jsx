@@ -123,9 +123,17 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
       const widthVal = parseFloat(w.width) || 0;
       const heightVal = parseFloat(w.height) || 0;
       const q = Math.max(1, parseInt(w.quantity) || 1);
-      const itemCost = isPole
-        ? (basePrice * widthVal * q)
-        : (basePrice * widthVal * heightVal * q);
+
+      let itemCost = 0;
+      if (isPole) {
+        itemCost = basePrice * widthVal * q;
+      } else if (product.category === 'Curtain' || product.category === 'Valance') {
+        const excessHeight = heightVal > 2.5 ? (heightVal - 2.5) : 0;
+        const heightMultiplier = 1 + excessHeight;
+        itemCost = basePrice * widthVal * heightMultiplier * q;
+      } else {
+        itemCost = basePrice * widthVal * heightVal * q;
+      }
       return sum + itemCost;
     }, 0);
   }, [product, windowSizes]);
@@ -269,8 +277,8 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
               <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: '600' }}>
                 (${Number(product.price).toFixed(2)} / {
                   product.category === 'Accessories' 
-                    ? (product.subCategory?.toLowerCase() === 'pole' ? 'ម៉ែត្រ' : 'គ្រឿង')
-                    : 'm²'
+                    ? (product.subCategory?.toLowerCase() === 'pole' ? (language === 'kh' ? 'ម៉ែត្រប្រវែង' : 'meter') : (language === 'kh' ? 'គ្រឿង' : 'unit'))
+                    : (language === 'kh' ? 'ម៉ែត្រទទឹង (កម្ពស់ ≤ 2.5m)' : 'meter width (height ≤ 2.5m)')
                 })
               </span>
             )}
@@ -434,9 +442,13 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
                   const heightVal = parseFloat(win.height) || 0;
                   const q = Math.max(1, parseInt(win.quantity) || 1);
                   const isPole = product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole';
+                  const excessHeight = heightVal > 2.5 ? (heightVal - 2.5) : 0;
+                  const heightMultiplier = 1 + excessHeight;
                   const winCost = isPole
                     ? (Number(product.price) * widthVal * q).toFixed(2)
-                    : (Number(product.price) * widthVal * heightVal * q).toFixed(2);
+                    : (product.category === 'Curtain' || product.category === 'Valance')
+                      ? (Number(product.price) * widthVal * heightMultiplier * q).toFixed(2)
+                      : (Number(product.price) * widthVal * heightVal * q).toFixed(2);
                   const area = (widthVal * heightVal).toFixed(2);
 
                   return (
@@ -587,11 +599,22 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
                       </div>
 
                       {/* Item sub-calc note */}
-                      <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '8px' }}>
-                        {isPole
-                          ? `* ${widthVal}m × $${product.price}/m ${q > 1 ? `× ${q} គ្រឿង` : ''} = $${winCost}`
-                          : `* ${widthVal}m × ${heightVal}m = ${area}m² × $${product.price}/m² ${q > 1 ? `× ${q} គ្រឿង` : ''} = $${winCost}`
-                        }
+                      <div style={{ fontSize: '0.72rem', color: '#475569', marginTop: '8px', lineHeight: '1.5' }}>
+                        {isPole ? (
+                          `* ${widthVal}m × $${product.price}/m ${q > 1 ? `× ${q} គ្រឿង ` : ''}= $${winCost}`
+                        ) : (product.category === 'Curtain' || product.category === 'Valance') ? (
+                          heightVal <= 2.5 ? (
+                            language === 'kh' 
+                              ? `* ${widthVal}m (ទទឹង) × $${product.price} ${q > 1 ? `× ${q} គ្រឿង ` : ''}= $${winCost} (កម្ពស់ ${heightVal}m ≤ 2.5m មិនគិតបន្ថែម)`
+                              : `* ${widthVal}m (Width) × $${product.price} ${q > 1 ? `× ${q} Qty ` : ''}= $${winCost} (Height ${heightVal}m ≤ 2.5m included free)`
+                          ) : (
+                            language === 'kh'
+                              ? `* ${widthVal}m (ទទឹង) × $${product.price} + លើសកម្ពស់ ${excessHeight.toFixed(2)}m (+${((excessHeight) * 100).toFixed(0)}%) ${q > 1 ? `× ${q} គ្រឿង ` : ''}= $${winCost}`
+                              : `* ${widthVal}m (Width) × $${product.price} + Excess height ${excessHeight.toFixed(2)}m (+${((excessHeight) * 100).toFixed(0)}%) ${q > 1 ? `× ${q} Qty ` : ''}= $${winCost}`
+                          )
+                        ) : (
+                          `* ${widthVal}m × ${heightVal}m = ${area}m² × $${product.price}/m² ${q > 1 ? `× ${q} គ្រឿង` : ''} = $${winCost}`
+                        )}
                       </div>
                     </div>
                   );
@@ -803,9 +826,13 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
                     const widthVal = parseFloat(w.width) || 0;
                     const heightVal = parseFloat(w.height) || 0;
                     const q = Math.max(1, parseInt(w.quantity) || 1);
+                    const excessHeight = heightVal > 2.5 ? (heightVal - 2.5) : 0;
+                    const heightMultiplier = 1 + excessHeight;
                     const itemCost = isPole
                       ? (Number(product.price) * widthVal * q).toFixed(2)
-                      : (Number(product.price) * widthVal * heightVal * q).toFixed(2);
+                      : (product.category === 'Curtain' || product.category === 'Valance')
+                        ? (Number(product.price) * widthVal * heightMultiplier * q).toFixed(2)
+                        : (Number(product.price) * widthVal * heightVal * q).toFixed(2);
 
                     return {
                       ...product,

@@ -303,7 +303,7 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
 
   const getPriceLabel = () => {
     if (formData.category === 'Curtain' || formData.category === 'Valance') {
-      return t('price_sqm');
+      return 'តម្លៃក្នុង ១ ម៉ែត្រទទឹង ($ / m width)';
     }
     if (formData.category === 'Fabric' || (formData.category === 'Accessories' && formData.subCategory === 'Pole')) {
       return t('price_meter');
@@ -313,7 +313,7 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
 
   const getPriceHelperInfo = () => {
     if (formData.category === 'Curtain' || formData.category === 'Valance') {
-      return t('curtain_calc_info');
+      return 'សម្រាប់វាំងនន និងដក់ តម្លៃគិតតាម ១ ម៉ែត្រទទឹង (កម្ពស់ក្រោម ឬត្រឹម 2.5m មិនគិតបន្ថែមទេ)។ ប្រសិនបើកម្ពស់លើស 2.5m ប្រព័ន្ធនឹងគណនាបន្ថែមតាមចំនួនម៉ែត្រលើសដោយស្វ័យប្រវត្តិ។';
     }
     if (formData.category === 'Fabric') {
       return t('fabrics_calc_info');

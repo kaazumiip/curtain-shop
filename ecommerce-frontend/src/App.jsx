@@ -192,8 +192,9 @@ function App() {
     } else if (item.category === 'Curtain' || item.category === 'Valance') {
       const w = parseFloat(item.customWidth) || 0;
       const h = parseFloat(item.customHeight) || 0;
-      item.totalPrice = (Number(item.price) * w * h * newQuantity).toFixed(2);
-      item.selectedSize = { name: `${w}m x ${h}m × ${newQuantity} Units` };
+      const excess = h > 2.5 ? (h - 2.5) : 0;
+      item.totalPrice = (Number(item.price) * w * (1 + excess) * newQuantity).toFixed(2);
+      item.selectedSize = { name: `${item.windowLabel || ''}: ${w}m × ${h}m × ${newQuantity} គ្រឿង` };
     } else if (item.category === 'Fabric') {
       const m = parseFloat(item.fabricMeters) || 0;
       item.totalPrice = (Number(item.price) * m * newQuantity).toFixed(2);

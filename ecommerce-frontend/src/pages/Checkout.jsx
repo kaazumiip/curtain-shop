@@ -566,7 +566,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                       {item.category === 'Accessories' && item.subCategory?.toLowerCase() === 'pole' 
                         ? `${item.quantity} x (${item.customWidth}m × $${item.price}/m)` 
                         : (item.category === 'Curtain' || item.category === 'Valance' 
-                            ? `${item.quantity} x (${item.customWidth}m x ${item.customHeight}m × $${item.price}/m²)`
+                            ? `${item.quantity} x (${item.customWidth}m (W) × ${item.customHeight}m (H))`
                             : (item.category === 'Fabric'
                                 ? `${item.quantity} x (${item.fabricMeters}m × $${item.price}/m)`
                                 : (item.quantity ? `${item.quantity} x $${item.price}` : `$${item.totalPrice || item.price}`)
