@@ -18,6 +18,7 @@ app.use('/api/products', require('./routes/productRoutes'));
 app.use('/api/orders', require('./routes/orderRoutes'));
 app.use('/api/chat', require('./routes/chatRoutes'));
 app.use('/api/hardware', require('./routes/hardwareRoutes'));
+app.use('/api/settings', require('./routes/settingsRoutes'));
 
 // Basic Health Check Route
 app.get(['/', '/health'], (req, res) => {

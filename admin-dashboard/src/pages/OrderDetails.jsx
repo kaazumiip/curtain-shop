@@ -423,9 +423,9 @@ const OrderDetails = () => {
               <p style={{ fontSize: '2.2rem', fontWeight: '900', color: '#0f172a', margin: '4px 0 10px 0' }}>
                 ${Number(order.subtotal || 0).toFixed(2)}
               </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: '0.85rem', color: '#475569', fontWeight: '600' }}>
-                  💳 {order.paymentMethod || 'ABA Bank'}
+                  💳 {order.paymentMethod || 'ABA / ACLEDA / Bakong KHQR'}
                 </span>
                 {order.cardDetails && (
                   <span style={{ padding: '4px 10px', backgroundColor: '#f1f5f9', borderRadius: '6px', fontSize: '0.75rem', fontWeight: '700', color: '#0f172a' }}>
@@ -433,6 +433,37 @@ const OrderDetails = () => {
                   </span>
                 )}
               </div>
+              {order.paymentDetails?.transactionRef && (
+                <div style={{ marginTop: '8px', fontSize: '0.82rem', color: '#0f172a', fontWeight: '700' }}>
+                  🔢 លេខកូដប្រតិបត្តិការ: <code style={{ backgroundColor: '#f1f5f9', padding: '2px 8px', borderRadius: '6px' }}>{order.paymentDetails.transactionRef}</code>
+                </div>
+              )}
+              {order.paymentDetails?.receiptUrl && (
+                <div style={{ marginTop: '10px' }}>
+                  <a
+                    href={order.paymentDetails.receiptUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '8px 14px',
+                      borderRadius: '10px',
+                      backgroundColor: '#f0fdf4',
+                      border: '1px solid #bbf7d0',
+                      color: '#15803d',
+                      fontSize: '0.8rem',
+                      fontWeight: '700',
+                      textDecoration: 'none'
+                    }}
+                  >
+                    <img src={order.paymentDetails.receiptUrl} alt="Receipt" style={{ width: '28px', height: '28px', objectFit: 'cover', borderRadius: '4px' }} />
+                    <span>មើលវិក្កយបត្របង់ប្រាក់ (Payment Screenshot)</span>
+                    <ExternalLink size={13} />
+                  </a>
+                </div>
+              )}
             </div>
           </div>
 

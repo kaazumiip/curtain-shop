@@ -152,7 +152,8 @@ router.post('/', async (req, res) => {
       } else if (item.category === 'Curtain' || item.category === 'Valance') {
         const w = parseFloat(item.customWidth) || 1;
         const h = parseFloat(item.customHeight) || 1;
-        calculatedItemTotal = verifiedUnitPrice * w * h * qty;
+        const extraHeight = Math.max(0, h - 2.5);
+        calculatedItemTotal = verifiedUnitPrice * w * (1 + extraHeight) * qty;
       } else if (item.category === 'Fabric') {
         const m = parseFloat(item.fabricMeters) || 1;
         calculatedItemTotal = verifiedUnitPrice * m * qty;
