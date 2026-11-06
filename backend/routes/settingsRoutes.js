@@ -137,16 +137,13 @@ router.post('/khqr/generate', async (req, res) => {
     const bakongAccountId = config.bakongAccountId || 'chanmonyroth_hout@bkrt';
     const merchantName = (config.accountName || 'CHANMONYROTH HOUT').slice(0, 25);
     const merchantCity = (config.merchantCity || 'Phnom Penh').slice(0, 15);
-    const billNumber = 'STC' + Date.now().toString().slice(-7);
     const now = Date.now();
     const expiresAt = now + 100 * 1000; // 100 seconds expiration
 
+    // Only include currency, amount, and expirationTimestamp (no extra billNumber/storeLabel/terminalLabel)
     const optionalData = {
       currency: khqrData.currency.usd,
       amount: amount,
-      billNumber: billNumber,
-      storeLabel: 'Srey Tha Curtain',
-      terminalLabel: 'Online Checkout',
       expirationTimestamp: expiresAt
     };
 
@@ -210,7 +207,6 @@ router.post('/khqr/generate', async (req, res) => {
         currency: 'USD',
         bakongAccountId,
         merchantName,
-        billNumber,
         status: 'PENDING',
         createdAt: now,
         expiresAt: expiresAt
@@ -227,7 +223,6 @@ router.post('/khqr/generate', async (req, res) => {
       currency: 'USD',
       bakongAccountId,
       merchantName,
-      billNumber,
       createdAt: now,
       expiresAt,
       expiresInSeconds: 100,

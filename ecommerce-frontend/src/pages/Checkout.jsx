@@ -35,8 +35,6 @@ const buildLocalBakongKhqr = (bakongId, merchantName, amountUsd, expiresAtMs) =>
   const cleanName = (merchantName || 'CHANMONYROTH HOUT').slice(0, 25);
   const amtStr = Number(amountUsd || 0).toFixed(2);
   const tag29 = formatTag('29', formatTag('00', cleanId));
-  const billNo = 'STC' + String(Date.now()).slice(-6);
-  const tag62 = formatTag('62', formatTag('01', billNo) + formatTag('03', 'Srey Tha Curtain') + formatTag('07', 'Online'));
   const tag99 = formatTag('99', formatTag('00', String(Date.now())) + formatTag('01', String(expiresAtMs)));
   const bodyWithoutCrc =
     '000201010212' +
@@ -46,7 +44,6 @@ const buildLocalBakongKhqr = (bakongId, merchantName, amountUsd, expiresAtMs) =>
     '5802KH' +
     formatTag('59', cleanName) +
     formatTag('60', 'Phnom Penh') +
-    tag62 +
     tag99 +
     '6304';
   return bodyWithoutCrc + computeCrc16(bodyWithoutCrc);
@@ -245,14 +242,14 @@ const Checkout = ({ cart, onOrderPlaced }) => {
     return () => clearAllKhqrTimers();
   }, [formData.paymentMethod, subtotal, cart.length, generateDynamicKhqr, clearAllKhqrTimers]);
 
-  // Build composite official KHQR Stand Card PNG on an HTML5 Canvas so ABA & ACLEDA Scan QR -> Upload QR reads it cleanly
+  // Build clean KHQR card PNG with ONLY Merchant and Total Amount + QR code
   const buildKhqrCardBlob = async () => {
     const qrSrc = khqrSession?.qrDataUrl;
     if (!qrSrc) return null;
 
     const canvas = document.createElement('canvas');
     canvas.width = 600;
-    canvas.height = 780;
+    canvas.height = 740;
     const ctx = canvas.getContext('2d');
 
     // White card background
@@ -261,33 +258,29 @@ const Checkout = ({ cart, onOrderPlaced }) => {
 
     // Red KHQR top header
     ctx.fillStyle = '#E1232E';
-    ctx.fillRect(0, 0, canvas.width, 100);
+    ctx.fillRect(0, 0, canvas.width, 95);
     ctx.fillStyle = '#FFFFFF';
     ctx.font = 'bold 42px Arial, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('KHQR', canvas.width / 2, 66);
+    ctx.fillText('KHQR', canvas.width / 2, 64);
 
-    // Merchant Name & Amount
+    // ONLY Merchant Name & Total Amount
     ctx.textAlign = 'left';
     ctx.fillStyle = '#64748B';
-    ctx.font = 'bold 20px Arial, sans-serif';
+    ctx.font = 'bold 22px Arial, sans-serif';
     ctx.fillText(khqrSession?.merchantName || paymentConfig.accountName || 'CHANMONYROTH HOUT', 50, 155);
 
     ctx.fillStyle = '#0F172A';
-    ctx.font = 'bold 46px Arial, sans-serif';
-    ctx.fillText(`$${subtotal} USD`, 50, 210);
-
-    ctx.fillStyle = '#E1232E';
-    ctx.font = 'bold 18px monospace';
-    ctx.fillText(khqrSession?.bakongAccountId || paymentConfig.bakongAccountId || 'chanmonyroth_hout@bkrt', 50, 242);
+    ctx.font = 'bold 48px Arial, sans-serif';
+    ctx.fillText(`$${subtotal} USD`, 50, 215);
 
     // Dashed divider
     ctx.strokeStyle = '#CBD5E1';
     ctx.lineWidth = 2;
     ctx.setLineDash([8, 6]);
     ctx.beginPath();
-    ctx.moveTo(40, 268);
-    ctx.lineTo(canvas.width - 40, 268);
+    ctx.moveTo(40, 245);
+    ctx.lineTo(canvas.width - 40, 245);
     ctx.stroke();
     ctx.setLineDash([]);
 
@@ -299,43 +292,37 @@ const Checkout = ({ cart, onOrderPlaced }) => {
       img.onerror = reject;
       img.src = qrSrc;
     });
-    ctx.drawImage(img, 90, 295, 420, 420);
-
-    // Footer text
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#64748B';
-    ctx.font = 'bold 16px Arial, sans-serif';
-    ctx.fillText('Scan or Upload QR in ABA Mobile / ACLEDA Mobile / Bakong', canvas.width / 2, 748);
+    ctx.drawImage(img, 80, 270, 440, 440);
 
     return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
   };
 
-  // Share QR image directly to ABA / ACLEDA (just like Flutter share_plus), or open deep link with QR payload
+  // Download QR image & open ABA Mobile or ACLEDA Mobile immediately (preserving user gesture so mobile browsers don't block the app popup)
   const handleSaveAndOpenBankApp = async (bankType = null) => {
-    const qrString = khqrSession?.qrString || '';
-    const encodedQr = encodeURIComponent(qrString);
-    const fileName = `KHQR_${(khqrSession?.bakongAccountId || 'chanmonyroth_hout').replace(/[^a-zA-Z0-9]/g, '_')}_${subtotal}USD.png`;
+    const fileName = `KHQR_${subtotal}USD.png`;
 
+    // 1. If user clicked ABA or ACLEDA, trigger the app launch FIRST while inside the synchronous click gesture!
+    //    (Mobile Safari & Chrome block custom app schemes if called after an async await or after a file download).
+    if (bankType === 'ABA') {
+      const abaUrl = khqrSession?.bakongDeepLink || 'abamobilebank://ababank.com';
+      const a = document.createElement('a');
+      a.href = abaUrl;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } else if (bankType === 'ACLEDA') {
+      const acledaUrl = khqrSession?.bakongDeepLink || 'acledabank://';
+      const a = document.createElement('a');
+      a.href = acledaUrl;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    // 2. Also save the QR image to the phone gallery so they can upload it in Scan QR -> Upload QR
     try {
       setDownloadingQr(true);
       const blob = await buildKhqrCardBlob();
-
-      // 1. If user tapped ABA or ACLEDA on a phone that supports Web Share API with files (iOS Safari / Android Chrome),
-      //    Alternatively if bankType === 'SHARE', open the native mobile share sheet so they can pick ABA Mobile or ACLEDA Mobile directly!
-      if (bankType === 'SHARE' && blob && navigator.canShare) {
-        const file = new File([blob], fileName, { type: 'image/png' });
-        if (navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-            title: 'Bakong KHQR Payment',
-            text: `Pay $${subtotal} USD to ${khqrSession?.merchantName || 'CHANMONYROTH HOUT'}`
-          });
-          setDownloadingQr(false);
-          return;
-        }
-      }
-
-      // 2. Always save the QR image to the phone gallery so it's ready in Scan QR -> Upload QR
       if (blob) {
         const blobUrl = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -350,33 +337,11 @@ const Checkout = ({ cart, onOrderPlaced }) => {
       if (khqrSession?.qrDataUrl) {
         const link = document.createElement('a');
         link.href = khqrSession.qrDataUrl;
-        link.download = `Bakong_KHQR_${subtotal}USD.png`;
+        link.download = fileName;
         link.click();
       }
     } finally {
       setDownloadingQr(false);
-    }
-
-    // 3. Launch ABA Mobile or ACLEDA Mobile
-    // Note: Do NOT pass ?type=payway&qrcode=... for an Individual Bakong KHQR (@bkrt),
-    // because ABA's PayWay handler rejects non-PayWay individual QRs with "Invalid Merchant Data".
-    // Instead, save the valid KHQR image to the phone gallery and open the app cleanly so the user can tap Scan QR -> Upload QR!
-    if (bankType === 'ABA') {
-      setTimeout(() => {
-        if (khqrSession?.bakongDeepLink) {
-          window.location.href = khqrSession.bakongDeepLink;
-        } else {
-          window.location.href = 'abamobilebank://';
-        }
-      }, 300);
-    } else if (bankType === 'ACLEDA') {
-      setTimeout(() => {
-        if (khqrSession?.bakongDeepLink) {
-          window.location.href = khqrSession.bakongDeepLink;
-        } else {
-          window.location.href = 'acledabank://';
-        }
-      }, 300);
     }
   };
 
@@ -849,9 +814,6 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                         </div>
                         <div style={{ fontSize: '1.35rem', fontWeight: '900', color: '#0f172a', marginTop: '2px' }}>
                           ${subtotal} <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b' }}>USD</span>
-                        </div>
-                        <div style={{ fontSize: '0.68rem', color: '#E1232E', fontFamily: 'monospace', fontWeight: '700', marginTop: '2px' }}>
-                          {khqrSession?.bakongAccountId || paymentConfig.bakongAccountId || 'chanmonyroth_hout@bkrt'}
                         </div>
                       </div>
 
