@@ -76,6 +76,8 @@ const Checkout = ({ cart, onOrderPlaced }) => {
   const [completedChecks, setCompletedChecks] = useState([]);
   const [activeCheckSecond, setActiveCheckSecond] = useState(null);
   const [isMobileDevice, setIsMobileDevice] = useState(false);
+  const [isAndroidDevice, setIsAndroidDevice] = useState(false);
+  const [prebuiltCardDataUrl, setPrebuiltCardDataUrl] = useState('');
   const [showBankChooser, setShowBankChooser] = useState(false);
   const [selectedBankHint, setSelectedBankHint] = useState('ABA');
 
@@ -90,6 +92,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
   useEffect(() => {
     const ua = navigator.userAgent || '';
     setIsMobileDevice(/Android|iPhone|iPad|iPod|Mobile/i.test(ua));
+    setIsAndroidDevice(/Android/i.test(ua));
 
     axios.get('/settings/payment')
       .then((res) => {
@@ -318,7 +321,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
     return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
   }, [khqrSession?.qrDataUrl, khqrSession?.merchantName, paymentConfig.accountName, subtotal]);
 
-  // Pre-build the KHQR File object as soon as khqrSession is ready so tapping ABA / ACLEDA can invoke navigator.share({ files }) synchronously!
+  // Pre-build the KHQR File and DataURL as soon as khqrSession is ready
   useEffect(() => {
     if (!khqrSession?.qrDataUrl) return;
     let active = true;
@@ -332,6 +335,13 @@ const Checkout = ({ cart, onOrderPlaced }) => {
         } catch (e) {
           prebuiltCardFileRef.current = null;
         }
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (active && typeof reader.result === 'string') {
+            setPrebuiltCardDataUrl(reader.result);
+          }
+        };
+        reader.readAsDataURL(blob);
       })
       .catch(() => {});
     return () => { active = false; };
@@ -1009,20 +1019,22 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                       </div>
                     </div>
 
-                    {/* ABA & ACLEDA Buttons (Directly opens the KHQR photo share sheet so 1 tap on ABA/ACLEDA loads the QR into Scan QR!) */}
+                    {/* Exact Web Flow: Direct <a href> Deep Links for ABA & ACLEDA + Save QR to Photos */}
                     {khqrStatus !== 'EXPIRED' && (
                       <div style={{ display: 'grid', gap: '10px', maxWidth: '380px', margin: '0 auto' }}>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                          <button
-                            type="button"
-                            onClick={() => handleDirectSaveAndOpenBankApp('ABA')}
-                            disabled={downloadingQr}
+                          <a
+                            href={
+                              isAndroidDevice
+                                ? 'intent://#Intent;package=com.paygo24.ibank;scheme=abamobilebank;end;'
+                                : 'abamobilebank://'
+                            }
                             style={{
                               padding: '13px 10px',
                               borderRadius: '12px',
                               backgroundColor: '#004B6E',
                               color: '#ffffff',
-                              border: 'none',
+                              textDecoration: 'none',
                               fontWeight: '800',
                               fontSize: '0.92rem',
                               cursor: 'pointer',
@@ -1034,18 +1046,21 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                             }}
                           >
                             <span>ABA</span>
-                          </button>
+                          </a>
 
-                          <button
-                            type="button"
-                            onClick={() => handleDirectSaveAndOpenBankApp('ACLEDA')}
-                            disabled={downloadingQr}
+                          <a
+                            href={
+                              isAndroidDevice
+                                ? 'intent://#Intent;package=com.domain.acledabankqr;scheme=acledabank;end;'
+                                : 'acledabank://'
+                            }
                             style={{
                               padding: '13px 10px',
                               borderRadius: '12px',
                               backgroundColor: '#003A70',
                               color: '#fbbf24',
                               border: '1px solid #f59e0b',
+                              textDecoration: 'none',
                               fontWeight: '800',
                               fontSize: '0.92rem',
                               cursor: 'pointer',
@@ -1057,21 +1072,21 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                             }}
                           >
                             <span>ACLEDA</span>
-                          </button>
+                          </a>
                         </div>
 
-                        {/* Save QR Image Only Button */}
-                        <button
-                          type="button"
-                          onClick={() => handleDirectSaveAndOpenBankApp(null)}
-                          disabled={downloadingQr}
+                        {/* Save QR to Photos (<a href="data:image/png;base64,..." download="aba-khqr.png">) */}
+                        <a
+                          href={prebuiltCardDataUrl || khqrSession?.qrDataUrl || '#'}
+                          download={`aba-khqr-${subtotal}USD.png`}
                           style={{
                             width: '100%',
+                            boxSizing: 'border-box',
                             padding: '11px 16px',
                             borderRadius: '12px',
                             backgroundColor: '#E1232E',
                             color: '#ffffff',
-                            border: 'none',
+                            textDecoration: 'none',
                             fontWeight: '800',
                             fontSize: '0.84rem',
                             cursor: 'pointer',
@@ -1084,18 +1099,18 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                           <Download size={16} />
                           <span>
                             {language === 'kh'
-                              ? 'ទាញយករូប QR (សម្រាប់ដាក់ក្នុង Scan QR របស់ ABA / ACLEDA)'
-                              : 'Download QR Image (For Upload QR in ABA / ACLEDA)'}
+                              ? 'រក្សាទុករូប QR ចូលទូរស័ព្ទ (Save QR to Photos)'
+                              : 'Save QR to Photos (aba-khqr.png)'}
                           </span>
-                        </button>
+                        </a>
                       </div>
                     )}
 
                     <p style={{ margin: '10px 0 0', fontSize: '0.74rem', color: '#64748b', lineHeight: '1.55' }}>
                       {isMobileDevice
                         ? (language === 'kh'
-                            ? '📱 លើទូរស័ព្ទ៖ ចុចប៊ូតុង "ABA" ឬ "ACLEDA" ខាងលើ → ជ្រើសរើសកម្មវិធីធនាគារក្នុងប្រអប់ដើម្បីបើក និងបង់ប្រាក់។ ពេលបង់ប្រាក់រួចរាល់ ប្រព័ន្ធនឹងបញ្ជាក់ការកម្មង់ដោយស្វ័យប្រវត្តិ!'
-                            : '📱 On Phone: Tap "ABA" or "ACLEDA" above → choose your banking app in the dialog to open and pay. Once paid, your order completes automatically!')
+                            ? '📱 លើទូរស័ព្ទ៖ ចុច "រក្សាទុករូប QR" រួចចុចប៊ូតុង "ABA" ឬ "ACLEDA" ដើម្បីបើកកម្មវិធីធនាគារផ្ទាល់ (ចូល Scan → រូបថត)។ ពេលបង់ប្រាក់រួច ប្រព័ន្ធនឹងបញ្ជាក់ការកម្មង់ដោយស្វ័យប្រវត្តិ!'
+                            : '📱 On Phone: Tap "Save QR to Photos", then tap "ABA" or "ACLEDA" to launch your banking app directly (Scan → Gallery). Once paid, your order completes automatically!')
                         : (language === 'kh'
                             ? '💻 លើកុំព្យូទ័រ (Laptop)៖ សូមបើកកម្មវិធី ABA ឬ ACLEDA លើទូរស័ព្ទរបស់អ្នក ហើយស្កេនកូដ QR ខាងលើមុនពេលផុតកំណត់ 100 វិនាទី។ ពេលបង់ប្រាក់រួចរាល់ ប្រព័ន្ធនឹងបញ្ជាក់ការកម្មង់ដោយស្វ័យប្រវត្តិ!'
                             : '💻 On Laptop: Scan the QR code above with ABA or ACLEDA before the 100s timer expires. Once paid, your order completes automatically!')}
