@@ -318,34 +318,40 @@ const Checkout = ({ cart, onOrderPlaced }) => {
     return () => { active = false; };
   }, [khqrSession, subtotal, buildKhqrCardBlob]);
 
-  // Method 1: Share the pre-built KHQR image File via navigator.share({ files }) so tapping ABA / ACLEDA in the sheet opens Scan QR and auto-inserts the QR!
-  const handleSaveAndOpenBankApp = async (bankType = null) => {
-    const fileName = `KHQR_${subtotal}USD.png`;
-    const isAndroid = /Android/i.test(navigator.userAgent || '');
+  // Method 1: Share ONLY the pre-built KHQR image File (`{ files: [file] }` with no text/title) so the OS Share Sheet prioritizes image-scanner apps like ABA Mobile & ACLEDA Mobile!
+  const handleShareQrToBankScanner = async (bankType = null) => {
+    const fileName = bankType ? `${bankType}_KHQR_${subtotal}USD.png` : `KHQR_${subtotal}USD.png`;
 
-    // If the user clicked ABA or ACLEDA on a phone and Web Share with files is supported, trigger the native QR Image Share Sheet synchronously!
     if (
       bankType &&
-      isMobileDevice &&
       prebuiltCardFileRef.current &&
       typeof navigator !== 'undefined' &&
-      navigator.canShare &&
-      navigator.canShare({ files: [prebuiltCardFileRef.current] })
+      navigator.canShare
     ) {
-      try {
-        await navigator.share({
-          files: [prebuiltCardFileRef.current],
-          title: `${bankType} KHQR - $${subtotal} USD`,
-          text: `${khqrSession?.merchantName || paymentConfig.accountName || 'CHANMONYROTH HOUT'} ($${subtotal} USD)`
-        });
-        return;
-      } catch (shareErr) {
-        // If the user dismissed the share sheet, stop here without forcing a download
-        if (shareErr?.name === 'AbortError') return;
+      const shareFile = new File([prebuiltCardFileRef.current], fileName, { type: 'image/png' });
+      if (navigator.canShare({ files: [shareFile] })) {
+        try {
+          // IMPORTANT: Pass ONLY `files` (no `title` or `text`) so Android/iOS filters the share sheet to image-receiving apps (like ABA Scan QR & ACLEDA Scan QR) instead of text-chat apps!
+          await navigator.share({
+            files: [shareFile]
+          });
+          return;
+        } catch (shareErr) {
+          if (shareErr?.name === 'AbortError') return;
+        }
       }
     }
 
-    // Fallback (or when clicking "Download QR Image"): save the KHQR image to the device
+    // Fallback: download the QR image and open the banking app directly
+    await handleDirectSaveAndOpenBankApp(bankType);
+  };
+
+  // Method 2: Save the KHQR image to the phone gallery and directly launch ABA Mobile or ACLEDA Mobile
+  const handleDirectSaveAndOpenBankApp = async (bankType = null) => {
+    const fileName = bankType ? `${bankType}_KHQR_${subtotal}USD.png` : `KHQR_${subtotal}USD.png`;
+    const isAndroid = /Android/i.test(navigator.userAgent || '');
+
+    // 1. Save the KHQR image to the phone gallery so it's immediately ready in Scan QR -> Upload QR
     try {
       setDownloadingQr(true);
       const blob = prebuiltCardBlobRef.current || (await buildKhqrCardBlob());
@@ -370,7 +376,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
       setDownloadingQr(false);
     }
 
-    // Fallback app launch if navigator.share({ files }) was unavailable
+    // 2. Directly launch ABA Mobile or ACLEDA Mobile
     if (bankType === 'ABA') {
       if (isAndroid) {
         window.location.href = 'intent://ababank.com#Intent;scheme=abamobilebank;package=com.paygo24.ibank;end';
@@ -941,62 +947,135 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                       </div>
                     </div>
 
-                    {/* Mobile vs Laptop Actions */}
+                    {/* Mobile vs Laptop Actions: Both Options Shown Clearly */}
                     {khqrStatus !== 'EXPIRED' && (
                       <div style={{ display: 'grid', gap: '10px', maxWidth: '380px', margin: '0 auto' }}>
-                        {/* ABA & ACLEDA Buttons */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                          <button
-                            type="button"
-                            onClick={() => handleSaveAndOpenBankApp('ABA')}
-                            disabled={downloadingQr}
-                            style={{
-                              padding: '13px 10px',
-                              borderRadius: '12px',
-                              backgroundColor: '#004B6E',
-                              color: '#ffffff',
-                              border: 'none',
-                              fontWeight: '800',
-                              fontSize: '0.9rem',
-                              cursor: 'pointer',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              gap: '6px',
-                              boxShadow: '0 4px 12px rgba(0,75,110,0.2)'
-                            }}
-                          >
-                            <span>ABA</span>
-                          </button>
+                        {/* Option 1: Auto-Insert QR into ABA / ACLEDA Scanner (Share Sheet) */}
+                        <div style={{
+                          padding: '10px',
+                          borderRadius: '12px',
+                          backgroundColor: '#f8fafc',
+                          border: '1px solid #e2e8f0',
+                          textAlign: 'left'
+                        }}>
+                          <div style={{ fontSize: '0.73rem', fontWeight: '800', color: '#0f172a', marginBottom: '7px' }}>
+                            {language === 'kh'
+                              ? 'ជម្រើសទី ១៖ បញ្ចូលរូប QR ទៅកាន់កន្លែងស្កេនស្វ័យប្រវត្តិ (ជ្រើសរើស ABA / ACLEDA ក្នុងផ្ទាំងលោតឡើង)'
+                              : 'Option 1: Auto-Insert QR to Scanner (Pick ABA / ACLEDA in popup)'}
+                          </div>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                            <button
+                              type="button"
+                              onClick={() => handleShareQrToBankScanner('ABA')}
+                              disabled={downloadingQr}
+                              style={{
+                                padding: '12px 10px',
+                                borderRadius: '10px',
+                                backgroundColor: '#004B6E',
+                                color: '#ffffff',
+                                border: 'none',
+                                fontWeight: '800',
+                                fontSize: '0.88rem',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '6px',
+                                boxShadow: '0 4px 12px rgba(0,75,110,0.2)'
+                              }}
+                            >
+                              <span>ABA</span>
+                            </button>
 
-                          <button
-                            type="button"
-                            onClick={() => handleSaveAndOpenBankApp('ACLEDA')}
-                            disabled={downloadingQr}
-                            style={{
-                              padding: '13px 10px',
-                              borderRadius: '12px',
-                              backgroundColor: '#003A70',
-                              color: '#fbbf24',
-                              border: '1px solid #f59e0b',
-                              fontWeight: '800',
-                              fontSize: '0.9rem',
-                              cursor: 'pointer',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              gap: '6px',
-                              boxShadow: '0 4px 12px rgba(0,58,112,0.2)'
-                            }}
-                          >
-                            <span>ACLEDA</span>
-                          </button>
+                            <button
+                              type="button"
+                              onClick={() => handleShareQrToBankScanner('ACLEDA')}
+                              disabled={downloadingQr}
+                              style={{
+                                padding: '12px 10px',
+                                borderRadius: '10px',
+                                backgroundColor: '#003A70',
+                                color: '#fbbf24',
+                                border: '1px solid #f59e0b',
+                                fontWeight: '800',
+                                fontSize: '0.88rem',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '6px',
+                                boxShadow: '0 4px 12px rgba(0,58,112,0.2)'
+                              }}
+                            >
+                              <span>ACLEDA</span>
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Option 2: Save QR + Open ABA / ACLEDA App Directly */}
+                        <div style={{
+                          padding: '10px',
+                          borderRadius: '12px',
+                          backgroundColor: '#f8fafc',
+                          border: '1px solid #e2e8f0',
+                          textAlign: 'left'
+                        }}>
+                          <div style={{ fontSize: '0.73rem', fontWeight: '800', color: '#0f172a', marginBottom: '7px' }}>
+                            {language === 'kh'
+                              ? 'ជម្រើសទី ២៖ រក្សាទុករូប QR + បើកកម្មវិធីផ្ទាល់ (រួចចុច Scan QR → Upload QR)'
+                              : 'Option 2: Save QR + Open App Directly (Then tap Scan QR → Upload QR)'}
+                          </div>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                            <button
+                              type="button"
+                              onClick={() => handleDirectSaveAndOpenBankApp('ABA')}
+                              disabled={downloadingQr}
+                              style={{
+                                padding: '10px 8px',
+                                borderRadius: '10px',
+                                backgroundColor: '#ffffff',
+                                color: '#004B6E',
+                                border: '1.5px solid #004B6E',
+                                fontWeight: '800',
+                                fontSize: '0.82rem',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '6px'
+                              }}
+                            >
+                              <span>{language === 'kh' ? 'បើក ABA ផ្ទាល់' : 'Open ABA Direct'}</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleDirectSaveAndOpenBankApp('ACLEDA')}
+                              disabled={downloadingQr}
+                              style={{
+                                padding: '10px 8px',
+                                borderRadius: '10px',
+                                backgroundColor: '#ffffff',
+                                color: '#003A70',
+                                border: '1.5px solid #003A70',
+                                fontWeight: '800',
+                                fontSize: '0.82rem',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '6px'
+                              }}
+                            >
+                              <span>{language === 'kh' ? 'បើក ACLEDA ផ្ទាល់' : 'Open ACLEDA Direct'}</span>
+                            </button>
+                          </div>
                         </div>
 
                         {/* Save QR Image Only Button */}
                         <button
                           type="button"
-                          onClick={() => handleSaveAndOpenBankApp(null)}
+                          onClick={() => handleDirectSaveAndOpenBankApp(null)}
                           disabled={downloadingQr}
                           style={{
                             width: '100%',
