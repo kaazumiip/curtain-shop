@@ -343,13 +343,36 @@ const Checkout = ({ cart, onOrderPlaced }) => {
     setShowBankChooser(true);
   };
 
-  // Launch the selected banking app from the "Open with" dialog (saves QR image + opens Bakong deep link or ABA/ACLEDA app directly, falling back to ABA if ACLEDA is not installed)
+  // Launch the selected banking app from the dialog:
+  // 1. Sends the pre-built KHQR image File via navigator.share({ files }) so tapping ABA / ACLEDA auto-inserts the QR directly into Scan QR!
+  // 2. Falls back to saving the QR image and opening the app if Web Share is unavailable.
   const handleDirectSaveAndOpenBankApp = async (bankType = null) => {
     setShowBankChooser(false);
     const fileName = bankType ? `${bankType}_KHQR_${subtotal}USD.png` : `KHQR_${subtotal}USD.png`;
     const isAndroid = /Android/i.test(navigator.userAgent || '');
 
-    // 1. Save the KHQR image to the phone gallery so it's immediately ready in Scan QR -> Upload QR
+    // If a bank was selected on mobile, share the pre-built KHQR image file so the bank app receives the photo directly in Scan QR!
+    if (
+      bankType &&
+      isMobileDevice &&
+      prebuiltCardFileRef.current &&
+      typeof navigator !== 'undefined' &&
+      navigator.canShare
+    ) {
+      const shareFile = new File([prebuiltCardFileRef.current], fileName, { type: 'image/png' });
+      if (navigator.canShare({ files: [shareFile] })) {
+        try {
+          await navigator.share({
+            files: [shareFile]
+          });
+          return;
+        } catch (shareErr) {
+          if (shareErr?.name === 'AbortError') return;
+        }
+      }
+    }
+
+    // Fallback (or when clicking "Download QR Image"): save the KHQR image to the phone gallery
     try {
       setDownloadingQr(true);
       const blob = prebuiltCardBlobRef.current || (await buildKhqrCardBlob());
@@ -376,13 +399,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
 
     if (!bankType) return;
 
-    // 2. If Bakong official KHQR deep link is available, open it (passes QR payload directly to banking app)
-    if (khqrSession?.bakongDeepLink) {
-      window.location.href = khqrSession.bakongDeepLink;
-      return;
-    }
-
-    // 3. Otherwise launch ABA Mobile or ACLEDA Mobile directly (if ACLEDA is not installed, fall back to ABA Mobile)
+    // Fallback direct launch if navigator.share({ files }) is not supported
     if (bankType === 'ABA') {
       if (isAndroid) {
         window.location.href = 'intent://ababank.com#Intent;scheme=abamobilebank;package=com.paygo24.ibank;end';
@@ -395,11 +412,6 @@ const Checkout = ({ cart, onOrderPlaced }) => {
         window.location.href = `intent://#Intent;scheme=acledabank;package=com.domain.acledabankqr;S.browser_fallback_url=${fallbackUrl};end`;
       } else {
         window.location.href = 'acledabank://';
-        setTimeout(() => {
-          if (document.visibilityState === 'visible') {
-            window.location.href = 'abamobilebank://';
-          }
-        }, 1200);
       }
     }
   };
@@ -1291,16 +1303,55 @@ const Checkout = ({ cart, onOrderPlaced }) => {
             }}
           >
             {/* Drag Handle */}
-            <div style={{ width: '42px', height: '4px', backgroundColor: '#475569', borderRadius: '4px', margin: '0 auto 16px' }} />
+            <div style={{ width: '42px', height: '4px', backgroundColor: '#475569', borderRadius: '4px', margin: '0 auto 14px' }} />
 
-            <div style={{ textAlign: 'center', marginBottom: '18px' }}>
-              <div style={{ fontSize: '1.05rem', fontWeight: '800', color: '#f8fafc', marginBottom: '4px' }}>
-                {language === 'kh' ? 'ជ្រើសរើសកម្មវិធីធនាគារដើម្បីបើក' : 'Open with Banking App'}
+            {/* KHQR Photo Card Preview inside the Dialog (just like the photo sheet!) */}
+            <div style={{
+              maxWidth: '220px',
+              margin: '0 auto 14px',
+              borderRadius: '14px',
+              overflow: 'hidden',
+              backgroundColor: '#ffffff',
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)'
+            }}>
+              <div style={{
+                backgroundColor: '#E1232E',
+                color: '#ffffff',
+                padding: '7px 12px',
+                fontWeight: '900',
+                fontSize: '0.88rem',
+                letterSpacing: '1.5px',
+                textAlign: 'center'
+              }}>
+                KHQR
               </div>
-              <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+              <div style={{ padding: '8px 14px 6px', textAlign: 'left', borderBottom: '1px dashed #e2e8f0' }}>
+                <div style={{ fontSize: '0.62rem', color: '#64748b', fontWeight: '800', textTransform: 'uppercase' }}>
+                  {khqrSession?.merchantName || paymentConfig.accountName || 'CHANMONYROTH HOUT'}
+                </div>
+                <div style={{ fontSize: '1.1rem', fontWeight: '900', color: '#0f172a' }}>
+                  ${subtotal} <span style={{ fontSize: '0.68rem', fontWeight: '700', color: '#64748b' }}>USD</span>
+                </div>
+              </div>
+              <div style={{ padding: '10px', display: 'flex', justifyContent: 'center', backgroundColor: '#ffffff' }}>
+                {khqrSession?.qrDataUrl && (
+                  <img
+                    src={khqrSession.qrDataUrl}
+                    alt="KHQR Preview"
+                    style={{ width: '150px', height: '150px', objectFit: 'contain', display: 'block' }}
+                  />
+                )}
+              </div>
+            </div>
+
+            <div style={{ textAlign: 'center', marginBottom: '14px' }}>
+              <div style={{ fontSize: '0.98rem', fontWeight: '800', color: '#f8fafc', marginBottom: '3px' }}>
+                {language === 'kh' ? 'បញ្ជូនរូប QR ទៅកាន់កម្មវិធីស្កេនធនាគារ' : 'Send QR Photo to Bank Scanner'}
+              </div>
+              <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
                 {language === 'kh'
-                  ? `ប្រព័ន្ធនឹងរក្សាទុករូប KHQR ($${subtotal} USD) និងបើកកម្មវិធីធនាគារជូនអ្នក`
-                  : `Saves the KHQR ($${subtotal} USD) and opens your banking app`}
+                  ? 'ចុចលើ ABA ឬ ACLEDA ខាងក្រោមដើម្បីបញ្ចូលរូប QR ទៅកាន់កន្លែងស្កេនដោយស្វ័យប្រវត្តិ'
+                  : 'Tap ABA or ACLEDA below to send this QR photo directly into Scan QR'}
               </div>
             </div>
 
