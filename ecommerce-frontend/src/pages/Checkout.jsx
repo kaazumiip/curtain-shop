@@ -318,12 +318,34 @@ const Checkout = ({ cart, onOrderPlaced }) => {
     return () => { active = false; };
   }, [khqrSession, subtotal, buildKhqrCardBlob]);
 
-  // Open ABA / ACLEDA directly without the share-sheet popup, and save the QR image to the phone
+  // Method 1: Share the pre-built KHQR image File via navigator.share({ files }) so tapping ABA / ACLEDA in the sheet opens Scan QR and auto-inserts the QR!
   const handleSaveAndOpenBankApp = async (bankType = null) => {
     const fileName = `KHQR_${subtotal}USD.png`;
     const isAndroid = /Android/i.test(navigator.userAgent || '');
 
-    // 1. Save the KHQR image to the phone gallery so it's immediately ready in Scan QR -> Upload QR
+    // If the user clicked ABA or ACLEDA on a phone and Web Share with files is supported, trigger the native QR Image Share Sheet synchronously!
+    if (
+      bankType &&
+      isMobileDevice &&
+      prebuiltCardFileRef.current &&
+      typeof navigator !== 'undefined' &&
+      navigator.canShare &&
+      navigator.canShare({ files: [prebuiltCardFileRef.current] })
+    ) {
+      try {
+        await navigator.share({
+          files: [prebuiltCardFileRef.current],
+          title: `${bankType} KHQR - $${subtotal} USD`,
+          text: `${khqrSession?.merchantName || paymentConfig.accountName || 'CHANMONYROTH HOUT'} ($${subtotal} USD)`
+        });
+        return;
+      } catch (shareErr) {
+        // If the user dismissed the share sheet, stop here without forcing a download
+        if (shareErr?.name === 'AbortError') return;
+      }
+    }
+
+    // Fallback (or when clicking "Download QR Image"): save the KHQR image to the device
     try {
       setDownloadingQr(true);
       const blob = prebuiltCardBlobRef.current || (await buildKhqrCardBlob());
@@ -348,7 +370,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
       setDownloadingQr(false);
     }
 
-    // 2. Directly launch ABA Mobile or ACLEDA Mobile (no intermediate Share popup!)
+    // Fallback app launch if navigator.share({ files }) was unavailable
     if (bankType === 'ABA') {
       if (isAndroid) {
         window.location.href = 'intent://ababank.com#Intent;scheme=abamobilebank;package=com.paygo24.ibank;end';
@@ -1005,8 +1027,8 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                     <p style={{ margin: '10px 0 0', fontSize: '0.74rem', color: '#64748b', lineHeight: '1.55' }}>
                       {isMobileDevice
                         ? (language === 'kh'
-                            ? '📱 លើទូរស័ព្ទ៖ ចុចប៊ូតុង "បើក ABA" ឬ "បើក ACLEDA" ខាងលើ ប្រព័ន្ធនឹងរក្សាទុករូប QR ចូលទូរស័ព្ទ និងបើកកម្មវិធីធនាគារជូនអ្នក រួចចុច Scan QR → Upload QR ពីរូបថតដើម្បីបង់ប្រាក់!'
-                            : '📱 On Phone: Tap "Open ABA" or "Open ACLEDA" above — it saves the QR image to your phone and opens your banking app so you can tap Scan QR → Upload QR!')
+                            ? '📱 លើទូរស័ព្ទ៖ ចុចប៊ូតុង "ABA" ឬ "ACLEDA" ខាងលើ → រួចចុចលើរូបកម្មវិធី ABA ឬ ACLEDA ក្នុងផ្ទាំងដែលលោតឡើង នោះវានឹងបញ្ចូលរូប QR ទៅកាន់កន្លែងស្កេនបង់ប្រាក់ដោយស្វ័យប្រវត្តិ!'
+                            : '📱 On Phone: Tap "ABA" or "ACLEDA" above → then tap the ABA or ACLEDA icon in the popup to automatically load the QR directly into the scanner!')
                         : (language === 'kh'
                             ? '💻 លើកុំព្យូទ័រ (Laptop)៖ សូមបើកកម្មវិធី ABA ឬ ACLEDA លើទូរស័ព្ទរបស់អ្នក ហើយស្កេនកូដ QR ខាងលើមុនពេលផុតកំណត់ 100 វិនាទី។'
                             : '💻 On Laptop: Simply open ABA or ACLEDA on your phone and scan the QR code above before the 100-second timer expires.')}
