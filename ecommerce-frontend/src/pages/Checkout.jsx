@@ -76,6 +76,8 @@ const Checkout = ({ cart, onOrderPlaced }) => {
   const [completedChecks, setCompletedChecks] = useState([]);
   const [activeCheckSecond, setActiveCheckSecond] = useState(null);
   const [isMobileDevice, setIsMobileDevice] = useState(false);
+  const [showBankChooser, setShowBankChooser] = useState(false);
+  const [selectedBankHint, setSelectedBankHint] = useState('ABA');
 
   const checkTimersRef = useRef([]);
   const countdownRef = useRef(null);
@@ -335,33 +337,19 @@ const Checkout = ({ cart, onOrderPlaced }) => {
     return () => { active = false; };
   }, [khqrSession, subtotal, buildKhqrCardBlob]);
 
-  // Share ONLY the pre-built KHQR image File (`{ files: [file] }` with no text/title) so the OS Share Sheet opens and tapping ABA / ACLEDA inserts the QR into Scan QR!
+  // Open our clean "Choose Banking App" dialog (showing ONLY ABA Mobile & ACLEDA Mobile — no social media icons!)
+  const handleOpenBankChooser = (preferredBank = 'ABA') => {
+    setSelectedBankHint(preferredBank);
+    setShowBankChooser(true);
+  };
+
+  // Launch the selected banking app from the "Open with" dialog (saves QR image + opens Bakong deep link or ABA/ACLEDA app directly, falling back to ABA if ACLEDA is not installed)
   const handleDirectSaveAndOpenBankApp = async (bankType = null) => {
+    setShowBankChooser(false);
     const fileName = bankType ? `${bankType}_KHQR_${subtotal}USD.png` : `KHQR_${subtotal}USD.png`;
     const isAndroid = /Android/i.test(navigator.userAgent || '');
 
-    // When clicking ABA or ACLEDA on a phone, open the native Share Sheet with ONLY the PNG file (no title/text)
-    if (
-      bankType &&
-      isMobileDevice &&
-      prebuiltCardFileRef.current &&
-      typeof navigator !== 'undefined' &&
-      navigator.canShare
-    ) {
-      const shareFile = new File([prebuiltCardFileRef.current], fileName, { type: 'image/png' });
-      if (navigator.canShare({ files: [shareFile] })) {
-        try {
-          await navigator.share({
-            files: [shareFile]
-          });
-          return;
-        } catch (shareErr) {
-          if (shareErr?.name === 'AbortError') return;
-        }
-      }
-    }
-
-    // Fallback (or when clicking "Download QR Image"): save the KHQR image to the phone gallery
+    // 1. Save the KHQR image to the phone gallery so it's immediately ready in Scan QR -> Upload QR
     try {
       setDownloadingQr(true);
       const blob = prebuiltCardBlobRef.current || (await buildKhqrCardBlob());
@@ -386,7 +374,15 @@ const Checkout = ({ cart, onOrderPlaced }) => {
       setDownloadingQr(false);
     }
 
-    // Fallback direct launch if navigator.share({ files }) is not supported
+    if (!bankType) return;
+
+    // 2. If Bakong official KHQR deep link is available, open it (passes QR payload directly to banking app)
+    if (khqrSession?.bakongDeepLink) {
+      window.location.href = khqrSession.bakongDeepLink;
+      return;
+    }
+
+    // 3. Otherwise launch ABA Mobile or ACLEDA Mobile directly (if ACLEDA is not installed, fall back to ABA Mobile)
     if (bankType === 'ABA') {
       if (isAndroid) {
         window.location.href = 'intent://ababank.com#Intent;scheme=abamobilebank;package=com.paygo24.ibank;end';
@@ -399,6 +395,11 @@ const Checkout = ({ cart, onOrderPlaced }) => {
         window.location.href = `intent://#Intent;scheme=acledabank;package=com.domain.acledabankqr;S.browser_fallback_url=${fallbackUrl};end`;
       } else {
         window.location.href = 'acledabank://';
+        setTimeout(() => {
+          if (document.visibilityState === 'visible') {
+            window.location.href = 'abamobilebank://';
+          }
+        }, 1200);
       }
     }
   };
@@ -996,13 +997,13 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                       </div>
                     </div>
 
-                    {/* ABA & ACLEDA Direct Launch Buttons */}
+                    {/* ABA & ACLEDA Buttons (Opens clean "Open with ABA / ACLEDA" Chooser Dialog) */}
                     {khqrStatus !== 'EXPIRED' && (
                       <div style={{ display: 'grid', gap: '10px', maxWidth: '380px', margin: '0 auto' }}>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                           <button
                             type="button"
-                            onClick={() => handleDirectSaveAndOpenBankApp('ABA')}
+                            onClick={() => handleOpenBankChooser('ABA')}
                             disabled={downloadingQr}
                             style={{
                               padding: '13px 10px',
@@ -1025,7 +1026,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
 
                           <button
                             type="button"
-                            onClick={() => handleDirectSaveAndOpenBankApp('ACLEDA')}
+                            onClick={() => handleOpenBankChooser('ACLEDA')}
                             disabled={downloadingQr}
                             style={{
                               padding: '13px 10px',
@@ -1081,8 +1082,8 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                     <p style={{ margin: '10px 0 0', fontSize: '0.74rem', color: '#64748b', lineHeight: '1.55' }}>
                       {isMobileDevice
                         ? (language === 'kh'
-                            ? '📱 លើទូរស័ព្ទ៖ ចុចប៊ូតុង "ABA" ឬ "ACLEDA" ខាងលើ → រួចជ្រើសរើសកម្មវិធី ABA ឬ ACLEDA ក្នុងផ្ទាំងលោតឡើង (ប្រសិនបើមិនឃើញនៅជួរមុខ សូមចុច "More / បន្ថែម" រួចចុចឱ្យជាប់លើ ABA / ACLEDA ដើម្បី Pin ដាក់មុខគេ)។ ពេលបង់ប្រាក់រួចរាល់ ប្រព័ន្ធនឹងបញ្ជាក់ការកម្មង់ដោយស្វ័យប្រវត្តិ!'
-                            : '📱 On Phone: Tap "ABA" or "ACLEDA" above → select ABA or ACLEDA in the popup (if not shown first, tap "More" and long-press ABA / ACLEDA to Pin them to the 1st & 2nd spots). Once paid, your order completes automatically!')
+                            ? '📱 លើទូរស័ព្ទ៖ ចុចប៊ូតុង "ABA" ឬ "ACLEDA" ខាងលើ → ជ្រើសរើសកម្មវិធីធនាគារក្នុងប្រអប់ដើម្បីបើក និងបង់ប្រាក់។ ពេលបង់ប្រាក់រួចរាល់ ប្រព័ន្ធនឹងបញ្ជាក់ការកម្មង់ដោយស្វ័យប្រវត្តិ!'
+                            : '📱 On Phone: Tap "ABA" or "ACLEDA" above → choose your banking app in the dialog to open and pay. Once paid, your order completes automatically!')
                         : (language === 'kh'
                             ? '💻 លើកុំព្យូទ័រ (Laptop)៖ សូមបើកកម្មវិធី ABA ឬ ACLEDA លើទូរស័ព្ទរបស់អ្នក ហើយស្កេនកូដ QR ខាងលើមុនពេលផុតកំណត់ 100 វិនាទី។ ពេលបង់ប្រាក់រួចរាល់ ប្រព័ន្ធនឹងបញ្ជាក់ការកម្មង់ដោយស្វ័យប្រវត្តិ!'
                             : '💻 On Laptop: Scan the QR code above with ABA or ACLEDA before the 100s timer expires. Once paid, your order completes automatically!')}
@@ -1259,6 +1260,153 @@ const Checkout = ({ cart, onOrderPlaced }) => {
           </div>
         </div>
       </div>
+
+      {/* Native-Style "Open with ABA / ACLEDA" App Chooser Bottom-Sheet Modal (No Social Media Icons!) */}
+      {showBankChooser && (
+        <div
+          onClick={() => setShowBankChooser(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(4px)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'center'
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%',
+              maxWidth: '460px',
+              backgroundColor: '#1e293b',
+              color: '#ffffff',
+              borderTopLeftRadius: '24px',
+              borderTopRightRadius: '24px',
+              padding: '20px 20px 28px',
+              boxShadow: '0 -12px 40px rgba(0, 0, 0, 0.45)',
+              animation: 'slideUp 0.2s ease-out'
+            }}
+          >
+            {/* Drag Handle */}
+            <div style={{ width: '42px', height: '4px', backgroundColor: '#475569', borderRadius: '4px', margin: '0 auto 16px' }} />
+
+            <div style={{ textAlign: 'center', marginBottom: '18px' }}>
+              <div style={{ fontSize: '1.05rem', fontWeight: '800', color: '#f8fafc', marginBottom: '4px' }}>
+                {language === 'kh' ? 'ជ្រើសរើសកម្មវិធីធនាគារដើម្បីបើក' : 'Open with Banking App'}
+              </div>
+              <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                {language === 'kh'
+                  ? `ប្រព័ន្ធនឹងរក្សាទុករូប KHQR ($${subtotal} USD) និងបើកកម្មវិធីធនាគារជូនអ្នក`
+                  : `Saves the KHQR ($${subtotal} USD) and opens your banking app`}
+              </div>
+            </div>
+
+            {/* ONLY Two Banking Apps: 1st ABA Mobile, 2nd ACLEDA Mobile */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '18px' }}>
+              {/* 1st Choice: ABA Mobile */}
+              <button
+                type="button"
+                onClick={() => handleDirectSaveAndOpenBankApp('ABA')}
+                style={{
+                  padding: '18px 14px',
+                  borderRadius: '18px',
+                  backgroundColor: selectedBankHint === 'ABA' ? '#0f172a' : '#334155',
+                  border: selectedBankHint === 'ABA' ? '2px solid #38bdf8' : '2px solid transparent',
+                  color: '#ffffff',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '10px',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <div style={{
+                  width: '58px',
+                  height: '58px',
+                  borderRadius: '16px',
+                  backgroundColor: '#004B6E',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: '900',
+                  fontSize: '1.15rem',
+                  color: '#ffffff',
+                  boxShadow: '0 6px 16px rgba(0, 75, 110, 0.5)',
+                  border: '1.5px solid rgba(255,255,255,0.2)'
+                }}>
+                  ABA<span style={{ color: '#E1232E' }}>&#39;</span>
+                </div>
+                <div style={{ fontWeight: '800', fontSize: '0.92rem' }}>ABA Mobile</div>
+                <div style={{ fontSize: '0.7rem', color: '#38bdf8', fontWeight: '700' }}>
+                  {language === 'kh' ? 'បើកកម្មវិធី ABA' : 'Open ABA App'}
+                </div>
+              </button>
+
+              {/* 2nd Choice: ACLEDA Mobile */}
+              <button
+                type="button"
+                onClick={() => handleDirectSaveAndOpenBankApp('ACLEDA')}
+                style={{
+                  padding: '18px 14px',
+                  borderRadius: '18px',
+                  backgroundColor: selectedBankHint === 'ACLEDA' ? '#0f172a' : '#334155',
+                  border: selectedBankHint === 'ACLEDA' ? '2px solid #fbbf24' : '2px solid transparent',
+                  color: '#ffffff',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '10px',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <div style={{
+                  width: '58px',
+                  height: '58px',
+                  borderRadius: '16px',
+                  backgroundColor: '#003A70',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: '900',
+                  fontSize: '0.88rem',
+                  color: '#fbbf24',
+                  boxShadow: '0 6px 16px rgba(0, 58, 112, 0.5)',
+                  border: '1.5px solid #f59e0b'
+                }}>
+                  ACLEDA
+                </div>
+                <div style={{ fontWeight: '800', fontSize: '0.92rem' }}>ACLEDA Mobile</div>
+                <div style={{ fontSize: '0.7rem', color: '#fbbf24', fontWeight: '700' }}>
+                  {language === 'kh' ? 'បើកកម្មវិធី ACLEDA' : 'Open ACLEDA App'}
+                </div>
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowBankChooser(false)}
+              style={{
+                width: '100%',
+                padding: '12px',
+                borderRadius: '12px',
+                backgroundColor: '#334155',
+                color: '#cbd5e1',
+                border: 'none',
+                fontWeight: '700',
+                fontSize: '0.88rem',
+                cursor: 'pointer'
+              }}
+            >
+              {language === 'kh' ? 'បោះបង់ (Cancel)' : 'Cancel'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
