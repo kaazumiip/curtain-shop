@@ -177,25 +177,23 @@ router.post('/khqr/generate', async (req, res) => {
       }
     });
 
-    // Optional: try generating official Bakong deep link if token is available
+    // Always call official Bakong generate_deeplink_by_qr endpoint (works with or without token!)
     let bakongDeepLink = null;
-    const token = config.bakongToken || process.env.BAKONG_TOKEN;
-    if (token) {
-      try {
-        const dlRes = await postBakongApi('/v1/generate_deeplink_by_qr', {
-          qr: qrString,
-          sourceInfo: {
-            appIconUrl: 'https://sreytha-curtain.vercel.app/favicon.ico',
-            appName: 'Srey Tha Curtain',
-            appDeepLinkCallback: 'https://sreytha-curtain.vercel.app/checkout'
-          }
-        }, token);
-        if (dlRes?.data?.shortLink) {
-          bakongDeepLink = dlRes.data.shortLink;
+    const token = config.bakongToken || process.env.BAKONG_TOKEN || '';
+    try {
+      const dlRes = await postBakongApi('/v1/generate_deeplink_by_qr', {
+        qr: qrString,
+        sourceInfo: {
+          appIconUrl: 'https://sreytha-curtain.vercel.app/favicon.ico',
+          appName: 'Srey Tha Curtain',
+          appDeepLinkCallback: 'https://sreytha-curtain.vercel.app/checkout'
         }
-      } catch (dlErr) {
-        // Ignore deep link error and fallback to client-side bank schemes + QR image share/upload
+      }, token);
+      if (dlRes?.data?.shortLink) {
+        bakongDeepLink = dlRes.data.shortLink;
       }
+    } catch (dlErr) {
+      // Ignore deep link error and fallback to client-side bank schemes + QR image share
     }
 
     // Store session in Firestore so status checks can track expiration & manual/webhook confirmations
