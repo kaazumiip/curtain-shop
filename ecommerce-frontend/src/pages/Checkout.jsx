@@ -81,6 +81,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
   const countdownRef = useRef(null);
   const prebuiltCardFileRef = useRef(null);
   const prebuiltCardBlobRef = useRef(null);
+  const autoSubmittedRef = useRef(false);
 
   const subtotal = cart.reduce((acc, item) => acc + Number(item.totalPrice || item.price), 0).toFixed(2);
 
@@ -243,6 +244,22 @@ const Checkout = ({ cart, onOrderPlaced }) => {
     }
     return () => clearAllKhqrTimers();
   }, [formData.paymentMethod, subtotal, cart.length, generateDynamicKhqr, clearAllKhqrTimers]);
+
+  // Immediately verify payment with Bakong when the customer switches back from ABA / ACLEDA to the browser!
+  useEffect(() => {
+    if (!khqrSession?.md5 || khqrStatus !== 'PENDING') return;
+    const handleVisibilityOrFocus = () => {
+      if (document.visibilityState === 'visible') {
+        triggerCheckAtSecond(khqrSession.md5, 'return');
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityOrFocus);
+    window.addEventListener('focus', handleVisibilityOrFocus);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
+      window.removeEventListener('focus', handleVisibilityOrFocus);
+    };
+  }, [khqrSession?.md5, khqrStatus, triggerCheckAtSecond]);
 
   // Build clean KHQR card PNG with ONLY Merchant and Total Amount + QR code
   const buildKhqrCardBlob = useCallback(async (qrDataUrl, merchantNameStr) => {
@@ -410,6 +427,77 @@ const Checkout = ({ cart, onOrderPlaced }) => {
     }
   };
 
+  const submitOrderToBackend = useCallback(async (overrideKhqrStatus = null) => {
+    if (submitting || isSuccess) return;
+
+    const { paymentMethod, cardNumber, cardExpiry, cardCvv, cardName, ...customerData } = formData;
+    const isKhqrBank = paymentMethod === 'ABA / ACLEDA / Bakong KHQR' || paymentMethod === 'ABA Bank';
+    const orderData = {
+      customer: customerData,
+      paymentMethod: paymentMethod,
+      paymentDetails: isKhqrBank ? {
+        bakongAccountId: khqrSession?.bakongAccountId || paymentConfig.bakongAccountId || 'chanmonyroth_hout@bkrt',
+        accountName: khqrSession?.merchantName || paymentConfig.accountName || 'CHANMONYROTH HOUT',
+        md5: khqrSession?.md5 || null,
+        khqrStatus: overrideKhqrStatus || khqrStatus,
+        transactionRef: abaTxRef.trim() || null,
+        receiptUrl: receiptUrl || null
+      } : null,
+      cardDetails: paymentMethod === 'Credit Card' ? { cardNumber: '**** **** **** ' + cardNumber.slice(-4), cardName } : null,
+      items: cart,
+      subtotal: subtotal,
+      status: 'Preparing'
+    };
+
+    try {
+      setSubmitting(true);
+      clearAllKhqrTimers();
+      const res = await axios.post('/orders', orderData);
+
+      const orderHistory = JSON.parse(localStorage.getItem('srey_tha_orders') || '[]');
+      const newOrder = {
+        id: res.data._id,
+        date: new Date().toISOString(),
+        total: res.data.subtotal
+      };
+      localStorage.setItem('srey_tha_orders', JSON.stringify([newOrder, ...orderHistory]));
+
+      setOrderDetails(res.data);
+      setIsSuccess(true);
+      if (onOrderPlaced) onOrderPlaced();
+    } catch (err) {
+      console.error('Failed to place order:', err);
+      const msg = err.response?.data?.error || t('order_failed_alert');
+      alert(msg);
+      autoSubmittedRef.current = false;
+    } finally {
+      setSubmitting(false);
+    }
+  }, [
+    submitting,
+    isSuccess,
+    formData,
+    khqrSession,
+    paymentConfig.bakongAccountId,
+    paymentConfig.accountName,
+    khqrStatus,
+    abaTxRef,
+    receiptUrl,
+    cart,
+    subtotal,
+    clearAllKhqrTimers,
+    onOrderPlaced,
+    t
+  ]);
+
+  // Automatically place the order and show "Order Succeeded!" as soon as Bakong verifies `PAID`!
+  useEffect(() => {
+    if (khqrStatus === 'PAID' && !isSuccess && !submitting && !autoSubmittedRef.current) {
+      autoSubmittedRef.current = true;
+      submitOrderToBackend('PAID');
+    }
+  }, [khqrStatus, isSuccess, submitting, submitOrderToBackend]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -424,49 +512,8 @@ const Checkout = ({ cart, onOrderPlaced }) => {
         return;
       }
     }
-    
-    const { paymentMethod, cardNumber, cardExpiry, cardCvv, cardName, ...customerData } = formData;
-    const isKhqrBank = paymentMethod === 'ABA / ACLEDA / Bakong KHQR' || paymentMethod === 'ABA Bank';
-    const orderData = {
-      customer: customerData,
-      paymentMethod: paymentMethod,
-      paymentDetails: isKhqrBank ? {
-        bakongAccountId: khqrSession?.bakongAccountId || paymentConfig.bakongAccountId || 'chanmonyroth_hout@bkrt',
-        accountName: khqrSession?.merchantName || paymentConfig.accountName || 'CHANMONYROTH HOUT',
-        md5: khqrSession?.md5 || null,
-        khqrStatus: khqrStatus,
-        transactionRef: abaTxRef.trim() || null,
-        receiptUrl: receiptUrl || null
-      } : null,
-      cardDetails: paymentMethod === 'Credit Card' ? { cardNumber: '**** **** **** ' + cardNumber.slice(-4), cardName } : null,
-      items: cart,
-      subtotal: subtotal,
-      status: 'Preparing'
-    };
-    
-    try {
-      setSubmitting(true);
-      clearAllKhqrTimers();
-      const res = await axios.post('/orders', orderData);
-      
-      const orderHistory = JSON.parse(localStorage.getItem('srey_tha_orders') || '[]');
-      const newOrder = {
-        id: res.data._id,
-        date: new Date().toISOString(),
-        total: res.data.subtotal
-      };
-      localStorage.setItem('srey_tha_orders', JSON.stringify([newOrder, ...orderHistory]));
-      
-      setOrderDetails(res.data);
-      setIsSuccess(true);
-      if (onOrderPlaced) onOrderPlaced();
-    } catch (err) {
-      console.error('Failed to place order:', err);
-      const msg = err.response?.data?.error || t('order_failed_alert');
-      alert(msg);
-    } finally {
-      setSubmitting(false);
-    }
+
+    await submitOrderToBackend();
   };
 
   if (isSuccess) {
