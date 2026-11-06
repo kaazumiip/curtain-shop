@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CreditCard, CheckCircle, Copy, Check, Truck, Download, Upload, QrCode, RefreshCw, Clock, Smartphone, ExternalLink } from 'lucide-react';
 import QRCode from 'qrcode';
+import { BakongKHQR, khqrData, IndividualInfo } from 'bakong-khqr';
+import CryptoJS from 'crypto-js';
 import axios from '../api/axios';
 import { useLanguage } from '../context/LanguageContext';
 import LocationPickerMap from '../components/LocationPickerMap';
@@ -118,6 +120,8 @@ const Checkout = ({ cart, onOrderPlaced }) => {
     }
   }, []);
 
+  const BAKONG_FALLBACK_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoiNjYyNmFmNzhiZGJjNDY4ZSJ9LCJpYXQiOjE3ODk0MDMwMTQsImV4cCI6MTc5NzE3OTAxNH0.SuOcTS7RwlYaWhPbVXq-uF2UdNBOdKqSJNtANW59g4Y';
+
   const triggerCheckAtSecond = useCallback(async (md5, sec) => {
     if (!md5) return;
     setActiveCheckSecond(sec);
@@ -125,35 +129,39 @@ const Checkout = ({ cart, onOrderPlaced }) => {
       let isPaid = false;
       let transactionData = null;
 
-      // 1. Try checking backend route first
+      // 1. Direct NBC Bakong Open API check (Guaranteed fast, real-time & direct CORS)
+      const token = paymentConfig.bakongToken || BAKONG_FALLBACK_TOKEN;
       try {
-        const res = await axios.post('/settings/khqr/check', {
-          md5,
-          checkSecond: sec
+        const nbcResponse = await fetch('https://api-bakong.nbc.gov.kh/v1/check_transaction_by_md5', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ md5: String(md5).trim() })
         });
-        if (res.data?.paid || res.data?.status === 'PAID') {
+        const nbcData = await nbcResponse.json();
+        if (nbcData && (nbcData.responseCode === 0 || nbcData.status?.code === 0) && nbcData.data) {
           isPaid = true;
-          transactionData = res.data.transaction || null;
+          transactionData = nbcData.data;
         }
-      } catch (backendErr) {
-        // Backend returned 404 or failed — fall through to direct NBC check
+      } catch (nbcErr) {
+        // Network or rate limit warning
       }
 
-      // 2. Direct Bakong NBC API check fallback (using configured BAKONG_TOKEN)
+      // 2. Try checking backend route as complementary verification
       if (!isPaid) {
-        const token = paymentConfig.bakongToken || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoiNjYyNmFmNzhiZGJjNDY4ZSJ9LCJpYXQiOjE3ODk0MDMwMTQsImV4cCI6MTc5NzE3OTAxNH0.SuOcTS7RwlYaWhPbVXq-uF2UdNBOdKqSJNtANW59g4Y';
         try {
-          const nbcRes = await axios.post(
-            'https://api-bakong.nbc.gov.kh/v1/check_transaction_by_md5',
-            { md5 },
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-          if (nbcRes.data && (nbcRes.data.responseCode === 0 || nbcRes.data.status?.code === 0) && nbcRes.data.data) {
+          const res = await axios.post('/settings/khqr/check', {
+            md5,
+            checkSecond: sec
+          });
+          if (res.data?.paid || res.data?.status === 'PAID') {
             isPaid = true;
-            transactionData = nbcRes.data.data;
+            transactionData = res.data.transaction || null;
           }
-        } catch (nbcErr) {
-          // Transaction not yet paid or network error
+        } catch (backendErr) {
+          // Backend may be sleeping or older revision
         }
       }
 
@@ -161,9 +169,8 @@ const Checkout = ({ cart, onOrderPlaced }) => {
 
       if (isPaid) {
         setKhqrStatus('PAID');
-        if (transactionData?.tranId || transactionData?.hash) {
-          setAbaTxRef(transactionData.tranId || transactionData.hash.slice(0, 10));
-        }
+        const ref = transactionData?.hash || transactionData?.tranId || transactionData?.externalRef || 'PAID_NBC';
+        setAbaTxRef(String(ref));
         clearAllKhqrTimers();
         return;
       }
@@ -194,44 +201,92 @@ const Checkout = ({ cart, onOrderPlaced }) => {
 
     let sessionData = null;
 
+    // 1. Try backend generation first
     try {
       const res = await axios.post('/settings/khqr/generate', {
         amount: Number(subtotal)
       });
-      if (res.data && res.data.qrDataUrl) {
+      if (res.data && res.data.qrDataUrl && res.data.md5) {
         sessionData = res.data;
       }
     } catch (err) {
-      // Fallback: generate genuine EMVCo Bakong KHQR locally so QR never fails
-      const now = Date.now();
-      const expiresAt = now + QR_EXPIRATION_SECONDS * 1000;
-      const qrString = buildLocalBakongKhqr(
-        paymentConfig.bakongAccountId || 'chanmonyroth_hout@bkrt',
-        paymentConfig.accountName || 'CHANMONYROTH HOUT',
-        Number(subtotal),
-        expiresAt
-      );
-      const qrDataUrl = await QRCode.toDataURL(qrString, {
-        errorCorrectionLevel: 'M',
-        margin: 2,
-        width: 420
-      });
-      sessionData = {
-        qrString,
-        qrDataUrl,
-        md5: 'local_' + now,
-        amount: Number(subtotal),
-        currency: 'USD',
-        bakongAccountId: paymentConfig.bakongAccountId || 'chanmonyroth_hout@bkrt',
-        merchantName: paymentConfig.accountName || 'CHANMONYROTH HOUT',
-        createdAt: now,
-        expiresAt,
-        expiresInSeconds: QR_EXPIRATION_SECONDS
-      };
-    } finally {
-      setGeneratingQr(false);
+      // Backend asleep or 404
     }
 
+    // 2. Official BakongKHQR generation with guaranteed genuine 32-character hexadecimal MD5!
+    if (!sessionData) {
+      try {
+        const now = Date.now();
+        const expiresAt = now + QR_EXPIRATION_SECONDS * 1000;
+        const accountId = paymentConfig.bakongAccountId || 'chanmonyroth_hout@bkrt';
+        const merchantName = (paymentConfig.accountName || 'CHANMONYROTH HOUT').slice(0, 25);
+        const city = 'Phnom Penh';
+
+        let qrString = '';
+        let md5 = '';
+
+        try {
+          const individualInfo = new IndividualInfo(
+            accountId,
+            merchantName,
+            city,
+            {
+              currency: khqrData.currency.usd,
+              amount: Number(subtotal),
+              expirationTimestamp: expiresAt
+            }
+          );
+          const khqr = new BakongKHQR();
+          const khqrRes = khqr.generateIndividual(individualInfo);
+          if (khqrRes?.data?.qr && khqrRes?.data?.md5) {
+            qrString = khqrRes.data.qr;
+            md5 = String(khqrRes.data.md5).toLowerCase();
+          }
+        } catch (sdkErr) {
+          console.warn('BakongKHQR SDK fallback:', sdkErr);
+        }
+
+        if (!qrString) {
+          qrString = buildLocalBakongKhqr(
+            accountId,
+            merchantName,
+            Number(subtotal),
+            expiresAt
+          );
+        }
+
+        if (!md5) {
+          md5 = CryptoJS.MD5(qrString).toString().toLowerCase();
+        }
+
+        const qrDataUrl = await QRCode.toDataURL(qrString, {
+          errorCorrectionLevel: 'M',
+          margin: 2,
+          width: 420,
+          color: {
+            dark: '#000000',
+            light: '#FFFFFF'
+          }
+        });
+
+        sessionData = {
+          qrString,
+          qrDataUrl,
+          md5,
+          amount: Number(subtotal),
+          currency: 'USD',
+          bakongAccountId: accountId,
+          merchantName: merchantName,
+          createdAt: now,
+          expiresAt,
+          expiresInSeconds: QR_EXPIRATION_SECONDS
+        };
+      } catch (genErr) {
+        console.error('Failed to generate KHQR:', genErr);
+      }
+    }
+
+    setGeneratingQr(false);
     if (!sessionData) return;
     setKhqrSession(sessionData);
 
@@ -1117,6 +1172,42 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                             {language === 'kh'
                               ? 'ទាញយករូប QR (សម្រាប់ដាក់ក្នុង Scan QR របស់ ABA / ACLEDA)'
                               : 'Download QR Image (For Upload QR in ABA / ACLEDA)'}
+                          </span>
+                        </button>
+
+                        {/* Instant Verify Payment Button */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (khqrSession?.md5) {
+                              triggerCheckAtSecond(khqrSession.md5, 'manual');
+                            }
+                          }}
+                          disabled={khqrStatus === 'PAID' || activeCheckSecond !== null}
+                          style={{
+                            width: '100%',
+                            padding: '11px 16px',
+                            borderRadius: '12px',
+                            backgroundColor: khqrStatus === 'PAID' ? '#16a34a' : '#0f172a',
+                            color: '#ffffff',
+                            border: 'none',
+                            fontWeight: '800',
+                            fontSize: '0.84rem',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                            boxShadow: '0 4px 14px rgba(15,23,42,0.18)'
+                          }}
+                        >
+                          <RefreshCw size={15} style={{ animation: activeCheckSecond ? 'spin 1s linear infinite' : 'none' }} />
+                          <span>
+                            {khqrStatus === 'PAID'
+                              ? (language === 'kh' ? 'ការទូទាត់បានជោគជ័យ ✓' : 'Payment Verified ✓')
+                              : activeCheckSecond
+                              ? (language === 'kh' ? 'កំពុងផ្ទៀងផ្ទាត់ការទូទាត់...' : 'Verifying Payment...')
+                              : (language === 'kh' ? 'ខ្ញុំបានបង់ប្រាក់រួចរាល់ (ផ្ទៀងផ្ទាត់ភ្លាមៗ)' : 'I Have Paid (Verify Immediately)')}
                           </span>
                         </button>
                       </div>

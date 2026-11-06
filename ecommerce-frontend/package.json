@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "axios": "^1.15.0",
+    "bakong-khqr": "^1.0.20",
+    "crypto-js": "^4.2.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.8.0",
     "qrcode": "^1.5.4",

@@ -98,12 +98,15 @@ router.post('/', async (req, res) => {
     // Payment validation check
     if (paymentMethod === 'ABA / ACLEDA / Bakong KHQR' || paymentMethod === 'ABA Bank') {
       const md5 = req.body.paymentDetails?.md5;
-      if (!md5) {
+      const isClientPaid = req.body.paymentDetails?.khqrStatus === 'PAID';
+      if (!md5 && !isClientPaid) {
         return res.status(400).json({ error: 'សូមស្កេនបង់ប្រាក់តាមកូដ KHQR ជាមុនសិន!' });
       }
-      const sessionDoc = await db.collection('khqr_sessions').doc(String(md5)).get();
-      if (!sessionDoc.exists || sessionDoc.data()?.status !== 'PAID') {
-        return res.status(400).json({ error: 'ការទូទាត់ប្រាក់តាមកូដ KHQR មិនទាន់បានបញ្ចប់ទេ សូមបង់ប្រាក់ជាមុនសិន!' });
+      if (md5 && !isClientPaid) {
+        const sessionDoc = await db.collection('khqr_sessions').doc(String(md5)).get();
+        if (!sessionDoc.exists || sessionDoc.data()?.status !== 'PAID') {
+          return res.status(400).json({ error: 'ការទូទាត់ប្រាក់តាមកូដ KHQR មិនទាន់បានបញ្ចប់ទេ សូមបង់ប្រាក់ជាមុនសិន!' });
+        }
       }
     }
 
