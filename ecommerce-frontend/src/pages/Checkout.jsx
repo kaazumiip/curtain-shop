@@ -335,35 +335,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
     return () => { active = false; };
   }, [khqrSession, subtotal, buildKhqrCardBlob]);
 
-  // Method 1: Share ONLY the pre-built KHQR image File (`{ files: [file] }` with no text/title) so the OS Share Sheet prioritizes image-scanner apps like ABA Mobile & ACLEDA Mobile!
-  const handleShareQrToBankScanner = async (bankType = null) => {
-    const fileName = bankType ? `${bankType}_KHQR_${subtotal}USD.png` : `KHQR_${subtotal}USD.png`;
-
-    if (
-      bankType &&
-      prebuiltCardFileRef.current &&
-      typeof navigator !== 'undefined' &&
-      navigator.canShare
-    ) {
-      const shareFile = new File([prebuiltCardFileRef.current], fileName, { type: 'image/png' });
-      if (navigator.canShare({ files: [shareFile] })) {
-        try {
-          // IMPORTANT: Pass ONLY `files` (no `title` or `text`) so Android/iOS filters the share sheet to image-receiving apps (like ABA Scan QR & ACLEDA Scan QR) instead of text-chat apps!
-          await navigator.share({
-            files: [shareFile]
-          });
-          return;
-        } catch (shareErr) {
-          if (shareErr?.name === 'AbortError') return;
-        }
-      }
-    }
-
-    // Fallback: download the QR image and open the banking app directly
-    await handleDirectSaveAndOpenBankApp(bankType);
-  };
-
-  // Method 2: Save the KHQR image to the phone gallery and directly launch ABA Mobile or ACLEDA Mobile
+  // Save the KHQR image to the phone gallery and directly open ONLY the selected banking app (ABA or ACLEDA) — never open the social media Share Sheet!
   const handleDirectSaveAndOpenBankApp = async (bankType = null) => {
     const fileName = bankType ? `${bankType}_KHQR_${subtotal}USD.png` : `KHQR_${subtotal}USD.png`;
     const isAndroid = /Android/i.test(navigator.userAgent || '');
@@ -393,7 +365,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
       setDownloadingQr(false);
     }
 
-    // 2. Directly launch ABA Mobile or ACLEDA Mobile
+    // 2. Directly launch ABA Mobile or ACLEDA Mobile (if ACLEDA is not installed, fall back to ABA Mobile!)
     if (bankType === 'ABA') {
       if (isAndroid) {
         window.location.href = 'intent://ababank.com#Intent;scheme=abamobilebank;package=com.paygo24.ibank;end';
@@ -402,9 +374,15 @@ const Checkout = ({ cart, onOrderPlaced }) => {
       }
     } else if (bankType === 'ACLEDA') {
       if (isAndroid) {
-        window.location.href = 'intent://#Intent;scheme=acledabank;package=com.domain.acledabankqr;end';
+        const fallbackUrl = encodeURIComponent('intent://ababank.com#Intent;scheme=abamobilebank;package=com.paygo24.ibank;end');
+        window.location.href = `intent://#Intent;scheme=acledabank;package=com.domain.acledabankqr;S.browser_fallback_url=${fallbackUrl};end`;
       } else {
         window.location.href = 'acledabank://';
+        setTimeout(() => {
+          if (document.visibilityState === 'visible') {
+            window.location.href = 'abamobilebank://';
+          }
+        }, 1200);
       }
     }
   };
@@ -500,6 +478,14 @@ const Checkout = ({ cart, onOrderPlaced }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const isKhqrBank = formData.paymentMethod === 'ABA / ACLEDA / Bakong KHQR' || formData.paymentMethod === 'ABA Bank';
+    if (isKhqrBank && khqrStatus !== 'PAID') {
+      if (khqrSession?.md5) {
+        triggerCheckAtSecond(khqrSession.md5, 'manual');
+      }
+      return;
+    }
 
     if (formData.paymentMethod === 'Credit Card') {
       const cleanNum = formData.cardNumber.replace(/\D/g, '');
@@ -994,129 +980,55 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                       </div>
                     </div>
 
-                    {/* Mobile vs Laptop Actions: Both Options Shown Clearly */}
+                    {/* ABA & ACLEDA Direct Launch Buttons */}
                     {khqrStatus !== 'EXPIRED' && (
                       <div style={{ display: 'grid', gap: '10px', maxWidth: '380px', margin: '0 auto' }}>
-                        {/* Option 1: Auto-Insert QR into ABA / ACLEDA Scanner (Share Sheet) */}
-                        <div style={{
-                          padding: '10px',
-                          borderRadius: '12px',
-                          backgroundColor: '#f8fafc',
-                          border: '1px solid #e2e8f0',
-                          textAlign: 'left'
-                        }}>
-                          <div style={{ fontSize: '0.73rem', fontWeight: '800', color: '#0f172a', marginBottom: '7px' }}>
-                            {language === 'kh'
-                              ? 'ជម្រើសទី ១៖ បញ្ចូលរូប QR ទៅកាន់កន្លែងស្កេនស្វ័យប្រវត្តិ (ជ្រើសរើស ABA / ACLEDA ក្នុងផ្ទាំងលោតឡើង)'
-                              : 'Option 1: Auto-Insert QR to Scanner (Pick ABA / ACLEDA in popup)'}
-                          </div>
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                            <button
-                              type="button"
-                              onClick={() => handleShareQrToBankScanner('ABA')}
-                              disabled={downloadingQr}
-                              style={{
-                                padding: '12px 10px',
-                                borderRadius: '10px',
-                                backgroundColor: '#004B6E',
-                                color: '#ffffff',
-                                border: 'none',
-                                fontWeight: '800',
-                                fontSize: '0.88rem',
-                                cursor: 'pointer',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '6px',
-                                boxShadow: '0 4px 12px rgba(0,75,110,0.2)'
-                              }}
-                            >
-                              <span>ABA</span>
-                            </button>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleDirectSaveAndOpenBankApp('ABA')}
+                            disabled={downloadingQr}
+                            style={{
+                              padding: '13px 10px',
+                              borderRadius: '12px',
+                              backgroundColor: '#004B6E',
+                              color: '#ffffff',
+                              border: 'none',
+                              fontWeight: '800',
+                              fontSize: '0.92rem',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '6px',
+                              boxShadow: '0 4px 12px rgba(0,75,110,0.2)'
+                            }}
+                          >
+                            <span>ABA</span>
+                          </button>
 
-                            <button
-                              type="button"
-                              onClick={() => handleShareQrToBankScanner('ACLEDA')}
-                              disabled={downloadingQr}
-                              style={{
-                                padding: '12px 10px',
-                                borderRadius: '10px',
-                                backgroundColor: '#003A70',
-                                color: '#fbbf24',
-                                border: '1px solid #f59e0b',
-                                fontWeight: '800',
-                                fontSize: '0.88rem',
-                                cursor: 'pointer',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '6px',
-                                boxShadow: '0 4px 12px rgba(0,58,112,0.2)'
-                              }}
-                            >
-                              <span>ACLEDA</span>
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Option 2: Save QR + Open ABA / ACLEDA App Directly */}
-                        <div style={{
-                          padding: '10px',
-                          borderRadius: '12px',
-                          backgroundColor: '#f8fafc',
-                          border: '1px solid #e2e8f0',
-                          textAlign: 'left'
-                        }}>
-                          <div style={{ fontSize: '0.73rem', fontWeight: '800', color: '#0f172a', marginBottom: '7px' }}>
-                            {language === 'kh'
-                              ? 'ជម្រើសទី ២៖ រក្សាទុករូប QR + បើកកម្មវិធីផ្ទាល់ (រួចចុច Scan QR → Upload QR)'
-                              : 'Option 2: Save QR + Open App Directly (Then tap Scan QR → Upload QR)'}
-                          </div>
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                            <button
-                              type="button"
-                              onClick={() => handleDirectSaveAndOpenBankApp('ABA')}
-                              disabled={downloadingQr}
-                              style={{
-                                padding: '10px 8px',
-                                borderRadius: '10px',
-                                backgroundColor: '#ffffff',
-                                color: '#004B6E',
-                                border: '1.5px solid #004B6E',
-                                fontWeight: '800',
-                                fontSize: '0.82rem',
-                                cursor: 'pointer',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '6px'
-                              }}
-                            >
-                              <span>{language === 'kh' ? 'បើក ABA ផ្ទាល់' : 'Open ABA Direct'}</span>
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() => handleDirectSaveAndOpenBankApp('ACLEDA')}
-                              disabled={downloadingQr}
-                              style={{
-                                padding: '10px 8px',
-                                borderRadius: '10px',
-                                backgroundColor: '#ffffff',
-                                color: '#003A70',
-                                border: '1.5px solid #003A70',
-                                fontWeight: '800',
-                                fontSize: '0.82rem',
-                                cursor: 'pointer',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '6px'
-                              }}
-                            >
-                              <span>{language === 'kh' ? 'បើក ACLEDA ផ្ទាល់' : 'Open ACLEDA Direct'}</span>
-                            </button>
-                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleDirectSaveAndOpenBankApp('ACLEDA')}
+                            disabled={downloadingQr}
+                            style={{
+                              padding: '13px 10px',
+                              borderRadius: '12px',
+                              backgroundColor: '#003A70',
+                              color: '#fbbf24',
+                              border: '1px solid #f59e0b',
+                              fontWeight: '800',
+                              fontSize: '0.92rem',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '6px',
+                              boxShadow: '0 4px 12px rgba(0,58,112,0.2)'
+                            }}
+                          >
+                            <span>ACLEDA</span>
+                          </button>
                         </div>
 
                         {/* Save QR Image Only Button */}
@@ -1153,77 +1065,12 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                     <p style={{ margin: '10px 0 0', fontSize: '0.74rem', color: '#64748b', lineHeight: '1.55' }}>
                       {isMobileDevice
                         ? (language === 'kh'
-                            ? '📱 លើទូរស័ព្ទ៖ ចុចប៊ូតុង "ABA" ឬ "ACLEDA" ខាងលើ → រួចចុចលើរូបកម្មវិធី ABA ឬ ACLEDA ក្នុងផ្ទាំងដែលលោតឡើង នោះវានឹងបញ្ចូលរូប QR ទៅកាន់កន្លែងស្កេនបង់ប្រាក់ដោយស្វ័យប្រវត្តិ!'
-                            : '📱 On Phone: Tap "ABA" or "ACLEDA" above → then tap the ABA or ACLEDA icon in the popup to automatically load the QR directly into the scanner!')
+                            ? '📱 លើទូរស័ព្ទ៖ ចុចប៊ូតុង "ABA" ឬ "ACLEDA" ខាងលើ ដើម្បីរក្សាទុករូប QR និងបើកកម្មវិធីធនាគារផ្ទាល់ (រួចចុច Scan QR → Upload QR)។ ពេលបង់ប្រាក់រួចរាល់ ប្រព័ន្ធនឹងបញ្ជាក់ការកម្មង់ដោយស្វ័យប្រវត្តិ!'
+                            : '📱 On Phone: Tap "ABA" or "ACLEDA" above to save the QR image and open your banking app directly (then tap Scan QR → Upload QR). Once paid, your order completes automatically!')
                         : (language === 'kh'
-                            ? '💻 លើកុំព្យូទ័រ (Laptop)៖ សូមបើកកម្មវិធី ABA ឬ ACLEDA លើទូរស័ព្ទរបស់អ្នក ហើយស្កេនកូដ QR ខាងលើមុនពេលផុតកំណត់ 100 វិនាទី។'
-                            : '💻 On Laptop: Simply open ABA or ACLEDA on your phone and scan the QR code above before the 100-second timer expires.')}
+                            ? '💻 លើកុំព្យូទ័រ (Laptop)៖ សូមបើកកម្មវិធី ABA ឬ ACLEDA លើទូរស័ព្ទរបស់អ្នក ហើយស្កេនកូដ QR ខាងលើមុនពេលផុតកំណត់ 100 វិនាទី។ ពេលបង់ប្រាក់រួចរាល់ ប្រព័ន្ធនឹងបញ្ជាក់ការកម្មង់ដោយស្វ័យប្រវត្តិ!'
+                            : '💻 On Laptop: Scan the QR code above with ABA or ACLEDA before the 100s timer expires. Once paid, your order completes automatically!')}
                     </p>
-                  </div>
-
-                  {/* Upload Payment Screenshot / Slip (Optional) + Transaction Ref */}
-                  <div style={{ display: 'grid', gap: '14px' }}>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '800', color: '#0f172a', marginBottom: '6px' }}>
-                        {language === 'kh'
-                          ? '📸 បង្ហោះរូបភាពវិក្កយបត្របង់ប្រាក់ ABA / ACLEDA (ប្រសិនបើមាន)'
-                          : '📸 Upload ABA / ACLEDA Payment Screenshot (Optional)'}
-                      </label>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                        <label style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          padding: '11px 16px',
-                          borderRadius: '12px',
-                          border: receiptUrl ? '2px solid #16a34a' : '1.5px dashed #94a3b8',
-                          backgroundColor: receiptUrl ? '#f0fdf4' : '#f8fafc',
-                          color: receiptUrl ? '#15803d' : '#0f172a',
-                          fontWeight: '700',
-                          fontSize: '0.84rem',
-                          cursor: 'pointer'
-                        }}>
-                          <Upload size={16} />
-                          <span>
-                            {uploadingReceipt
-                              ? (language === 'kh' ? 'កំពុងបង្ហោះរូបភាព...' : 'Uploading screenshot...')
-                              : (receiptUrl
-                                  ? (language === 'kh' ? 'បានភ្ជាប់រូបវិក្កយបត្រ ✓ (ចុចដើម្បីប្តូរ)' : 'Screenshot Attached ✓ (Tap to change)')
-                                  : (language === 'kh' ? 'ជ្រើសរើសរូបថតអេក្រង់បង់ប្រាក់ (Screenshot)' : 'Select Payment Screenshot'))}
-                          </span>
-                          <input type="file" accept="image/*" onChange={handleReceiptUpload} hidden />
-                        </label>
-                        {receiptUrl && (
-                          <img
-                            src={receiptUrl}
-                            alt="Receipt preview"
-                            style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #bbf7d0' }}
-                          />
-                        )}
-                      </div>
-                    </div>
-
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', color: '#475569', marginBottom: '6px' }}>
-                        {language === 'kh' 
-                          ? 'លេខកូដប្រតិបត្តិការ ឬ ៤ខ្ទង់ចុងក្រោយ (ជាជម្រើស)' 
-                          : 'ABA / ACLEDA Transaction ID or Last 4 Digits (Optional)'}
-                      </label>
-                      <input
-                        type="text"
-                        placeholder={language === 'kh' ? 'ឧ. TRX-123456 ឬ ៤ខ្ទង់ចុងក្រោយ...' : 'e.g. TRX-123456 or last 4 digits...'}
-                        value={abaTxRef}
-                        onChange={(e) => setAbaTxRef(e.target.value)}
-                        style={{
-                          ...inputStyle,
-                          backgroundColor: '#f8fafc',
-                          border: '1px solid #cbd5e1',
-                          borderRadius: '12px',
-                          fontSize: '0.9rem',
-                          padding: '12px 16px'
-                        }}
-                      />
-                    </div>
                   </div>
                 </div>
               </div>
@@ -1325,41 +1172,43 @@ const Checkout = ({ cart, onOrderPlaced }) => {
             )}
           </div>
 
-          <button 
-            type="submit" 
-            disabled={submitting}
-            className="btn-primary" 
-            style={{ 
-              width: '100%', 
-              padding: '18px 24px', 
-              fontSize: '1.08rem', 
-              fontWeight: '800', 
-              backgroundColor: submitting ? '#64748b' : '#0f172a', 
-              color: '#ffffff', 
-              border: 'none', 
-              borderRadius: '16px', 
-              cursor: submitting ? 'not-allowed' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '12px',
-              boxShadow: '0 10px 25px rgba(15, 23, 42, 0.25)',
-              marginTop: '15px',
-              fontFamily: "'Poppins', 'Noto Sans Khmer', 'Kdam Thmor Pro', sans-serif",
-              transition: 'all 0.2s ease'
-            }}
-          >
-            {submitting ? (
-              <span>{language === 'kh' ? 'កំពុងដំណើរការបញ្ជាទិញ...' : 'Processing Order...'}</span>
-            ) : (
-              <>
-                <span>{t('complete_order')}</span>
-                <span style={{ opacity: 0.5 }}>—</span>
-                <span style={{ fontSize: '1.2rem', fontWeight: '900' }}>${subtotal}</span>
-                <Check size={20} />
-              </>
-            )}
-          </button>
+          {formData.paymentMethod !== 'ABA / ACLEDA / Bakong KHQR' && formData.paymentMethod !== 'ABA Bank' && (
+            <button 
+              type="submit" 
+              disabled={submitting}
+              className="btn-primary" 
+              style={{ 
+                width: '100%', 
+                padding: '18px 24px', 
+                fontSize: '1.08rem', 
+                fontWeight: '800', 
+                backgroundColor: submitting ? '#64748b' : '#0f172a', 
+                color: '#ffffff', 
+                border: 'none', 
+                borderRadius: '16px', 
+                cursor: submitting ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '12px',
+                boxShadow: '0 10px 25px rgba(15, 23, 42, 0.25)',
+                marginTop: '15px',
+                fontFamily: "'Poppins', 'Noto Sans Khmer', 'Kdam Thmor Pro', sans-serif",
+                transition: 'all 0.2s ease'
+              }}
+            >
+              {submitting ? (
+                <span>{language === 'kh' ? 'កំពុងដំណើរការបញ្ជាទិញ...' : 'Processing Order...'}</span>
+              ) : (
+                <>
+                  <span>{t('complete_order')}</span>
+                  <span style={{ opacity: 0.5 }}>—</span>
+                  <span style={{ fontSize: '1.2rem', fontWeight: '900' }}>${subtotal}</span>
+                  <Check size={20} />
+                </>
+              )}
+            </button>
+          )}
         </form>
 
         {/* Sidebar Mini Cart */}
