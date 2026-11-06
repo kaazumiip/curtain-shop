@@ -107,7 +107,10 @@ const Checkout = ({ cart, onOrderPlaced }) => {
   }, []);
 
   const clearAllKhqrTimers = useCallback(() => {
-    checkTimersRef.current.forEach((id) => clearTimeout(id));
+    checkTimersRef.current.forEach((id) => {
+      clearTimeout(id);
+      clearInterval(id);
+    });
     checkTimersRef.current = [];
     if (countdownRef.current) {
       clearInterval(countdownRef.current);
@@ -119,20 +122,53 @@ const Checkout = ({ cart, onOrderPlaced }) => {
     if (!md5) return;
     setActiveCheckSecond(sec);
     try {
-      const res = await axios.post('/settings/khqr/check', {
-        md5,
-        checkSecond: sec
-      });
+      let isPaid = false;
+      let transactionData = null;
+
+      // 1. Try checking backend route first
+      try {
+        const res = await axios.post('/settings/khqr/check', {
+          md5,
+          checkSecond: sec
+        });
+        if (res.data?.paid || res.data?.status === 'PAID') {
+          isPaid = true;
+          transactionData = res.data.transaction || null;
+        }
+      } catch (backendErr) {
+        // Backend returned 404 or failed — fall through to direct NBC check
+      }
+
+      // 2. Direct Bakong NBC API check fallback (using configured BAKONG_TOKEN)
+      if (!isPaid) {
+        const token = paymentConfig.bakongToken || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoiNjYyNmFmNzhiZGJjNDY4ZSJ9LCJpYXQiOjE3ODk0MDMwMTQsImV4cCI6MTc5NzE3OTAxNH0.SuOcTS7RwlYaWhPbVXq-uF2UdNBOdKqSJNtANW59g4Y';
+        try {
+          const nbcRes = await axios.post(
+            'https://api-bakong.nbc.gov.kh/v1/check_transaction_by_md5',
+            { md5 },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          if (nbcRes.data && (nbcRes.data.responseCode === 0 || nbcRes.data.status?.code === 0) && nbcRes.data.data) {
+            isPaid = true;
+            transactionData = nbcRes.data.data;
+          }
+        } catch (nbcErr) {
+          // Transaction not yet paid or network error
+        }
+      }
+
       setCompletedChecks((prev) => (prev.includes(sec) ? prev : [...prev, sec]));
-      if (res.data?.paid || res.data?.status === 'PAID') {
+
+      if (isPaid) {
         setKhqrStatus('PAID');
-        if (res.data?.transaction?.tranId || res.data?.transaction?.hash) {
-          setAbaTxRef(res.data.transaction.tranId || res.data.transaction.hash.slice(0, 10));
+        if (transactionData?.tranId || transactionData?.hash) {
+          setAbaTxRef(transactionData.tranId || transactionData.hash.slice(0, 10));
         }
         clearAllKhqrTimers();
         return;
       }
-      if (sec >= QR_EXPIRATION_SECONDS || res.data?.status === 'EXPIRED') {
+
+      if (sec >= QR_EXPIRATION_SECONDS) {
         setKhqrStatus('EXPIRED');
         clearAllKhqrTimers();
       }
@@ -145,7 +181,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
     } finally {
       setActiveCheckSecond(null);
     }
-  }, [clearAllKhqrTimers]);
+  }, [clearAllKhqrTimers, paymentConfig.bakongToken]);
 
   const generateDynamicKhqr = useCallback(async () => {
     if (Number(subtotal) <= 0) return;
@@ -210,13 +246,11 @@ const Checkout = ({ cart, onOrderPlaced }) => {
       }
     }, 1000);
 
-    // 2. Schedule status checks strictly at 5s, 10s, 30s, 45s, 80s, and 100s ONLY
-    CHECK_INTERVALS_SECONDS.forEach((sec) => {
-      const timerId = setTimeout(() => {
-        triggerCheckAtSecond(sessionData.md5, sec);
-      }, sec * 1000);
-      checkTimersRef.current.push(timerId);
-    });
+    // 2. Schedule status checks every 3 seconds for 100s so payment confirms immediately!
+    const intervalId = setInterval(() => {
+      triggerCheckAtSecond(sessionData.md5, 'interval');
+    }, 3000);
+    checkTimersRef.current.push(intervalId);
   }, [subtotal, paymentConfig.bakongAccountId, paymentConfig.accountName, clearAllKhqrTimers, triggerCheckAtSecond]);
 
   const [formData, setFormData] = useState({
