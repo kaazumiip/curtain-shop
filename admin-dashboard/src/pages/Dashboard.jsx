@@ -5,7 +5,6 @@ import OrdersTable from '../components/OrdersTable';
 import ProductModal from '../components/ProductModal';
 import LiveChat from './LiveChat';
 import HardwareManager from '../components/HardwareManager';
-import PaymentQrManager from '../components/PaymentQrManager';
 import { Plus, Package, ChevronRight, Globe, Clock, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
@@ -290,17 +289,6 @@ function Dashboard({ onLogout }) {
             border: '1px solid #eaeaea' 
           }}>
             <HardwareManager isCompact={true} />
-          </div>
-
-          {/* Payment QR (ABA / ACLEDA / Bakong KHQR) Section */}
-          <div style={{ 
-            marginTop: '14px', 
-            padding: '18px 22px', 
-            backgroundColor: '#fafafa', 
-            borderRadius: '16px', 
-            border: '1px solid #eaeaea' 
-          }}>
-            <PaymentQrManager />
           </div>
 
           <div style={{ margin: '30px 0' }}>
