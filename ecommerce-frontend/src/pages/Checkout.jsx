@@ -1,9 +1,56 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CreditCard, CheckCircle, Copy, Check, Truck, Download, Upload, QrCode, Image as ImageIcon } from 'lucide-react';
+import { CreditCard, CheckCircle, Copy, Check, Truck, Download, Upload, QrCode, RefreshCw, Clock, Smartphone, ExternalLink } from 'lucide-react';
+import QRCode from 'qrcode';
 import axios from '../api/axios';
 import { useLanguage } from '../context/LanguageContext';
 import LocationPickerMap from '../components/LocationPickerMap';
+
+const CHECK_INTERVALS_SECONDS = [5, 10, 30, 45, 80, 100];
+const QR_EXPIRATION_SECONDS = 100;
+
+// Pure client-side EMVCo CRC16-CCITT helper (fallback if backend is waking up)
+const computeCrc16 = (str) => {
+  let crc = 0xFFFF;
+  for (let i = 0; i < str.length; i++) {
+    crc ^= str.charCodeAt(i) << 8;
+    for (let j = 0; j < 8; j++) {
+      if ((crc & 0x8000) !== 0) {
+        crc = ((crc << 1) ^ 0x1021) & 0xFFFF;
+      } else {
+        crc = (crc << 1) & 0xFFFF;
+      }
+    }
+  }
+  return crc.toString(16).toUpperCase().padStart(4, '0');
+};
+
+const formatTag = (tag, val) => {
+  const s = String(val);
+  return `${tag}${String(s.length).padStart(2, '0')}${s}`;
+};
+
+const buildLocalBakongKhqr = (bakongId, merchantName, amountUsd, expiresAtMs) => {
+  const cleanId = bakongId || 'chanmonyroth_hout@bkrt';
+  const cleanName = (merchantName || 'CHANMONYROTH HOUT').slice(0, 25);
+  const amtStr = Number(amountUsd || 0).toFixed(2);
+  const tag29 = formatTag('29', formatTag('00', cleanId));
+  const billNo = 'STC' + String(Date.now()).slice(-6);
+  const tag62 = formatTag('62', formatTag('01', billNo) + formatTag('03', 'Srey Tha Curtain') + formatTag('07', 'Online'));
+  const tag99 = formatTag('99', formatTag('00', String(Date.now())) + formatTag('01', String(expiresAtMs)));
+  const bodyWithoutCrc =
+    '000201010212' +
+    tag29 +
+    '520459995303840' +
+    formatTag('54', amtStr) +
+    '5802KH' +
+    formatTag('59', cleanName) +
+    formatTag('60', 'Phnom Penh') +
+    tag62 +
+    tag99 +
+    '6304';
+  return bodyWithoutCrc + computeCrc16(bodyWithoutCrc);
+};
 
 const Checkout = ({ cart, onOrderPlaced }) => {
   const navigate = useNavigate();
@@ -12,28 +59,44 @@ const Checkout = ({ cart, onOrderPlaced }) => {
   const [orderDetails, setOrderDetails] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [copiedAcleda, setCopiedAcleda] = useState(false);
   const [abaTxRef, setAbaTxRef] = useState('');
   const [receiptUrl, setReceiptUrl] = useState('');
   const [uploadingReceipt, setUploadingReceipt] = useState(false);
   const [downloadingQr, setDownloadingQr] = useState(false);
+
   const [paymentConfig, setPaymentConfig] = useState({
-    accountName: 'LIM SITHA',
+    bakongAccountId: 'chanmonyroth_hout@bkrt',
+    accountName: 'CHANMONYROTH HOUT',
     merchantId: '14463116',
-    bakongQrUrl: '',
     acledaAccountNumber: '089 902 001'
   });
+
+  // Dynamic KHQR session state
+  const [khqrSession, setKhqrSession] = useState(null);
+  const [generatingQr, setGeneratingQr] = useState(false);
+  const [secondsLeft, setSecondsLeft] = useState(QR_EXPIRATION_SECONDS);
+  const [khqrStatus, setKhqrStatus] = useState('IDLE'); // 'IDLE' | 'PENDING' | 'PAID' | 'EXPIRED'
+  const [completedChecks, setCompletedChecks] = useState([]);
+  const [activeCheckSecond, setActiveCheckSecond] = useState(null);
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
+
+  const checkTimersRef = useRef([]);
+  const countdownRef = useRef(null);
+
   const subtotal = cart.reduce((acc, item) => acc + Number(item.totalPrice || item.price), 0).toFixed(2);
 
   useEffect(() => {
+    const ua = navigator.userAgent || '';
+    setIsMobileDevice(/Android|iPhone|iPad|iPod|Mobile/i.test(ua));
+
     axios.get('/settings/payment')
       .then((res) => {
         if (res.data) {
           setPaymentConfig((prev) => ({
             ...prev,
-            accountName: res.data.accountName || 'LIM SITHA',
+            bakongAccountId: res.data.bakongAccountId || 'chanmonyroth_hout@bkrt',
+            accountName: res.data.accountName || 'CHANMONYROTH HOUT',
             merchantId: res.data.merchantId || '14463116',
-            bakongQrUrl: res.data.bakongQrUrl || '',
             acledaAccountNumber: res.data.acledaAccountNumber || '089 902 001'
           }));
         }
@@ -41,25 +104,256 @@ const Checkout = ({ cart, onOrderPlaced }) => {
       .catch(() => {});
   }, []);
 
-  const handleDownloadQrImage = async () => {
-    const qrSrc = paymentConfig.bakongQrUrl || '/bakong-qr.png';
+  const clearAllKhqrTimers = useCallback(() => {
+    checkTimersRef.current.forEach((id) => clearTimeout(id));
+    checkTimersRef.current = [];
+    if (countdownRef.current) {
+      clearInterval(countdownRef.current);
+      countdownRef.current = null;
+    }
+  }, []);
+
+  const triggerCheckAtSecond = useCallback(async (md5, sec) => {
+    if (!md5) return;
+    setActiveCheckSecond(sec);
+    try {
+      const res = await axios.post('/settings/khqr/check', {
+        md5,
+        checkSecond: sec
+      });
+      setCompletedChecks((prev) => (prev.includes(sec) ? prev : [...prev, sec]));
+      if (res.data?.paid || res.data?.status === 'PAID') {
+        setKhqrStatus('PAID');
+        if (res.data?.transaction?.tranId || res.data?.transaction?.hash) {
+          setAbaTxRef(res.data.transaction.tranId || res.data.transaction.hash.slice(0, 10));
+        }
+        clearAllKhqrTimers();
+        return;
+      }
+      if (sec >= QR_EXPIRATION_SECONDS || res.data?.status === 'EXPIRED') {
+        setKhqrStatus('EXPIRED');
+        clearAllKhqrTimers();
+      }
+    } catch (err) {
+      setCompletedChecks((prev) => (prev.includes(sec) ? prev : [...prev, sec]));
+      if (sec >= QR_EXPIRATION_SECONDS) {
+        setKhqrStatus('EXPIRED');
+        clearAllKhqrTimers();
+      }
+    } finally {
+      setActiveCheckSecond(null);
+    }
+  }, [clearAllKhqrTimers]);
+
+  const generateDynamicKhqr = useCallback(async () => {
+    if (Number(subtotal) <= 0) return;
+    clearAllKhqrTimers();
+    setGeneratingQr(true);
+    setCompletedChecks([]);
+    setActiveCheckSecond(null);
+    setSecondsLeft(QR_EXPIRATION_SECONDS);
+    setKhqrStatus('PENDING');
+
+    let sessionData = null;
+
+    try {
+      const res = await axios.post('/settings/khqr/generate', {
+        amount: Number(subtotal)
+      });
+      if (res.data && res.data.qrDataUrl) {
+        sessionData = res.data;
+      }
+    } catch (err) {
+      // Fallback: generate genuine EMVCo Bakong KHQR locally so QR never fails
+      const now = Date.now();
+      const expiresAt = now + QR_EXPIRATION_SECONDS * 1000;
+      const qrString = buildLocalBakongKhqr(
+        paymentConfig.bakongAccountId || 'chanmonyroth_hout@bkrt',
+        paymentConfig.accountName || 'CHANMONYROTH HOUT',
+        Number(subtotal),
+        expiresAt
+      );
+      const qrDataUrl = await QRCode.toDataURL(qrString, {
+        errorCorrectionLevel: 'M',
+        margin: 2,
+        width: 420
+      });
+      sessionData = {
+        qrString,
+        qrDataUrl,
+        md5: 'local_' + now,
+        amount: Number(subtotal),
+        currency: 'USD',
+        bakongAccountId: paymentConfig.bakongAccountId || 'chanmonyroth_hout@bkrt',
+        merchantName: paymentConfig.accountName || 'CHANMONYROTH HOUT',
+        createdAt: now,
+        expiresAt,
+        expiresInSeconds: QR_EXPIRATION_SECONDS
+      };
+    } finally {
+      setGeneratingQr(false);
+    }
+
+    if (!sessionData) return;
+    setKhqrSession(sessionData);
+
+    // 1. Start 1-second visual countdown up to 100s expiration
+    const expiryTime = sessionData.expiresAt || (Date.now() + QR_EXPIRATION_SECONDS * 1000);
+    countdownRef.current = setInterval(() => {
+      const remaining = Math.max(0, Math.ceil((expiryTime - Date.now()) / 1000));
+      setSecondsLeft(remaining);
+      if (remaining <= 0) {
+        setKhqrStatus((curr) => (curr === 'PAID' ? 'PAID' : 'EXPIRED'));
+        if (countdownRef.current) clearInterval(countdownRef.current);
+      }
+    }, 1000);
+
+    // 2. Schedule status checks strictly at 5s, 10s, 30s, 45s, 80s, and 100s ONLY
+    CHECK_INTERVALS_SECONDS.forEach((sec) => {
+      const timerId = setTimeout(() => {
+        triggerCheckAtSecond(sessionData.md5, sec);
+      }, sec * 1000);
+      checkTimersRef.current.push(timerId);
+    });
+  }, [subtotal, paymentConfig.bakongAccountId, paymentConfig.accountName, clearAllKhqrTimers, triggerCheckAtSecond]);
+
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    phone: '',
+    phone2: '',
+    address: '',
+    additionalAddress: '',
+    city: '',
+    latitude: null,
+    longitude: null,
+    googleMapsUrl: '',
+    paymentMethod: 'ABA / ACLEDA / Bakong KHQR',
+    cardNumber: '',
+    cardExpiry: '',
+    cardCvv: '',
+    cardName: ''
+  });
+
+  useEffect(() => {
+    const isKhqr = formData.paymentMethod === 'ABA / ACLEDA / Bakong KHQR' || formData.paymentMethod === 'ABA Bank';
+    if (isKhqr && cart.length > 0) {
+      generateDynamicKhqr();
+    } else {
+      clearAllKhqrTimers();
+    }
+    return () => clearAllKhqrTimers();
+  }, [formData.paymentMethod, subtotal, cart.length, generateDynamicKhqr, clearAllKhqrTimers]);
+
+  // Build composite official KHQR Stand Card PNG on an HTML5 Canvas so ABA & ACLEDA Scan QR -> Upload QR reads it cleanly
+  const buildKhqrCardBlob = async () => {
+    const qrSrc = khqrSession?.qrDataUrl;
+    if (!qrSrc) return null;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 600;
+    canvas.height = 780;
+    const ctx = canvas.getContext('2d');
+
+    // White card background
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Red KHQR top header
+    ctx.fillStyle = '#E1232E';
+    ctx.fillRect(0, 0, canvas.width, 100);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 42px Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('KHQR', canvas.width / 2, 66);
+
+    // Merchant Name & Amount
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#64748B';
+    ctx.font = 'bold 20px Arial, sans-serif';
+    ctx.fillText(khqrSession?.merchantName || paymentConfig.accountName || 'CHANMONYROTH HOUT', 50, 155);
+
+    ctx.fillStyle = '#0F172A';
+    ctx.font = 'bold 46px Arial, sans-serif';
+    ctx.fillText(`$${subtotal} USD`, 50, 210);
+
+    ctx.fillStyle = '#E1232E';
+    ctx.font = 'bold 18px monospace';
+    ctx.fillText(khqrSession?.bakongAccountId || paymentConfig.bakongAccountId || 'chanmonyroth_hout@bkrt', 50, 242);
+
+    // Dashed divider
+    ctx.strokeStyle = '#CBD5E1';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([8, 6]);
+    ctx.beginPath();
+    ctx.moveTo(40, 268);
+    ctx.lineTo(canvas.width - 40, 268);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Draw QR Code in the center
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    await new Promise((resolve, reject) => {
+      img.onload = resolve;
+      img.onerror = reject;
+      img.src = qrSrc;
+    });
+    ctx.drawImage(img, 90, 295, 420, 420);
+
+    // Footer text
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#64748B';
+    ctx.font = 'bold 16px Arial, sans-serif';
+    ctx.fillText('Scan or Upload QR in ABA Mobile / ACLEDA Mobile / Bakong', canvas.width / 2, 748);
+
+    return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+  };
+
+  // Download QR image & optionally open ABA Mobile or ACLEDA Mobile on phone
+  const handleSaveAndOpenBankApp = async (bankType = null) => {
     try {
       setDownloadingQr(true);
-      const response = await fetch(qrSrc);
-      if (!response.ok) throw new Error('QR image not found');
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = `LIM_SITHA_Bakong_KHQR_${subtotal}USD.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(blobUrl);
-    } catch (err) {
-      window.open(qrSrc, '_blank');
+      const blob = await buildKhqrCardBlob();
+      if (blob) {
+        const fileName = `KHQR_${(khqrSession?.bakongAccountId || 'chanmonyroth_hout').replace(/[^a-zA-Z0-9]/g, '_')}_${subtotal}USD.png`;
+        const blobUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => window.URL.revokeObjectURL(blobUrl), 3000);
+      }
+    } catch (e) {
+      if (khqrSession?.qrDataUrl) {
+        const link = document.createElement('a');
+        link.href = khqrSession.qrDataUrl;
+        link.download = `Bakong_KHQR_${subtotal}USD.png`;
+        link.click();
+      }
     } finally {
       setDownloadingQr(false);
+    }
+
+    // If user clicked Open ABA or Open ACLEDA on mobile, launch the banking app right after saving the QR
+    if (bankType === 'ABA') {
+      setTimeout(() => {
+        if (khqrSession?.bakongDeepLink) {
+          window.location.href = khqrSession.bakongDeepLink;
+        } else {
+          window.location.href = 'abapay://';
+        }
+      }, 450);
+    } else if (bankType === 'ACLEDA') {
+      setTimeout(() => {
+        if (khqrSession?.bakongDeepLink) {
+          window.location.href = khqrSession.bakongDeepLink;
+        } else {
+          window.location.href = 'acledabank://';
+        }
+      }, 450);
     }
   };
 
@@ -80,24 +374,6 @@ const Checkout = ({ cart, onOrderPlaced }) => {
       setUploadingReceipt(false);
     }
   };
-
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    phone: '',
-    phone2: '',
-    address: '',
-    additionalAddress: '',
-    city: '',
-    latitude: null,
-    longitude: null,
-    googleMapsUrl: '',
-    paymentMethod: 'ABA / ACLEDA / Bakong KHQR',
-    cardNumber: '',
-    cardExpiry: '',
-    cardCvv: '',
-    cardName: ''
-  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -120,8 +396,10 @@ const Checkout = ({ cart, onOrderPlaced }) => {
       customer: customerData,
       paymentMethod: paymentMethod,
       paymentDetails: isKhqrBank ? {
-        merchantId: paymentConfig.merchantId || '14463116',
-        accountName: paymentConfig.accountName || 'LIM SITHA',
+        bakongAccountId: khqrSession?.bakongAccountId || paymentConfig.bakongAccountId || 'chanmonyroth_hout@bkrt',
+        accountName: khqrSession?.merchantName || paymentConfig.accountName || 'CHANMONYROTH HOUT',
+        md5: khqrSession?.md5 || null,
+        khqrStatus: khqrStatus,
         transactionRef: abaTxRef.trim() || null,
         receiptUrl: receiptUrl || null
       } : null,
@@ -133,9 +411,9 @@ const Checkout = ({ cart, onOrderPlaced }) => {
     
     try {
       setSubmitting(true);
+      clearAllKhqrTimers();
       const res = await axios.post('/orders', orderData);
       
-      // Save order to history
       const orderHistory = JSON.parse(localStorage.getItem('srey_tha_orders') || '[]');
       const newOrder = {
         id: res.data._id,
@@ -146,7 +424,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
       
       setOrderDetails(res.data);
       setIsSuccess(true);
-      if (onOrderPlaced) onOrderPlaced(); // Clear cart immediately
+      if (onOrderPlaced) onOrderPlaced();
     } catch (err) {
       console.error('Failed to place order:', err);
       const msg = err.response?.data?.error || t('order_failed_alert');
@@ -279,7 +557,6 @@ const Checkout = ({ cart, onOrderPlaced }) => {
               <input required placeholder={t('last_name')} style={inputStyle} value={formData.lastName} onChange={(e) => setFormData({...formData, lastName: e.target.value})}/>
             </div>
 
-            {/* Interactive Draggable Delivery Map */}
             <LocationPickerMap 
               initialAddress={formData.address}
               onLocationSelected={(loc) => {
@@ -305,10 +582,10 @@ const Checkout = ({ cart, onOrderPlaced }) => {
               {[
                 {
                   id: 'ABA / ACLEDA / Bakong KHQR',
-                  label: language === 'kh' ? 'ABA / ACLEDA / Bakong KHQR (ទូទាត់ប្រាក់ជាមុន)' : 'ABA / ACLEDA / Bakong KHQR (Pay Upfront)',
+                  label: language === 'kh' ? 'ABA / ACLEDA / Bakong KHQR (ស្កេន QR ទូទាត់ប្រាក់)' : 'ABA / ACLEDA / Bakong KHQR (Scan & Pay)',
                   sub: language === 'kh'
-                    ? `ទាញយករូប QR រួចបញ្ចូលក្នុងកន្លែង Scan QR របស់ ABA ឬ ACLEDA (${paymentConfig.accountName})`
-                    : `Save QR & Upload inside ABA or ACLEDA Scan QR (${paymentConfig.accountName})`
+                    ? `គណនី Bakong: ${paymentConfig.bakongAccountId || 'chanmonyroth_hout@bkrt'} (ពិនិត្យស្វ័យប្រវត្តិ និងផុតកំណត់ក្នុង 100 វិនាទី)`
+                    : `Bakong ID: ${paymentConfig.bakongAccountId || 'chanmonyroth_hout@bkrt'} (Auto-check & 100s expiration)`
                 },
                 {
                   id: 'Cash on Delivery',
@@ -362,7 +639,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
             {(formData.paymentMethod === 'ABA / ACLEDA / Bakong KHQR' || formData.paymentMethod === 'ABA Bank') && (
               <div className="page-transition" style={{
                 backgroundColor: '#fff',
-                border: '2px solid #E1232E',
+                border: khqrStatus === 'PAID' ? '2px solid #16a34a' : (khqrStatus === 'EXPIRED' ? '2px solid #94a3b8' : '2px solid #E1232E'),
                 borderRadius: '24px',
                 overflow: 'hidden',
                 boxShadow: '0 12px 32px rgba(225,35,46,0.08)',
@@ -370,7 +647,9 @@ const Checkout = ({ cart, onOrderPlaced }) => {
               }}>
                 {/* KHQR / ABA / ACLEDA Brand Header */}
                 <div style={{
-                  background: 'linear-gradient(135deg, #E1232E 0%, #004B6E 55%, #003A70 100%)',
+                  background: khqrStatus === 'PAID'
+                    ? '#16a34a'
+                    : 'linear-gradient(135deg, #E1232E 0%, #004B6E 55%, #003A70 100%)',
                   color: '#fff',
                   padding: '16px 20px',
                   display: 'flex',
@@ -416,12 +695,32 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                       ACLEDA
                     </span>
                     <span style={{ fontWeight: '800', fontSize: '0.95rem', letterSpacing: '0.3px', marginLeft: '2px' }}>
-                      {language === 'kh' ? 'ស្កេន Bakong KHQR' : 'Scan Bakong KHQR'}
+                      {khqrStatus === 'PAID'
+                        ? (language === 'kh' ? 'បានបង់ប្រាក់ជោគជ័យ ✓' : 'Payment Verified ✓')
+                        : (language === 'kh' ? 'ស្កេន Bakong KHQR' : 'Scan Bakong KHQR')}
                     </span>
                   </div>
-                  <span style={{ fontSize: '0.73rem', backgroundColor: 'rgba(255,255,255,0.2)', padding: '4px 10px', borderRadius: '12px', fontWeight: '700' }}>
-                    {language === 'kh' ? 'គ្រប់ធនាគារទាំងអស់' : 'All Banks Supported'}
-                  </span>
+
+                  {/* Live 100s Expiration Timer Badge */}
+                  <div style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '0.78rem',
+                    backgroundColor: khqrStatus === 'EXPIRED' ? '#dc2626' : 'rgba(0,0,0,0.28)',
+                    padding: '5px 12px',
+                    borderRadius: '50px',
+                    fontWeight: '800'
+                  }}>
+                    <Clock size={14} />
+                    <span>
+                      {khqrStatus === 'PAID'
+                        ? (language === 'kh' ? 'បានទូទាត់រួចរាល់' : 'Paid')
+                        : khqrStatus === 'EXPIRED'
+                        ? (language === 'kh' ? 'QR ផុតកំណត់ (100s)' : 'QR Expired (100s)')
+                        : (language === 'kh' ? `ផុតកំណត់ក្នុង ${secondsLeft}s` : `Expires in ${secondsLeft}s`)}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Main Content */}
@@ -434,13 +733,13 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                     padding: '16px 18px',
                     marginBottom: '18px'
                   }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', borderBottom: '1px dashed #cbd5e1', paddingBottom: '12px', flexWrap: 'wrap', gap: '10px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', borderBottom: '1px dashed #cbd5e1', paddingBottom: '12px', flexWrap: 'wrap', gap: '10px' }}>
                       <div>
                         <span style={{ fontSize: '0.7rem', color: '#64748b', textTransform: 'uppercase', fontWeight: '800', letterSpacing: '1px' }}>
-                          {language === 'kh' ? 'ឈ្មោះគណនី (ACCOUNT NAME)' : 'ACCOUNT NAME'}
+                          {language === 'kh' ? 'គណនីទទួលប្រាក់ (BAKONG KHQR)' : 'MERCHANT BAKONG ACCOUNT'}
                         </span>
-                        <p style={{ margin: '2px 0 0', fontSize: '1.2rem', fontWeight: '900', color: '#0f172a' }}>
-                          {paymentConfig.accountName || 'LIM SITHA'}
+                        <p style={{ margin: '2px 0 0', fontSize: '1.15rem', fontWeight: '900', color: '#0f172a' }}>
+                          {khqrSession?.merchantName || paymentConfig.accountName || 'CHANMONYROTH HOUT'}
                         </p>
                       </div>
                       <div style={{ textAlign: 'right' }}>
@@ -453,19 +752,19 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                       </div>
                     </div>
 
-                    {/* ABA Merchant ID Copy Row */}
-                    <div style={{ marginBottom: paymentConfig.acledaAccountNumber ? '12px' : 0 }}>
+                    {/* Bakong ID Copy Row */}
+                    <div>
                       <span style={{ fontSize: '0.7rem', color: '#64748b', textTransform: 'uppercase', fontWeight: '800', letterSpacing: '0.8px' }}>
-                        {language === 'kh' ? 'លេខសម្គាល់ ABA / Bakong ID' : 'ABA MERCHANT / ACCOUNT ID'}
+                        {language === 'kh' ? 'លេខសម្គាល់គណនី BAKONG ID' : 'BAKONG ACCOUNT ID'}
                       </span>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px', flexWrap: 'wrap', gap: '10px' }}>
-                        <span style={{ fontSize: 'clamp(1.2rem, 4.5vw, 1.55rem)', fontWeight: '900', letterSpacing: '1.5px', color: '#004B6E', fontFamily: 'monospace' }}>
-                          {paymentConfig.merchantId || '14463116'}
+                        <span style={{ fontSize: 'clamp(0.95rem, 3.8vw, 1.2rem)', fontWeight: '900', color: '#004B6E', fontFamily: 'monospace' }}>
+                          {khqrSession?.bakongAccountId || paymentConfig.bakongAccountId || 'chanmonyroth_hout@bkrt'}
                         </span>
                         <button
                           type="button"
                           onClick={() => {
-                            navigator.clipboard.writeText(paymentConfig.merchantId || '14463116');
+                            navigator.clipboard.writeText(khqrSession?.bakongAccountId || paymentConfig.bakongAccountId || 'chanmonyroth_hout@bkrt');
                             setCopied(true);
                             setTimeout(() => setCopied(false), 2000);
                           }}
@@ -473,62 +772,24 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: '6px',
-                            padding: '7px 15px',
+                            padding: '6px 14px',
                             borderRadius: '10px',
                             backgroundColor: copied ? '#16a34a' : '#004B6E',
                             color: '#fff',
                             border: 'none',
                             fontWeight: '700',
-                            fontSize: '0.8rem',
+                            fontSize: '0.78rem',
                             cursor: 'pointer'
                           }}
                         >
                           {copied ? <Check size={14} /> : <Copy size={14} />}
-                          {copied ? (language === 'kh' ? 'បានចម្លង!' : 'Copied!') : (language === 'kh' ? 'ចម្លងលេខ ABA' : 'Copy ABA ID')}
+                          {copied ? (language === 'kh' ? 'បានចម្លង!' : 'Copied!') : (language === 'kh' ? 'ចម្លង Bakong ID' : 'Copy ID')}
                         </button>
                       </div>
                     </div>
-
-                    {/* ACLEDA Phone / Account Copy Row */}
-                    {paymentConfig.acledaAccountNumber && (
-                      <div style={{ borderTop: '1px dashed #e2e8f0', paddingTop: '10px' }}>
-                        <span style={{ fontSize: '0.7rem', color: '#64748b', textTransform: 'uppercase', fontWeight: '800', letterSpacing: '0.8px' }}>
-                          {language === 'kh' ? 'លេខទូរស័ព្ទ / គណនី ACLEDA' : 'ACLEDA PHONE / ACCOUNT'}
-                        </span>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px', flexWrap: 'wrap', gap: '10px' }}>
-                          <span style={{ fontSize: 'clamp(1.1rem, 4vw, 1.35rem)', fontWeight: '900', letterSpacing: '1px', color: '#003A70', fontFamily: 'monospace' }}>
-                            {paymentConfig.acledaAccountNumber}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              navigator.clipboard.writeText(paymentConfig.acledaAccountNumber.replace(/\s+/g, ''));
-                              setCopiedAcleda(true);
-                              setTimeout(() => setCopiedAcleda(false), 2000);
-                            }}
-                            style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '6px',
-                              padding: '7px 15px',
-                              borderRadius: '10px',
-                              backgroundColor: copiedAcleda ? '#16a34a' : '#003A70',
-                              color: '#fff',
-                              border: 'none',
-                              fontWeight: '700',
-                              fontSize: '0.8rem',
-                              cursor: 'pointer'
-                            }}
-                          >
-                            {copiedAcleda ? <Check size={14} /> : <Copy size={14} />}
-                            {copiedAcleda ? (language === 'kh' ? 'បានចម្លង!' : 'Copied!') : (language === 'kh' ? 'ចម្លងលេខ ACLEDA' : 'Copy ACLEDA')}
-                          </button>
-                        </div>
-                      </div>
-                    )}
                   </div>
 
-                  {/* Bakong KHQR Card & 1-Tap Save QR for ABA / ACLEDA "Scan QR -> Upload Image" */}
+                  {/* Dynamic Bakong KHQR Card */}
                   <div style={{
                     backgroundColor: '#ffffff',
                     border: '2px solid #f1f5f9',
@@ -538,18 +799,18 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                     textAlign: 'center',
                     boxShadow: '0 6px 20px rgba(15,23,42,0.05)'
                   }}>
-                    {/* Official-style Bakong KHQR Stand Card */}
                     <div style={{
                       maxWidth: '280px',
                       margin: '0 auto 14px',
                       borderRadius: '18px',
                       overflow: 'hidden',
-                      border: '2px solid #E1232E',
+                      border: khqrStatus === 'EXPIRED' ? '2px solid #94a3b8' : '2px solid #E1232E',
                       backgroundColor: '#ffffff',
-                      boxShadow: '0 8px 24px rgba(225,35,46,0.12)'
+                      boxShadow: '0 8px 24px rgba(225,35,46,0.12)',
+                      position: 'relative'
                     }}>
                       <div style={{
-                        backgroundColor: '#E1232E',
+                        backgroundColor: khqrStatus === 'EXPIRED' ? '#64748b' : '#E1232E',
                         color: '#ffffff',
                         padding: '10px 16px',
                         fontWeight: '900',
@@ -559,151 +820,239 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                       }}>
                         KHQR
                       </div>
-                      <div style={{ padding: '14px 16px 10px', textAlign: 'left', borderBottom: '1px dashed #e2e8f0' }}>
-                        <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase' }}>
-                          {paymentConfig.accountName || 'LIM SITHA'}
+                      <div style={{ padding: '12px 16px 8px', textAlign: 'left', borderBottom: '1px dashed #e2e8f0' }}>
+                        <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: '800', textTransform: 'uppercase' }}>
+                          {khqrSession?.merchantName || paymentConfig.accountName || 'CHANMONYROTH HOUT'}
                         </div>
                         <div style={{ fontSize: '1.35rem', fontWeight: '900', color: '#0f172a', marginTop: '2px' }}>
                           ${subtotal} <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b' }}>USD</span>
                         </div>
+                        <div style={{ fontSize: '0.68rem', color: '#E1232E', fontFamily: 'monospace', fontWeight: '700', marginTop: '2px' }}>
+                          {khqrSession?.bakongAccountId || paymentConfig.bakongAccountId || 'chanmonyroth_hout@bkrt'}
+                        </div>
                       </div>
 
-                      <div style={{ padding: '16px', backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                        {(paymentConfig.bakongQrUrl || true) && (
+                      <div style={{ padding: '14px', backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '220px', position: 'relative' }}>
+                        {generatingQr ? (
+                          <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: '700' }}>
+                            {language === 'kh' ? 'កំពុងបង្កើតកូដ KHQR...' : 'Generating KHQR...'}
+                          </div>
+                        ) : khqrSession?.qrDataUrl ? (
                           <img
-                            src={paymentConfig.bakongQrUrl || '/bakong-qr.png'}
-                            alt="Bakong KHQR Code"
+                            src={khqrSession.qrDataUrl}
+                            alt="Dynamic Bakong KHQR"
                             style={{
                               width: '210px',
                               height: '210px',
                               objectFit: 'contain',
-                              borderRadius: '10px',
-                              display: 'block'
-                            }}
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                              const fallback = e.currentTarget.nextElementSibling;
-                              if (fallback) fallback.style.display = 'flex';
+                              borderRadius: '8px',
+                              display: 'block',
+                              filter: khqrStatus === 'EXPIRED' ? 'blur(5px) grayscale(100%)' : 'none',
+                              opacity: khqrStatus === 'EXPIRED' ? 0.35 : 1,
+                              transition: 'all 0.3s ease'
                             }}
                           />
+                        ) : null}
+
+                        {/* Expired Overlay */}
+                        {khqrStatus === 'EXPIRED' && (
+                          <div style={{
+                            position: 'absolute',
+                            inset: 0,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: 'rgba(255,255,255,0.86)',
+                            padding: '16px'
+                          }}>
+                            <Clock size={36} color="#dc2626" style={{ marginBottom: '8px' }} />
+                            <div style={{ fontSize: '0.9rem', fontWeight: '900', color: '#0f172a', marginBottom: '4px' }}>
+                              {language === 'kh' ? 'កូដ QR បានផុតកំណត់ (100s)' : 'QR Code Expired (100s)'}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={generateDynamicKhqr}
+                              style={{
+                                marginTop: '8px',
+                                padding: '9px 16px',
+                                borderRadius: '10px',
+                                backgroundColor: '#E1232E',
+                                color: '#fff',
+                                border: 'none',
+                                fontWeight: '800',
+                                fontSize: '0.8rem',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px'
+                              }}
+                            >
+                              <RefreshCw size={14} />
+                              <span>{language === 'kh' ? 'បង្កើតកូដ QR ថ្មី' : 'Generate New QR'}</span>
+                            </button>
+                          </div>
                         )}
-                        <div style={{
-                          display: 'none',
-                          width: '210px',
-                          height: '210px',
-                          borderRadius: '12px',
-                          border: '2px dashed #cbd5e1',
-                          backgroundColor: '#f8fafc',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          padding: '16px',
-                          boxSizing: 'border-box',
-                          textAlign: 'center'
-                        }}>
-                          <QrCode size={52} color="#E1232E" style={{ marginBottom: '8px' }} />
-                          <span style={{ fontSize: '0.8rem', fontWeight: '800', color: '#0f172a' }}>
-                            {paymentConfig.accountName || 'LIM SITHA'}
-                          </span>
-                          <span style={{ fontSize: '0.75rem', color: '#004B6E', fontWeight: '800', marginTop: '4px' }}>
-                            ID: {paymentConfig.merchantId || '14463116'}
-                          </span>
-                          <span style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '6px', lineHeight: '1.4' }}>
-                            {language === 'kh'
-                              ? 'សូមបង្ហោះរូប QR ក្នុងផ្ទាំង Admin ដើម្បីឱ្យអតិថិជនទាញយកស្កេន'
-                              : 'Upload your Bakong QR in Admin Dashboard to display here'}
-                          </span>
-                        </div>
+
+                        {/* Paid Overlay */}
+                        {khqrStatus === 'PAID' && (
+                          <div style={{
+                            position: 'absolute',
+                            inset: 0,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: 'rgba(240,253,244,0.94)',
+                            padding: '16px'
+                          }}>
+                            <CheckCircle size={48} color="#16a34a" style={{ marginBottom: '8px' }} />
+                            <div style={{ fontSize: '0.95rem', fontWeight: '900', color: '#15803d' }}>
+                              {language === 'kh' ? 'ការទូទាត់ប្រាក់បានជោគជ័យ!' : 'Payment Verified!'}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
 
-                    {/* Save / Download QR Button for Mobile Upload into ABA & ACLEDA */}
-                    <button
-                      type="button"
-                      onClick={handleDownloadQrImage}
-                      disabled={downloadingQr}
-                      style={{
-                        width: '100%',
-                        maxWidth: '340px',
-                        padding: '13px 18px',
-                        borderRadius: '14px',
-                        backgroundColor: '#E1232E',
-                        color: '#ffffff',
-                        border: 'none',
-                        fontWeight: '800',
-                        fontSize: '0.9rem',
-                        cursor: 'pointer',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '8px',
-                        boxShadow: '0 6px 18px rgba(225,35,46,0.25)',
-                        fontFamily: "'Poppins', 'Noto Sans Khmer', sans-serif"
-                      }}
-                    >
-                      <Download size={18} />
-                      <span>
-                        {language === 'kh'
-                          ? 'ទាញយករូប QR (ដាក់ក្នុងកន្លែង Scan QR របស់ ABA / ACLEDA)'
-                          : 'Save QR Image (To Upload in ABA / ACLEDA Scan QR)'}
-                      </span>
-                    </button>
-                    <p style={{ margin: '8px 0 0', fontSize: '0.75rem', color: '#64748b', lineHeight: '1.5' }}>
-                      {language === 'kh'
-                        ? '💡 លើទូរស័ព្ទ៖ ចុចប៊ូតុងខាងលើដើម្បីរក្សាទុករូប QR ចូលទូរស័ព្ទ រួចបើក ABA ឬ ACLEDA → ចុច "Scan QR" → ចុចរូបភាពជ្រុងខាងក្រោមដើម្បីជ្រើសរើសរូប QR ពីទូរស័ព្ទ!'
-                        : '💡 On mobile: Tap above to save the QR to your photos, then open ABA or ACLEDA → tap "Scan QR" → tap the gallery icon to upload the saved QR!'}
-                    </p>
-                  </div>
+                    {/* Scheduled Check Progress Bar: 5s, 10s, 30s, 45s, 80s, 100s */}
+                    <div style={{
+                      maxWidth: '380px',
+                      margin: '0 auto 16px',
+                      padding: '10px 12px',
+                      backgroundColor: '#f8fafc',
+                      borderRadius: '12px',
+                      border: '1px solid #e2e8f0'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', fontSize: '0.72rem', fontWeight: '700', color: '#475569' }}>
+                        <span>
+                          {language === 'kh'
+                            ? 'ការពិនិត្យស្ថានភាពបង់ប្រាក់ (កំណត់ត្រឹម 6 ដង)៖'
+                            : 'Scheduled Status Checks (Limited to 6 checks):'}
+                        </span>
+                        <span style={{ color: khqrStatus === 'EXPIRED' ? '#dc2626' : '#0f172a', fontWeight: '800' }}>
+                          {secondsLeft}s / 100s
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '4px', flexWrap: 'wrap' }}>
+                        {CHECK_INTERVALS_SECONDS.map((sec) => {
+                          const done = completedChecks.includes(sec);
+                          const active = activeCheckSecond === sec;
+                          return (
+                            <span
+                              key={sec}
+                              style={{
+                                flex: 1,
+                                padding: '4px 0',
+                                borderRadius: '6px',
+                                fontSize: '0.68rem',
+                                fontWeight: '800',
+                                backgroundColor: active ? '#fef08a' : (done ? '#dcfce7' : '#e2e8f0'),
+                                color: active ? '#854d0e' : (done ? '#166534' : '#64748b'),
+                                border: active ? '1px solid #facc15' : 'none'
+                              }}
+                            >
+                              {sec}s {done ? '✓' : (active ? '•••' : '')}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
 
-                  {/* Step by Step Instruction for ABA & ACLEDA Scan -> Upload QR */}
-                  <div style={{
-                    backgroundColor: '#f8fafc',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '16px',
-                    padding: '16px',
-                    marginBottom: '18px'
-                  }}>
-                    <h4 style={{ fontSize: '0.82rem', fontWeight: '800', color: '#0f172a', margin: '0 0 10px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span>📲</span>
-                      <span>
-                        {language === 'kh'
-                          ? 'របៀបបញ្ចូលរូប QR ក្នុងកន្លែង Scan QR របស់ ABA និង ACLEDA៖'
-                          : 'How to Upload QR in ABA & ACLEDA Scan QR:'}
-                      </span>
-                    </h4>
-                    <ol style={{ margin: 0, paddingLeft: '20px', color: '#334155', fontSize: '0.84rem', lineHeight: '1.85' }}>
-                      <li>
-                        {language === 'kh'
-                          ? 'ចុចប៊ូតុងពណ៌ក្រហមខាងលើ '
-                          : 'Tap the red button above '}
-                        <b>"{language === 'kh' ? 'ទាញយករូប QR' : 'Save QR Image'}"</b>
-                        {language === 'kh' ? ' (ឬចុចសង្កត់លើរូប QR ដើម្បីរក្សាទុកក្នុងទូរស័ព្ទ)' : ' to save the QR to your phone gallery'}
-                      </li>
-                      <li>
-                        {language === 'kh' ? 'បើកកម្មវិធី ' : 'Open '}
-                        <b style={{ color: '#004B6E' }}>ABA Mobile</b>
-                        {language === 'kh' ? ' ឬ ' : ' or '}
-                        <b style={{ color: '#003A70' }}>ACLEDA Mobile</b>
-                        {language === 'kh' ? ' ហើយចុចលើប៊ូតុង ' : ' and tap '}
-                        <b>"Scan QR / ស្កេន QR"</b>
-                      </li>
-                      <li>
-                        {language === 'kh'
-                          ? 'នៅក្នុងអេក្រង់ស្កេន សូមចុចប៊ូតុង '
-                          : 'Inside the scanner screen, tap '}
-                        <b style={{ color: '#E1232E' }}>
-                          {language === 'kh' ? '"Upload QR / រូបភាពពីទូរស័ព្ទ (Gallery)"' : '"Upload QR / Select from Gallery"'}
-                        </b>
-                        {language === 'kh' ? ' រួចជ្រើសរើសរូប QR ដែលបានទាញយក' : ' and select the saved QR image'}
-                      </li>
-                      <li>
-                        {language === 'kh' ? 'ផ្ទៀងផ្ទាត់ឈ្មោះ ' : 'Verify account name '}
-                        <b>{paymentConfig.accountName || 'LIM SITHA'}</b>
-                        {language === 'kh' ? ' និងបញ្ចូលទឹកប្រាក់ ' : ' and enter amount '}
-                        <b style={{ color: '#E1232E' }}>${subtotal}</b>
-                        {language === 'kh' ? ' រួចចុចបង់ប្រាក់' : ' to complete payment'}
-                      </li>
-                    </ol>
+                    {/* Mobile vs Laptop Actions */}
+                    {khqrStatus !== 'EXPIRED' && (
+                      <div style={{ display: 'grid', gap: '10px', maxWidth: '380px', margin: '0 auto' }}>
+                        {/* Mobile One-Tap Pop to ABA / ACLEDA + Auto-Save QR for Upload QR */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleSaveAndOpenBankApp('ABA')}
+                            disabled={downloadingQr}
+                            style={{
+                              padding: '12px 10px',
+                              borderRadius: '12px',
+                              backgroundColor: '#004B6E',
+                              color: '#ffffff',
+                              border: 'none',
+                              fontWeight: '800',
+                              fontSize: '0.82rem',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '6px',
+                              boxShadow: '0 4px 12px rgba(0,75,110,0.2)'
+                            }}
+                          >
+                            <Smartphone size={16} />
+                            <span>{language === 'kh' ? 'បើក ABA + ទាញយក QR' : 'Open ABA + Save QR'}</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleSaveAndOpenBankApp('ACLEDA')}
+                            disabled={downloadingQr}
+                            style={{
+                              padding: '12px 10px',
+                              borderRadius: '12px',
+                              backgroundColor: '#003A70',
+                              color: '#fbbf24',
+                              border: '1px solid #f59e0b',
+                              fontWeight: '800',
+                              fontSize: '0.82rem',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '6px',
+                              boxShadow: '0 4px 12px rgba(0,58,112,0.2)'
+                            }}
+                          >
+                            <Smartphone size={16} />
+                            <span>{language === 'kh' ? 'បើក ACLEDA + ទាញយក QR' : 'Open ACLEDA + Save QR'}</span>
+                          </button>
+                        </div>
+
+                        {/* Save QR Image Only Button */}
+                        <button
+                          type="button"
+                          onClick={() => handleSaveAndOpenBankApp(null)}
+                          disabled={downloadingQr}
+                          style={{
+                            width: '100%',
+                            padding: '11px 16px',
+                            borderRadius: '12px',
+                            backgroundColor: '#E1232E',
+                            color: '#ffffff',
+                            border: 'none',
+                            fontWeight: '800',
+                            fontSize: '0.84rem',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px'
+                          }}
+                        >
+                          <Download size={16} />
+                          <span>
+                            {language === 'kh'
+                              ? 'ទាញយករូប QR (សម្រាប់ដាក់ក្នុង Scan QR របស់ ABA / ACLEDA)'
+                              : 'Download QR Image (For Upload QR in ABA / ACLEDA)'}
+                          </span>
+                        </button>
+                      </div>
+                    )}
+
+                    <p style={{ margin: '10px 0 0', fontSize: '0.74rem', color: '#64748b', lineHeight: '1.55' }}>
+                      {isMobileDevice
+                        ? (language === 'kh'
+                            ? '📱 លើទូរស័ព្ទ៖ ចុចប៊ូតុង "បើក ABA" ឬ "បើក ACLEDA" ខាងលើ ប្រព័ន្ធនឹងរក្សាទុករូប QR ចូលទូរស័ព្ទ និងបើកកម្មវិធីធនាគារជូនអ្នក រួចចុច Scan QR → Upload QR ពីរូបថតដើម្បីបង់ប្រាក់!'
+                            : '📱 On Phone: Tap "Open ABA" or "Open ACLEDA" above — it saves the QR image to your phone and opens your banking app so you can tap Scan QR → Upload QR!')
+                        : (language === 'kh'
+                            ? '💻 លើកុំព្យូទ័រ (Laptop)៖ សូមបើកកម្មវិធី ABA ឬ ACLEDA លើទូរស័ព្ទរបស់អ្នក ហើយស្កេនកូដ QR ខាងលើមុនពេលផុតកំណត់ 100 វិនាទី។'
+                            : '💻 On Laptop: Simply open ABA or ACLEDA on your phone and scan the QR code above before the 100-second timer expires.')}
+                    </p>
                   </div>
 
                   {/* Upload Payment Screenshot / Slip (Optional) + Transaction Ref */}

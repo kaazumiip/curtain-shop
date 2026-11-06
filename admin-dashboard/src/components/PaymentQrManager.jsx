@@ -6,10 +6,12 @@ import { useLanguage } from '../context/LanguageContext';
 const PaymentQrManager = () => {
   const { language } = useLanguage();
   const [settings, setSettings] = useState({
-    accountName: 'LIM SITHA',
+    bakongAccountId: 'chanmonyroth_hout@bkrt',
+    accountName: 'CHANMONYROTH HOUT',
     merchantId: '14463116',
+    bakongToken: '',
     bakongQrUrl: '',
-    acledaAccountNumber: ''
+    acledaAccountNumber: '089 902 001'
   });
   const [showEditor, setShowEditor] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -23,7 +25,12 @@ const PaymentQrManager = () => {
     try {
       const res = await api.get('/settings/payment');
       if (res.data) {
-        setSettings(prev => ({ ...prev, ...res.data }));
+        setSettings(prev => ({
+          ...prev,
+          ...res.data,
+          bakongAccountId: res.data.bakongAccountId || 'chanmonyroth_hout@bkrt',
+          accountName: res.data.accountName || 'CHANMONYROTH HOUT'
+        }));
       }
     } catch (err) {
       console.error('Error fetching payment settings:', err);
@@ -97,46 +104,21 @@ const PaymentQrManager = () => {
 
           <span style={{
             fontSize: '0.72rem',
-            backgroundColor: settings.bakongQrUrl ? '#16a34a' : '#f59e0b',
+            backgroundColor: '#16a34a',
             color: '#ffffff',
             padding: '3px 10px',
             borderRadius: '50px',
             fontWeight: '700'
           }}>
-            {settings.bakongQrUrl
-              ? (language === 'kh' ? 'មានរូប QR រួចរាល់ ✓' : 'QR Image Active ✓')
-              : (language === 'kh' ? 'សូមដាក់រូប Bakong QR' : 'Upload Bakong QR')}
+            {language === 'kh' ? `Dynamic KHQR (${settings.bakongAccountId}) ✓` : `Dynamic KHQR (${settings.bakongAccountId}) ✓`}
           </span>
 
           <span style={{ fontSize: '0.78rem', color: '#475569', fontWeight: '600' }}>
-            • {settings.accountName} (ID: {settings.merchantId})
+            • {settings.accountName} (100s Expiry • Checks: 5s, 10s, 30s, 45s, 80s, 100s)
           </span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          <label style={{
-            backgroundColor: '#E1232E',
-            color: '#ffffff',
-            padding: '7px 14px',
-            borderRadius: '8px',
-            fontSize: '0.8rem',
-            fontWeight: '700',
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px'
-          }}>
-            <Upload size={14} />
-            <span>
-              {uploading
-                ? (language === 'kh' ? 'កំពុងបង្ហោះ...' : 'Uploading...')
-                : (settings.bakongQrUrl
-                    ? (language === 'kh' ? 'ប្តូររូប Bakong QR' : 'Change QR Image')
-                    : (language === 'kh' ? '+ ដាក់រូប Bakong / ABA QR' : '+ Upload Bakong / ABA QR'))}
-            </span>
-            <input type="file" accept="image/*" onChange={handleQrUpload} hidden />
-          </label>
-
           <button
             type="button"
             onClick={() => setShowEditor(!showEditor)}
@@ -154,57 +136,10 @@ const PaymentQrManager = () => {
               gap: '6px'
             }}
           >
-            {showEditor ? <><X size={14} /> {language === 'kh' ? 'បិទ' : 'Close'}</> : (language === 'kh' ? 'កែព័ត៌មានគណនី' : 'Edit Info')}
+            {showEditor ? <><X size={14} /> {language === 'kh' ? 'បិទ' : 'Close'}</> : (language === 'kh' ? 'កែព័ត៌មាន Bakong KHQR' : 'Edit Bakong Settings')}
           </button>
         </div>
       </div>
-
-      {/* Preview of current QR if uploaded */}
-      {settings.bakongQrUrl && !showEditor && (
-        <div style={{
-          marginTop: '12px',
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '12px',
-          backgroundColor: '#ffffff',
-          border: '1px solid #e2e8f0',
-          borderRadius: '12px',
-          padding: '8px 14px'
-        }}>
-          <img
-            src={settings.bakongQrUrl}
-            alt="Bakong KHQR"
-            style={{ width: '48px', height: '48px', objectFit: 'contain', borderRadius: '6px', border: '1px solid #eee' }}
-          />
-          <div>
-            <div style={{ fontSize: '0.8rem', fontWeight: '800', color: '#0f172a' }}>
-              {language === 'kh' ? 'រូបភាព QR កំពុងបង្ហាញលើទំព័រទូទាត់ប្រាក់' : 'QR Image Active on Checkout Page'}
-            </div>
-            <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
-              {language === 'kh'
-                ? 'អតិថិជនអាចចុច "ទាញយករូប QR" រួចបញ្ចូលក្នុងកន្លែង Scan QR របស់ ABA ឬ ACLEDA'
-                : 'Customers can download this QR to upload inside ABA or ACLEDA Scan QR'}
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={handleRemoveQr}
-            title="Remove QR"
-            style={{
-              border: 'none',
-              background: '#fee2e2',
-              color: '#dc2626',
-              borderRadius: '8px',
-              padding: '6px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center'
-            }}
-          >
-            <Trash2 size={14} />
-          </button>
-        </div>
-      )}
 
       {showEditor && (
         <div style={{
@@ -216,10 +151,31 @@ const PaymentQrManager = () => {
         }}>
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
             gap: '12px',
             marginBottom: '14px'
           }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.74rem', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>
+                {language === 'kh' ? 'Bakong Account ID (សម្រាប់បង្កើត KHQR)' : 'Bakong Account ID (KHQR)'}
+              </label>
+              <input
+                type="text"
+                value={settings.bakongAccountId}
+                onChange={(e) => setSettings({ ...settings, bakongAccountId: e.target.value })}
+                placeholder="chanmonyroth_hout@bkrt"
+                style={{
+                  width: '100%',
+                  padding: '9px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #cbd5e1',
+                  fontSize: '0.85rem',
+                  fontWeight: '700',
+                  fontFamily: 'monospace'
+                }}
+              />
+            </div>
+
             <div>
               <label style={{ display: 'block', fontSize: '0.74rem', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>
                 {language === 'kh' ? 'ឈ្មោះគណនី (Account Name)' : 'Account Name'}
@@ -228,7 +184,7 @@ const PaymentQrManager = () => {
                 type="text"
                 value={settings.accountName}
                 onChange={(e) => setSettings({ ...settings, accountName: e.target.value })}
-                placeholder="LIM SITHA"
+                placeholder="CHANMONYROTH HOUT"
                 style={{
                   width: '100%',
                   padding: '9px 12px',
@@ -242,40 +198,20 @@ const PaymentQrManager = () => {
 
             <div>
               <label style={{ display: 'block', fontSize: '0.74rem', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>
-                {language === 'kh' ? 'លេខសម្គាល់ ABA / Bakong ID' : 'ABA Merchant / Account ID'}
+                {language === 'kh' ? 'Bakong Developer Token (សម្រាប់ពិនិត្យ Status ស្វ័យប្រវត្តិ)' : 'Bakong API Token (Optional for Auto-Check)'}
               </label>
               <input
-                type="text"
-                value={settings.merchantId}
-                onChange={(e) => setSettings({ ...settings, merchantId: e.target.value })}
-                placeholder="14463116"
+                type="password"
+                value={settings.bakongToken || ''}
+                onChange={(e) => setSettings({ ...settings, bakongToken: e.target.value })}
+                placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..."
                 style={{
                   width: '100%',
                   padding: '9px 12px',
                   borderRadius: '8px',
                   border: '1px solid #cbd5e1',
                   fontSize: '0.85rem',
-                  fontWeight: '700'
-                }}
-              />
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '0.74rem', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>
-                {language === 'kh' ? 'លេខគណនី / ទូរស័ព្ទ ACLEDA (បើមាន)' : 'ACLEDA Account / Phone (Optional)'}
-              </label>
-              <input
-                type="text"
-                value={settings.acledaAccountNumber || ''}
-                onChange={(e) => setSettings({ ...settings, acledaAccountNumber: e.target.value })}
-                placeholder={language === 'kh' ? 'ឧ. 089 902 001' : 'e.g. 089 902 001'}
-                style={{
-                  width: '100%',
-                  padding: '9px 12px',
-                  borderRadius: '8px',
-                  border: '1px solid #cbd5e1',
-                  fontSize: '0.85rem',
-                  fontWeight: '600'
+                  fontFamily: 'monospace'
                 }}
               />
             </div>
