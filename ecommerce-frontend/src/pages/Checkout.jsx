@@ -335,12 +335,33 @@ const Checkout = ({ cart, onOrderPlaced }) => {
     return () => { active = false; };
   }, [khqrSession, subtotal, buildKhqrCardBlob]);
 
-  // Save the KHQR image to the phone gallery and directly open ONLY the selected banking app (ABA or ACLEDA) — never open the social media Share Sheet!
+  // Share ONLY the pre-built KHQR image File (`{ files: [file] }` with no text/title) so the OS Share Sheet opens and tapping ABA / ACLEDA inserts the QR into Scan QR!
   const handleDirectSaveAndOpenBankApp = async (bankType = null) => {
     const fileName = bankType ? `${bankType}_KHQR_${subtotal}USD.png` : `KHQR_${subtotal}USD.png`;
     const isAndroid = /Android/i.test(navigator.userAgent || '');
 
-    // 1. Save the KHQR image to the phone gallery so it's immediately ready in Scan QR -> Upload QR
+    // When clicking ABA or ACLEDA on a phone, open the native Share Sheet with ONLY the PNG file (no title/text)
+    if (
+      bankType &&
+      isMobileDevice &&
+      prebuiltCardFileRef.current &&
+      typeof navigator !== 'undefined' &&
+      navigator.canShare
+    ) {
+      const shareFile = new File([prebuiltCardFileRef.current], fileName, { type: 'image/png' });
+      if (navigator.canShare({ files: [shareFile] })) {
+        try {
+          await navigator.share({
+            files: [shareFile]
+          });
+          return;
+        } catch (shareErr) {
+          if (shareErr?.name === 'AbortError') return;
+        }
+      }
+    }
+
+    // Fallback (or when clicking "Download QR Image"): save the KHQR image to the phone gallery
     try {
       setDownloadingQr(true);
       const blob = prebuiltCardBlobRef.current || (await buildKhqrCardBlob());
@@ -365,7 +386,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
       setDownloadingQr(false);
     }
 
-    // 2. Directly launch ABA Mobile or ACLEDA Mobile (if ACLEDA is not installed, fall back to ABA Mobile!)
+    // Fallback direct launch if navigator.share({ files }) is not supported
     if (bankType === 'ABA') {
       if (isAndroid) {
         window.location.href = 'intent://ababank.com#Intent;scheme=abamobilebank;package=com.paygo24.ibank;end';
@@ -378,11 +399,6 @@ const Checkout = ({ cart, onOrderPlaced }) => {
         window.location.href = `intent://#Intent;scheme=acledabank;package=com.domain.acledabankqr;S.browser_fallback_url=${fallbackUrl};end`;
       } else {
         window.location.href = 'acledabank://';
-        setTimeout(() => {
-          if (document.visibilityState === 'visible') {
-            window.location.href = 'abamobilebank://';
-          }
-        }, 1200);
       }
     }
   };
@@ -1065,8 +1081,8 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                     <p style={{ margin: '10px 0 0', fontSize: '0.74rem', color: '#64748b', lineHeight: '1.55' }}>
                       {isMobileDevice
                         ? (language === 'kh'
-                            ? '📱 លើទូរស័ព្ទ៖ ចុចប៊ូតុង "ABA" ឬ "ACLEDA" ខាងលើ ដើម្បីរក្សាទុករូប QR និងបើកកម្មវិធីធនាគារផ្ទាល់ (រួចចុច Scan QR → Upload QR)។ ពេលបង់ប្រាក់រួចរាល់ ប្រព័ន្ធនឹងបញ្ជាក់ការកម្មង់ដោយស្វ័យប្រវត្តិ!'
-                            : '📱 On Phone: Tap "ABA" or "ACLEDA" above to save the QR image and open your banking app directly (then tap Scan QR → Upload QR). Once paid, your order completes automatically!')
+                            ? '📱 លើទូរស័ព្ទ៖ ចុចប៊ូតុង "ABA" ឬ "ACLEDA" ខាងលើ → រួចជ្រើសរើសកម្មវិធី ABA ឬ ACLEDA ក្នុងផ្ទាំងលោតឡើង (ប្រសិនបើមិនឃើញនៅជួរមុខ សូមចុច "More / បន្ថែម" រួចចុចឱ្យជាប់លើ ABA / ACLEDA ដើម្បី Pin ដាក់មុខគេ)។ ពេលបង់ប្រាក់រួចរាល់ ប្រព័ន្ធនឹងបញ្ជាក់ការកម្មង់ដោយស្វ័យប្រវត្តិ!'
+                            : '📱 On Phone: Tap "ABA" or "ACLEDA" above → select ABA or ACLEDA in the popup (if not shown first, tap "More" and long-press ABA / ACLEDA to Pin them to the 1st & 2nd spots). Once paid, your order completes automatically!')
                         : (language === 'kh'
                             ? '💻 លើកុំព្យូទ័រ (Laptop)៖ សូមបើកកម្មវិធី ABA ឬ ACLEDA លើទូរស័ព្ទរបស់អ្នក ហើយស្កេនកូដ QR ខាងលើមុនពេលផុតកំណត់ 100 វិនាទី។ ពេលបង់ប្រាក់រួចរាល់ ប្រព័ន្ធនឹងបញ្ជាក់ការកម្មង់ដោយស្វ័យប្រវត្តិ!'
                             : '💻 On Laptop: Scan the QR code above with ABA or ACLEDA before the 100s timer expires. Once paid, your order completes automatically!')}
