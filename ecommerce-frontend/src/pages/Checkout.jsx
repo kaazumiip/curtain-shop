@@ -357,14 +357,16 @@ const Checkout = ({ cart, onOrderPlaced }) => {
       setDownloadingQr(false);
     }
 
-    // 3. Launch ABA Mobile or ACLEDA Mobile with the KHQR payload embedded in the deep link URI
+    // 3. Launch ABA Mobile or ACLEDA Mobile
+    // Note: Do NOT pass ?type=payway&qrcode=... for an Individual Bakong KHQR (@bkrt),
+    // because ABA's PayWay handler rejects non-PayWay individual QRs with "Invalid Merchant Data".
+    // Instead, save the valid KHQR image to the phone gallery and open the app cleanly so the user can tap Scan QR -> Upload QR!
     if (bankType === 'ABA') {
       setTimeout(() => {
         if (khqrSession?.bakongDeepLink) {
           window.location.href = khqrSession.bakongDeepLink;
         } else {
-          // Pass the KHQR payload directly into ABA Mobile's deep link handler
-          window.location.href = `abamobilebank://ababank.com?type=payway&qrcode=${encodedQr}`;
+          window.location.href = 'abamobilebank://';
         }
       }, 300);
     } else if (bankType === 'ACLEDA') {
@@ -372,8 +374,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
         if (khqrSession?.bakongDeepLink) {
           window.location.href = khqrSession.bakongDeepLink;
         } else {
-          // Pass the KHQR payload into ACLEDA Mobile
-          window.location.href = `acledabank://?qrcode=${encodedQr}`;
+          window.location.href = 'acledabank://';
         }
       }, 300);
     }
