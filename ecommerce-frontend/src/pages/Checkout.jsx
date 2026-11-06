@@ -1009,13 +1009,13 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                       </div>
                     </div>
 
-                    {/* ABA & ACLEDA Buttons (Opens clean "Open with ABA / ACLEDA" Chooser Dialog) */}
+                    {/* ABA & ACLEDA Buttons (Directly opens the KHQR photo share sheet so 1 tap on ABA/ACLEDA loads the QR into Scan QR!) */}
                     {khqrStatus !== 'EXPIRED' && (
                       <div style={{ display: 'grid', gap: '10px', maxWidth: '380px', margin: '0 auto' }}>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                           <button
                             type="button"
-                            onClick={() => handleOpenBankChooser('ABA')}
+                            onClick={() => handleDirectSaveAndOpenBankApp('ABA')}
                             disabled={downloadingQr}
                             style={{
                               padding: '13px 10px',
@@ -1038,7 +1038,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
 
                           <button
                             type="button"
-                            onClick={() => handleOpenBankChooser('ACLEDA')}
+                            onClick={() => handleDirectSaveAndOpenBankApp('ACLEDA')}
                             disabled={downloadingQr}
                             style={{
                               padding: '13px 10px',
