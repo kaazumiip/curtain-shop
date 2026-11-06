@@ -310,13 +310,33 @@ const Checkout = ({ cart, onOrderPlaced }) => {
     return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
   };
 
-  // Download QR image & optionally open ABA Mobile or ACLEDA Mobile on phone
+  // Share QR image directly to ABA / ACLEDA (just like Flutter share_plus), or open deep link with QR payload
   const handleSaveAndOpenBankApp = async (bankType = null) => {
+    const qrString = khqrSession?.qrString || '';
+    const encodedQr = encodeURIComponent(qrString);
+    const fileName = `KHQR_${(khqrSession?.bakongAccountId || 'chanmonyroth_hout').replace(/[^a-zA-Z0-9]/g, '_')}_${subtotal}USD.png`;
+
     try {
       setDownloadingQr(true);
       const blob = await buildKhqrCardBlob();
+
+      // 1. If user tapped ABA or ACLEDA on a phone that supports Web Share API with files (iOS Safari / Android Chrome),
+      //    Alternatively if bankType === 'SHARE', open the native mobile share sheet so they can pick ABA Mobile or ACLEDA Mobile directly!
+      if (bankType === 'SHARE' && blob && navigator.canShare) {
+        const file = new File([blob], fileName, { type: 'image/png' });
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: 'Bakong KHQR Payment',
+            text: `Pay $${subtotal} USD to ${khqrSession?.merchantName || 'CHANMONYROTH HOUT'}`
+          });
+          setDownloadingQr(false);
+          return;
+        }
+      }
+
+      // 2. Always save the QR image to the phone gallery so it's ready in Scan QR -> Upload QR
       if (blob) {
-        const fileName = `KHQR_${(khqrSession?.bakongAccountId || 'chanmonyroth_hout').replace(/[^a-zA-Z0-9]/g, '_')}_${subtotal}USD.png`;
         const blobUrl = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = blobUrl;
@@ -337,23 +357,25 @@ const Checkout = ({ cart, onOrderPlaced }) => {
       setDownloadingQr(false);
     }
 
-    // If user clicked Open ABA or Open ACLEDA on mobile, launch the banking app right after saving the QR
+    // 3. Launch ABA Mobile or ACLEDA Mobile with the KHQR payload embedded in the deep link URI
     if (bankType === 'ABA') {
       setTimeout(() => {
         if (khqrSession?.bakongDeepLink) {
           window.location.href = khqrSession.bakongDeepLink;
         } else {
-          window.location.href = 'abapay://';
+          // Pass the KHQR payload directly into ABA Mobile's deep link handler
+          window.location.href = `abamobilebank://ababank.com?type=payway&qrcode=${encodedQr}`;
         }
-      }, 450);
+      }, 300);
     } else if (bankType === 'ACLEDA') {
       setTimeout(() => {
         if (khqrSession?.bakongDeepLink) {
           window.location.href = khqrSession.bakongDeepLink;
         } else {
-          window.location.href = 'acledabank://';
+          // Pass the KHQR payload into ACLEDA Mobile
+          window.location.href = `acledabank://?qrcode=${encodedQr}`;
         }
-      }, 450);
+      }, 300);
     }
   };
 
@@ -1012,6 +1034,36 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                             <span>{language === 'kh' ? 'បើក ACLEDA + ទាញយក QR' : 'Open ACLEDA + Save QR'}</span>
                           </button>
                         </div>
+
+                        {/* Direct Share QR Image to ABA / ACLEDA App (Flutter share_plus equivalent on Mobile Web) */}
+                        <button
+                          type="button"
+                          onClick={() => handleSaveAndOpenBankApp('SHARE')}
+                          disabled={downloadingQr}
+                          style={{
+                            width: '100%',
+                            padding: '13px 16px',
+                            borderRadius: '12px',
+                            background: 'linear-gradient(135deg, #004B6E 0%, #E1232E 100%)',
+                            color: '#ffffff',
+                            border: 'none',
+                            fontWeight: '800',
+                            fontSize: '0.86rem',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                            boxShadow: '0 6px 16px rgba(0,75,110,0.22)'
+                          }}
+                        >
+                          <ExternalLink size={16} />
+                          <span>
+                            {language === 'kh'
+                              ? 'បញ្ជូនរូប QR ផ្ទាល់ទៅកម្មវិធី ABA / ACLEDA (Share QR to App)'
+                              : 'Send QR Directly to ABA / ACLEDA App (Share QR)'}
+                          </span>
+                        </button>
 
                         {/* Save QR Image Only Button */}
                         <button
