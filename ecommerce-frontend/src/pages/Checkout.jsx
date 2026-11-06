@@ -606,8 +606,8 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                   id: 'ABA / ACLEDA / Bakong KHQR',
                   label: language === 'kh' ? 'ABA / ACLEDA / Bakong KHQR (ស្កេន QR ទូទាត់ប្រាក់)' : 'ABA / ACLEDA / Bakong KHQR (Scan & Pay)',
                   sub: language === 'kh'
-                    ? `គណនី Bakong: ${paymentConfig.bakongAccountId || 'chanmonyroth_hout@bkrt'} (ពិនិត្យស្វ័យប្រវត្តិ និងផុតកំណត់ក្នុង 100 វិនាទី)`
-                    : `Bakong ID: ${paymentConfig.bakongAccountId || 'chanmonyroth_hout@bkrt'} (Auto-check & 100s expiration)`
+                    ? `គណនី Bakong: ${paymentConfig.bakongAccountId || 'chanmonyroth_hout@bkrt'}`
+                    : `Bakong ID: ${paymentConfig.bakongAccountId || 'chanmonyroth_hout@bkrt'}`
                 },
                 {
                   id: 'Cash on Delivery',
@@ -937,67 +937,23 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                       </div>
                     </div>
 
-                    {/* Scheduled Check Progress Bar: 5s, 10s, 30s, 45s, 80s, 100s */}
-                    <div style={{
-                      maxWidth: '380px',
-                      margin: '0 auto 16px',
-                      padding: '10px 12px',
-                      backgroundColor: '#f8fafc',
-                      borderRadius: '12px',
-                      border: '1px solid #e2e8f0'
-                    }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', fontSize: '0.72rem', fontWeight: '700', color: '#475569' }}>
-                        <span>
-                          {language === 'kh'
-                            ? 'ការពិនិត្យស្ថានភាពបង់ប្រាក់ (កំណត់ត្រឹម 6 ដង)៖'
-                            : 'Scheduled Status Checks (Limited to 6 checks):'}
-                        </span>
-                        <span style={{ color: khqrStatus === 'EXPIRED' ? '#dc2626' : '#0f172a', fontWeight: '800' }}>
-                          {secondsLeft}s / 100s
-                        </span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '4px', flexWrap: 'wrap' }}>
-                        {CHECK_INTERVALS_SECONDS.map((sec) => {
-                          const done = completedChecks.includes(sec);
-                          const active = activeCheckSecond === sec;
-                          return (
-                            <span
-                              key={sec}
-                              style={{
-                                flex: 1,
-                                padding: '4px 0',
-                                borderRadius: '6px',
-                                fontSize: '0.68rem',
-                                fontWeight: '800',
-                                backgroundColor: active ? '#fef08a' : (done ? '#dcfce7' : '#e2e8f0'),
-                                color: active ? '#854d0e' : (done ? '#166534' : '#64748b'),
-                                border: active ? '1px solid #facc15' : 'none'
-                              }}
-                            >
-                              {sec}s {done ? '✓' : (active ? '•••' : '')}
-                            </span>
-                          );
-                        })}
-                      </div>
-                    </div>
-
                     {/* Mobile vs Laptop Actions */}
                     {khqrStatus !== 'EXPIRED' && (
                       <div style={{ display: 'grid', gap: '10px', maxWidth: '380px', margin: '0 auto' }}>
-                        {/* Mobile One-Tap Pop to ABA / ACLEDA + Auto-Save QR for Upload QR */}
+                        {/* ABA & ACLEDA Buttons */}
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                           <button
                             type="button"
                             onClick={() => handleSaveAndOpenBankApp('ABA')}
                             disabled={downloadingQr}
                             style={{
-                              padding: '12px 10px',
+                              padding: '13px 10px',
                               borderRadius: '12px',
                               backgroundColor: '#004B6E',
                               color: '#ffffff',
                               border: 'none',
                               fontWeight: '800',
-                              fontSize: '0.82rem',
+                              fontSize: '0.9rem',
                               cursor: 'pointer',
                               display: 'inline-flex',
                               alignItems: 'center',
@@ -1006,8 +962,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                               boxShadow: '0 4px 12px rgba(0,75,110,0.2)'
                             }}
                           >
-                            <Smartphone size={16} />
-                            <span>{language === 'kh' ? 'បើក ABA + ទាញយក QR' : 'Open ABA + Save QR'}</span>
+                            <span>ABA</span>
                           </button>
 
                           <button
@@ -1015,13 +970,13 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                             onClick={() => handleSaveAndOpenBankApp('ACLEDA')}
                             disabled={downloadingQr}
                             style={{
-                              padding: '12px 10px',
+                              padding: '13px 10px',
                               borderRadius: '12px',
                               backgroundColor: '#003A70',
                               color: '#fbbf24',
                               border: '1px solid #f59e0b',
                               fontWeight: '800',
-                              fontSize: '0.82rem',
+                              fontSize: '0.9rem',
                               cursor: 'pointer',
                               display: 'inline-flex',
                               alignItems: 'center',
@@ -1030,40 +985,9 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                               boxShadow: '0 4px 12px rgba(0,58,112,0.2)'
                             }}
                           >
-                            <Smartphone size={16} />
-                            <span>{language === 'kh' ? 'បើក ACLEDA + ទាញយក QR' : 'Open ACLEDA + Save QR'}</span>
+                            <span>ACLEDA</span>
                           </button>
                         </div>
-
-                        {/* Direct Share QR Image to ABA / ACLEDA App (Flutter share_plus equivalent on Mobile Web) */}
-                        <button
-                          type="button"
-                          onClick={() => handleSaveAndOpenBankApp('SHARE')}
-                          disabled={downloadingQr}
-                          style={{
-                            width: '100%',
-                            padding: '13px 16px',
-                            borderRadius: '12px',
-                            background: 'linear-gradient(135deg, #004B6E 0%, #E1232E 100%)',
-                            color: '#ffffff',
-                            border: 'none',
-                            fontWeight: '800',
-                            fontSize: '0.86rem',
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '8px',
-                            boxShadow: '0 6px 16px rgba(0,75,110,0.22)'
-                          }}
-                        >
-                          <ExternalLink size={16} />
-                          <span>
-                            {language === 'kh'
-                              ? 'បញ្ជូនរូប QR ផ្ទាល់ទៅកម្មវិធី ABA / ACLEDA (Share QR to App)'
-                              : 'Send QR Directly to ABA / ACLEDA App (Share QR)'}
-                          </span>
-                        </button>
 
                         {/* Save QR Image Only Button */}
                         <button
