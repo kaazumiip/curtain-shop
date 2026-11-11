@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CreditCard, CheckCircle, Copy, Check, Truck, Download, Upload, QrCode, RefreshCw, Clock, Smartphone, ExternalLink } from 'lucide-react';
 import QRCode from 'qrcode';
-import { BakongKHQR, khqrData, IndividualInfo } from 'bakong-khqr';
 import CryptoJS from 'crypto-js';
 import axios from '../api/axios';
 import { useLanguage } from '../context/LanguageContext';
@@ -35,7 +34,8 @@ const formatTag = (tag, val) => {
 const buildLocalBakongKhqr = (bakongId, merchantName, amountUsd, expiresAtMs) => {
   const cleanId = bakongId || 'chanmonyroth_hout@bkrt';
   const cleanName = (merchantName || 'CHANMONYROTH HOUT').slice(0, 25);
-  const amtStr = Number(amountUsd || 0).toFixed(2);
+  const rounded = Math.round(Number(amountUsd || 0) * 100) / 100;
+  const amtStr = Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(2);
   const tag29 = formatTag('29', formatTag('00', cleanId));
   const tag99 = formatTag('99', formatTag('00', String(Date.now())) + formatTag('01', String(expiresAtMs)));
   const bodyWithoutCrc =
@@ -101,7 +101,8 @@ const Checkout = ({ cart, onOrderPlaced }) => {
             bakongAccountId: res.data.bakongAccountId || 'chanmonyroth_hout@bkrt',
             accountName: res.data.accountName || 'CHANMONYROTH HOUT',
             merchantId: res.data.merchantId || '14463116',
-            acledaAccountNumber: res.data.acledaAccountNumber || '089 902 001'
+            acledaAccountNumber: res.data.acledaAccountNumber || '089 902 001',
+            bakongToken: res.data.bakongToken || prev.bakongToken
           }));
         }
       })
@@ -201,89 +202,44 @@ const Checkout = ({ cart, onOrderPlaced }) => {
 
     let sessionData = null;
 
-    // 1. Try backend generation first
     try {
-      const res = await axios.post('/settings/khqr/generate', {
-        amount: Number(subtotal)
+      const now = Date.now();
+      const expiresAt = now + QR_EXPIRATION_SECONDS * 1000;
+      const accountId = paymentConfig.bakongAccountId || 'chanmonyroth_hout@bkrt';
+      const merchantName = (paymentConfig.accountName || 'CHANMONYROTH HOUT').slice(0, 25);
+
+      const qrString = buildLocalBakongKhqr(
+        accountId,
+        merchantName,
+        Number(subtotal),
+        expiresAt
+      );
+      const md5 = CryptoJS.MD5(qrString).toString().toLowerCase();
+
+      const qrDataUrl = await QRCode.toDataURL(qrString, {
+        errorCorrectionLevel: 'M',
+        margin: 2,
+        width: 420,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
       });
-      if (res.data && res.data.qrDataUrl && res.data.md5) {
-        sessionData = res.data;
-      }
-    } catch (err) {
-      // Backend asleep or 404
-    }
 
-    // 2. Official BakongKHQR generation with guaranteed genuine 32-character hexadecimal MD5!
-    if (!sessionData) {
-      try {
-        const now = Date.now();
-        const expiresAt = now + QR_EXPIRATION_SECONDS * 1000;
-        const accountId = paymentConfig.bakongAccountId || 'chanmonyroth_hout@bkrt';
-        const merchantName = (paymentConfig.accountName || 'CHANMONYROTH HOUT').slice(0, 25);
-        const city = 'Phnom Penh';
-
-        let qrString = '';
-        let md5 = '';
-
-        try {
-          const individualInfo = new IndividualInfo(
-            accountId,
-            merchantName,
-            city,
-            {
-              currency: khqrData.currency.usd,
-              amount: Number(subtotal),
-              expirationTimestamp: expiresAt
-            }
-          );
-          const khqr = new BakongKHQR();
-          const khqrRes = khqr.generateIndividual(individualInfo);
-          if (khqrRes?.data?.qr && khqrRes?.data?.md5) {
-            qrString = khqrRes.data.qr;
-            md5 = String(khqrRes.data.md5).toLowerCase();
-          }
-        } catch (sdkErr) {
-          console.warn('BakongKHQR SDK fallback:', sdkErr);
-        }
-
-        if (!qrString) {
-          qrString = buildLocalBakongKhqr(
-            accountId,
-            merchantName,
-            Number(subtotal),
-            expiresAt
-          );
-        }
-
-        if (!md5) {
-          md5 = CryptoJS.MD5(qrString).toString().toLowerCase();
-        }
-
-        const qrDataUrl = await QRCode.toDataURL(qrString, {
-          errorCorrectionLevel: 'M',
-          margin: 2,
-          width: 420,
-          color: {
-            dark: '#000000',
-            light: '#FFFFFF'
-          }
-        });
-
-        sessionData = {
-          qrString,
-          qrDataUrl,
-          md5,
-          amount: Number(subtotal),
-          currency: 'USD',
-          bakongAccountId: accountId,
-          merchantName: merchantName,
-          createdAt: now,
-          expiresAt,
-          expiresInSeconds: QR_EXPIRATION_SECONDS
-        };
-      } catch (genErr) {
-        console.error('Failed to generate KHQR:', genErr);
-      }
+      sessionData = {
+        qrString,
+        qrDataUrl,
+        md5,
+        amount: Number(subtotal),
+        currency: 'USD',
+        bakongAccountId: accountId,
+        merchantName,
+        createdAt: now,
+        expiresAt,
+        expiresInSeconds: QR_EXPIRATION_SECONDS
+      };
+    } catch (genErr) {
+      console.error('Failed to generate KHQR:', genErr);
     }
 
     setGeneratingQr(false);
