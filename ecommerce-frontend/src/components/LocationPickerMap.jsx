@@ -80,7 +80,11 @@ const LocationPickerMap = ({ onLocationSelected, initialAddress = '' }) => {
         const addr = data.address || {};
         const road = addr.road || addr.suburb || addr.neighbourhood || addr.village || '';
         const city = addr.city || addr.town || addr.county || addr.state || 'Phnom Penh';
-        const formatted = road ? `${road}, ${city}` : data.display_name.split(',').slice(0, 3).join(',');
+        const province = addr.state || addr.province || addr.region || '';
+        const cityWithProvince = province && !city.toLowerCase().includes(province.toLowerCase())
+          ? `${city}, ${province}`
+          : city;
+        const formatted = road ? `${road}, ${cityWithProvince}` : data.display_name.split(',').slice(0, 3).join(',');
         
         setDetectedAddress(formatted);
         if (onLocationSelected) {
@@ -88,7 +92,8 @@ const LocationPickerMap = ({ onLocationSelected, initialAddress = '' }) => {
             lat,
             lng,
             fullAddress: formatted,
-            city: city,
+            city: cityWithProvince,
+            province,
             osmData: data
           });
         }
