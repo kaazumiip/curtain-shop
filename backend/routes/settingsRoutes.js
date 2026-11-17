@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const https = require('https');
 const crypto = require('crypto');
-const QRCode = require('qrcode');
 const { db } = require('../config/firebase');
 
 const settingsCollection = db.collection('settings');
@@ -171,16 +170,7 @@ router.post('/khqr/generate', async (req, res) => {
     const qrString = bodyWithoutCrc + computeCrc16(bodyWithoutCrc);
     const md5 = crypto.createHash('md5').update(qrString).digest('hex');
 
-    // Generate high-contrast scannable QR image DataURL
-    const qrDataUrl = await QRCode.toDataURL(qrString, {
-      errorCorrectionLevel: 'M',
-      margin: 2,
-      width: 420,
-      color: {
-        dark: '#000000',
-        light: '#FFFFFF'
-      }
-    });
+    const qrDataUrl = null;
 
     // Always call official Bakong generate_deeplink_by_qr endpoint (works with or without token!)
     let bakongDeepLink = null;
