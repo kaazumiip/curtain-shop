@@ -195,19 +195,22 @@ ${specs.join('\n')}
     ? `✅ <b>PAID (${totalStr})</b> — KHQR`
     : `💳 <b>${order.paymentMethod || 'KHQR'} (${totalStr})</b>`;
 
+  const orderLabel = order.orderNumber ? `#${order.orderNumber}` : `${order._id || order.id}`;
+  const customerNote = (customer.note || order.note || '').trim();
+
   return `${imagePreviewTag}
-🛒 <b>NEW ORDER</b> | ${paymentBadge}
+🛒 <b>NEW ORDER ${orderLabel}</b> | ${paymentBadge}
 ━━━━━━━━━━━━━━━━━━
 👤 <b>${customerName}</b>
 📞 <code>${customer.phone || 'N/A'}</code>${customer.phone2 ? ` / <code>${customer.phone2}</code>` : ''}
-${addressDisplay}
+${addressDisplay}${customerNote ? `\n📝 <b>Note:</b> ${customerNote}` : ''}
 
 📦 <b>ITEMS (${items.length})</b>
 ${itemsList || '  (No items details)'}
 
 💰 <b>TOTAL: ${totalStr}</b>${order.paymentDetails?.transactionRef ? ` | Ref: <code>${order.paymentDetails.transactionRef}</code>` : ''}${order.paymentDetails?.receiptUrl ? `\n🧾 <a href="${order.paymentDetails.receiptUrl}">View Receipt</a>` : ''}
 ━━━━━━━━━━━━━━━━━━
-🆔 <code>${order._id || order.id}</code> • ${orderTime}
+🆔 <b>Order ID:</b> <code>${orderLabel}</code> • ${orderTime}
 `;
 };
 

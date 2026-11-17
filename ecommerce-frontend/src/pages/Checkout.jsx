@@ -249,6 +249,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
     address: '',
     additionalAddress: '',
     city: '',
+    note: '',
     latitude: null,
     longitude: null,
     googleMapsUrl: '',
@@ -693,6 +694,18 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                   style={inputStyle} 
                   value={formData.phone2} 
                   onChange={(e) => setFormData({...formData, phone2: e.target.value})}
+                />
+              </div>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={{ display: 'block', fontSize: '0.74rem', fontWeight: '700', color: '#64748b', marginBottom: '6px' }}>
+                  {language === 'kh' ? 'កំណត់ចំណាំសម្រាប់ការបញ្ជាទិញ (ជាជម្រើស)' : 'Order Note (Optional)'}
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder={language === 'kh' ? 'ឧ. សូមទូរស័ព្ទមុនពេលដឹក ឬ ព័ត៌មានបន្ថែម...' : 'Any special instructions or delivery notes...'}
+                  style={{ ...inputStyle, resize: 'vertical', minHeight: '64px' }}
+                  value={formData.note}
+                  onChange={(e) => setFormData({ ...formData, note: e.target.value })}
                 />
               </div>
             </div>

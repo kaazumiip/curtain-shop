@@ -192,8 +192,23 @@ router.post('/', async (req, res) => {
 
     const finalSubtotal = Number(calculatedSubtotal.toFixed(2));
 
+    // Generate sequential order number (1, 2, 3, ...)
+    let orderNumber = 1;
+    try {
+      const counterRef = db.collection('settings').doc('orderCounter');
+      orderNumber = await db.runTransaction(async (tx) => {
+        const counterDoc = await tx.get(counterRef);
+        const nextNum = (counterDoc.exists ? Number(counterDoc.data()?.lastOrderNumber || 0) : 0) + 1;
+        tx.set(counterRef, { lastOrderNumber: nextNum }, { merge: true });
+        return nextNum;
+      });
+    } catch (counterErr) {
+      console.error('Order counter error:', counterErr.message);
+    }
+
     // 2. Save order document with server-verified total
     const newOrderData = {
+      orderNumber,
       customer: customer || {},
       items: verifiedItems,
       subtotal: finalSubtotal,
