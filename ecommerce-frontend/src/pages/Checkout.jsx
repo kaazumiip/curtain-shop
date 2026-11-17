@@ -1178,41 +1178,36 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                           </span>
                         </button>
 
-                        {/* Instant Verify Payment Button */}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (khqrSession?.md5) {
-                              triggerCheckAtSecond(khqrSession.md5, 'manual');
-                            }
-                          }}
-                          disabled={khqrStatus === 'PAID' || activeCheckSecond !== null}
+                        {/* Automatic Payment Status Indicator */}
+                        <div
                           style={{
                             width: '100%',
                             padding: '11px 16px',
                             borderRadius: '12px',
-                            backgroundColor: khqrStatus === 'PAID' ? '#16a34a' : '#0f172a',
-                            color: '#ffffff',
-                            border: 'none',
-                            fontWeight: '800',
+                            backgroundColor: khqrStatus === 'PAID' ? '#f0fdf4' : '#f8fafc',
+                            color: khqrStatus === 'PAID' ? '#15803d' : '#334155',
+                            border: khqrStatus === 'PAID' ? '1px solid #bbf7d0' : '1px solid #e2e8f0',
+                            fontWeight: '700',
                             fontSize: '0.84rem',
-                            cursor: 'pointer',
                             display: 'inline-flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            gap: '8px',
-                            boxShadow: '0 4px 14px rgba(15,23,42,0.18)'
+                            gap: '8px'
                           }}
                         >
-                          <RefreshCw size={15} style={{ animation: activeCheckSecond ? 'spin 1s linear infinite' : 'none' }} />
+                          {khqrStatus === 'PAID' ? (
+                            <CheckCircle size={16} color="#16a34a" />
+                          ) : (
+                            <RefreshCw size={15} color="#0f172a" style={{ animation: 'spin 1.4s linear infinite' }} />
+                          )}
                           <span>
-                            {khqrStatus === 'PAID'
+                            {submitting
+                              ? (language === 'kh' ? 'កំពុងបញ្ជាក់ការបញ្ជាទិញ...' : 'Completing your order...')
+                              : khqrStatus === 'PAID'
                               ? (language === 'kh' ? 'ការទូទាត់បានជោគជ័យ ✓' : 'Payment Verified ✓')
-                              : activeCheckSecond
-                              ? (language === 'kh' ? 'កំពុងផ្ទៀងផ្ទាត់ការទូទាត់...' : 'Verifying Payment...')
-                              : (language === 'kh' ? 'ខ្ញុំបានបង់ប្រាក់រួចរាល់ (ផ្ទៀងផ្ទាត់ភ្លាមៗ)' : 'I Have Paid (Verify Immediately)')}
+                              : (language === 'kh' ? 'កំពុងរង់ចាំការស្កេនបង់ប្រាក់ (ពិនិត្យស្វ័យប្រវត្តិ)...' : 'Waiting for payment (Checking automatically)...')}
                           </span>
-                        </button>
+                        </div>
                       </div>
                     )}
 
