@@ -121,7 +121,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
     }
   }, []);
 
-  const BAKONG_FALLBACK_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoiNjYyNmFmNzhiZGJjNDY4ZSJ9LCJpYXQiOjE3ODk0MDMwMTQsImV4cCI6MTc5NzE3OTAxNH0.SuOcTS7RwlYaWhPbVXq-uF2UdNBOdKqSJNtANW59g4Y';
+  const phoneInputRef = useRef(null);
 
   const triggerCheckAtSecond = useCallback(async (md5, sec) => {
     if (!md5) return;
@@ -130,40 +130,13 @@ const Checkout = ({ cart, onOrderPlaced }) => {
       let isPaid = false;
       let transactionData = null;
 
-      // 1. Direct NBC Bakong Open API check (Guaranteed fast, real-time & direct CORS)
-      const token = paymentConfig.bakongToken || BAKONG_FALLBACK_TOKEN;
-      try {
-        const nbcResponse = await fetch('https://api-bakong.nbc.gov.kh/v1/check_transaction_by_md5', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ md5: String(md5).trim() })
-        });
-        const nbcData = await nbcResponse.json();
-        if (nbcData && (nbcData.responseCode === 0 || nbcData.status?.code === 0) && nbcData.data) {
-          isPaid = true;
-          transactionData = nbcData.data;
-        }
-      } catch (nbcErr) {
-        // Network or rate limit warning
-      }
-
-      // 2. Try checking backend route as complementary verification
-      if (!isPaid) {
-        try {
-          const res = await axios.post('/settings/khqr/check', {
-            md5,
-            checkSecond: sec
-          });
-          if (res.data?.paid || res.data?.status === 'PAID') {
-            isPaid = true;
-            transactionData = res.data.transaction || null;
-          }
-        } catch (backendErr) {
-          // Backend may be sleeping or older revision
-        }
+      const res = await axios.post('/settings/khqr/check', {
+        md5,
+        checkSecond: sec
+      });
+      if (res.data?.paid || res.data?.status === 'PAID') {
+        isPaid = true;
+        transactionData = res.data.transaction || null;
       }
 
       setCompletedChecks((prev) => (prev.includes(sec) ? prev : [...prev, sec]));
@@ -391,6 +364,12 @@ const Checkout = ({ cart, onOrderPlaced }) => {
   // Send the KHQR image File via navigator.share({ files }) so tapping ABA / ACLEDA auto-inserts the QR directly into Scan QR!
   // Never use `intent://...;package=...` because Android Chrome redirects `intent://` to the Google Play Store!
   const handleDirectSaveAndOpenBankApp = async (bankType = null) => {
+    if (bankType && !formData.phone.trim()) {
+      alert(language === 'kh' ? 'សូមបញ្ចូលលេខទូរស័ព្ទរបស់អ្នកជាមុនសិន!' : 'Please enter your phone number first!');
+      phoneInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      phoneInputRef.current?.focus();
+      return;
+    }
     setShowBankChooser(false);
     const fileName = `KHQR_${subtotal}USD.png`;
 
@@ -691,6 +670,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                   {language === 'kh' ? 'លេខទូរស័ព្ទ (ចាំបាច់) *' : 'Phone Number (Required) *'}
                 </label>
                 <input 
+                  ref={phoneInputRef}
                   required 
                   type="tel" 
                   placeholder={language === 'kh' ? 'ឧ. 012 345 678' : t('phone_number')} 
