@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const https = require('https');
-const { BakongKHQR, khqrData, IndividualInfo } = require('bakong-khqr');
+const crypto = require('crypto');
 const QRCode = require('qrcode');
 const { db } = require('../config/firebase');
 
@@ -140,31 +140,36 @@ router.post('/khqr/generate', async (req, res) => {
     const now = Date.now();
     const expiresAt = now + 100 * 1000; // 100 seconds expiration
 
-    // Only include currency, amount, and expirationTimestamp (no extra billNumber/storeLabel/terminalLabel)
-    const optionalData = {
-      currency: khqrData.currency.usd,
-      amount: amount,
-      expirationTimestamp: expiresAt
+    const formatTag = (tag, val) => {
+      const s = String(val);
+      return `${tag}${String(s.length).padStart(2, '0')}${s}`;
     };
-
-    const individualInfo = new IndividualInfo(
-      bakongAccountId,
-      merchantName,
-      merchantCity,
-      optionalData
-    );
-
-    const khqr = new BakongKHQR();
-    const result = khqr.generateIndividual(individualInfo);
-
-    if (!result || !result.data || !result.data.qr) {
-      return res.status(400).json({
-        error: result?.status?.message || 'Failed to generate Bakong KHQR payload'
-      });
-    }
-
-    const qrString = result.data.qr;
-    const md5 = result.data.md5;
+    const computeCrc16 = (str) => {
+      let crc = 0xFFFF;
+      for (let i = 0; i < str.length; i++) {
+        crc ^= str.charCodeAt(i) << 8;
+        for (let j = 0; j < 8; j++) {
+          crc = (crc & 0x8000) !== 0 ? ((crc << 1) ^ 0x1021) & 0xFFFF : (crc << 1) & 0xFFFF;
+        }
+      }
+      return crc.toString(16).toUpperCase().padStart(4, '0');
+    };
+    const rounded = Math.round(Number(amount || 0) * 100) / 100;
+    const amtStr = Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(2);
+    const tag29 = formatTag('29', formatTag('00', bakongAccountId));
+    const tag99 = formatTag('99', formatTag('00', String(now)) + formatTag('01', String(expiresAt)));
+    const bodyWithoutCrc =
+      '000201010212' +
+      tag29 +
+      '520459995303840' +
+      formatTag('54', amtStr) +
+      '5802KH' +
+      formatTag('59', merchantName) +
+      formatTag('60', merchantCity) +
+      tag99 +
+      '6304';
+    const qrString = bodyWithoutCrc + computeCrc16(bodyWithoutCrc);
+    const md5 = crypto.createHash('md5').update(qrString).digest('hex');
 
     // Generate high-contrast scannable QR image DataURL
     const qrDataUrl = await QRCode.toDataURL(qrString, {
