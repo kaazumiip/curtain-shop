@@ -228,7 +228,9 @@ router.post('/khqr/generate', async (req, res) => {
   }
 });
 
-// @desc    Check Bakong KHQR transaction status by MD5 (called at 5s, 10s, 30s, 45s, 80s, 100s)
+const lastBakongCheckByMd5 = new Map();
+
+// @desc    Check Bakong KHQR transaction status by MD5
 // @route   POST /api/settings/khqr/check
 router.post('/khqr/check', async (req, res) => {
   try {
@@ -236,6 +238,19 @@ router.post('/khqr/check', async (req, res) => {
     if (!md5) {
       return res.status(400).json({ error: 'MD5 hash is required' });
     }
+
+    const md5Key = String(md5);
+    const now = Date.now();
+    const lastCheck = lastBakongCheckByMd5.get(md5Key) || 0;
+    if (now - lastCheck < 5000) {
+      return res.json({
+        paid: false,
+        status: 'PENDING',
+        checkSecond: checkSecond || null,
+        rateLimited: true
+      });
+    }
+    lastBakongCheckByMd5.set(md5Key, now);
 
     // 1. Check local Firestore session first
     let sessionData = null;

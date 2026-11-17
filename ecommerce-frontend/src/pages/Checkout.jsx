@@ -7,8 +7,8 @@ import axios from '../api/axios';
 import { useLanguage } from '../context/LanguageContext';
 import LocationPickerMap from '../components/LocationPickerMap';
 
-const CHECK_INTERVALS_SECONDS = [5, 10, 30, 45, 80, 100];
-const QR_EXPIRATION_SECONDS = 100;
+const CHECK_INTERVALS_SECONDS = [7, 14, 21, 28, 35, 42, 49, 56, 60];
+const QR_EXPIRATION_SECONDS = 60;
 
 // Pure client-side EMVCo CRC16-CCITT helper (fallback if backend is waking up)
 const computeCrc16 = (str) => {
@@ -122,9 +122,13 @@ const Checkout = ({ cart, onOrderPlaced }) => {
   }, []);
 
   const phoneInputRef = useRef(null);
+  const lastCheckAtRef = useRef(0);
 
   const triggerCheckAtSecond = useCallback(async (md5, sec) => {
     if (!md5) return;
+    const now = Date.now();
+    if (now - lastCheckAtRef.current < 5000) return;
+    lastCheckAtRef.current = now;
     setActiveCheckSecond(sec);
     try {
       let isPaid = false;
@@ -230,10 +234,10 @@ const Checkout = ({ cart, onOrderPlaced }) => {
       }
     }, 1000);
 
-    // 2. Schedule status checks every 5 seconds for 100s so payment confirms reliably!
+    // 2. Schedule status checks every 7 seconds for 60s
     const intervalId = setInterval(() => {
       triggerCheckAtSecond(sessionData.md5, 'interval');
-    }, 5000);
+    }, 7000);
     checkTimersRef.current.push(intervalId);
   }, [subtotal, paymentConfig.bakongAccountId, paymentConfig.accountName, clearAllKhqrTimers, triggerCheckAtSecond]);
 
