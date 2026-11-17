@@ -257,10 +257,10 @@ const Checkout = ({ cart, onOrderPlaced }) => {
       }
     }, 1000);
 
-    // 2. Schedule status checks every 3 seconds for 100s so payment confirms immediately!
+    // 2. Schedule status checks every 5 seconds for 100s so payment confirms reliably!
     const intervalId = setInterval(() => {
       triggerCheckAtSecond(sessionData.md5, 'interval');
-    }, 3000);
+    }, 5000);
     checkTimersRef.current.push(intervalId);
   }, [subtotal, paymentConfig.bakongAccountId, paymentConfig.accountName, clearAllKhqrTimers, triggerCheckAtSecond]);
 
