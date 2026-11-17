@@ -186,27 +186,28 @@ ${specs.join('\n')}
   const previewImg = firstItemImg ? (firstItemImg.imageUrl || firstItemImg.images?.[0]?.url) : null;
   const imagePreviewTag = previewImg ? `<a href="${previewImg}">&#8205;</a>` : '';
 
+  const isCod = order.paymentMethod === 'Cash on Delivery';
+  const isPaidKhqr = order.paymentDetails?.khqrStatus === 'PAID';
+  const totalStr = `$${Number(order.subtotal || 0).toFixed(2)}`;
+  const paymentBadge = isCod
+    ? `🚚 <b>COD — Collect ${totalStr}</b>`
+    : isPaidKhqr
+    ? `✅ <b>PAID (${totalStr})</b> — KHQR`
+    : `💳 <b>${order.paymentMethod || 'KHQR'} (${totalStr})</b>`;
+
   return `${imagePreviewTag}
-🔔 <b>NEW ORDER PLACED!</b>
-━━━━━━━━━━━━━━━━━━━━
-🆔 <b>Order ID:</b> <code>${order._id || order.id}</code>
-📅 <b>Date:</b> ${orderTime}
-⚡ <b>Status:</b> <b>${order.status || 'Preparing'}</b>
-
-👤 <b>CUSTOMER & DELIVERY INFORMATION</b>
-• <b>Customer:</b> ${customerName}
-• <b>Phone:</b> <code>${customer.phone || 'N/A'}${customer.phone2 ? ` / ${customer.phone2}` : ''}</code>
-${customer.email ? `• <b>Email:</b> ${customer.email}\n` : ''}• <b>Delivery Address & Map:</b>
+🛒 <b>NEW ORDER</b> | ${paymentBadge}
+━━━━━━━━━━━━━━━━━━
+👤 <b>${customerName}</b>
+📞 <code>${customer.phone || 'N/A'}</code>${customer.phone2 ? ` / <code>${customer.phone2}</code>` : ''}
 ${addressDisplay}
-• <b>Payment Method:</b> ${order.paymentMethod === 'Cash on Delivery' ? '🚚 <b>Cash on Delivery (ទូទាត់ពេលដឹកដល់)</b>\n• <b>Collection Status:</b> ⚠️ <b>Collect $' + Number(order.subtotal || 0).toFixed(2) + ' upon delivery</b>' : ((order.paymentMethod === 'ABA Bank' || order.paymentMethod === 'ABA / ACLEDA / Bakong KHQR') ? '💳 <b>ABA / ACLEDA / Bakong KHQR (' + (order.paymentDetails?.bakongAccountId || 'chanmonyroth_hout@bkrt') + ')</b>' : '💳 <b>' + (order.paymentMethod || 'ABA / ACLEDA / Bakong KHQR') + '</b>')}${order.paymentDetails?.khqrStatus ? `\n• <b>KHQR Status:</b> <code>${order.paymentDetails.khqrStatus}</code>` : ''}${order.paymentDetails?.transactionRef ? `\n• <b>Transaction Ref / Code:</b> <code>${order.paymentDetails.transactionRef}</code>` : ''}${order.paymentDetails?.receiptUrl ? `\n• <b>Payment Receipt:</b> <a href="${order.paymentDetails.receiptUrl}">🧾 មើលវិក្កយបត្របង់ប្រាក់ (View Screenshot)</a>` : ''}
 
-📦 <b>ORDER SPECIFICATIONS (${items.length} Item${items.length > 1 ? 's' : ''})</b>
-━━━━━━━━━━━━━━━━━━━━
+📦 <b>ITEMS (${items.length})</b>
 ${itemsList || '  (No items details)'}
 
-💰 <b>TOTAL AMOUNT DUE:</b> <b>$${Number(order.subtotal || 0).toFixed(2)}</b>
-━━━━━━━━━━━━━━━━━━━━
-<i>Check the Admin Dashboard to accept and advance this order.</i>
+💰 <b>TOTAL: ${totalStr}</b>${order.paymentDetails?.transactionRef ? ` | Ref: <code>${order.paymentDetails.transactionRef}</code>` : ''}${order.paymentDetails?.receiptUrl ? `\n🧾 <a href="${order.paymentDetails.receiptUrl}">View Receipt</a>` : ''}
+━━━━━━━━━━━━━━━━━━
+🆔 <code>${order._id || order.id}</code> • ${orderTime}
 `;
 };
 
