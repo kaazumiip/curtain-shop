@@ -595,7 +595,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
             {String(t('transaction_id') || 'លេខកូដបញ្ជាទិញ').toUpperCase()}
           </p>
           <p style={{ fontWeight: '800', fontSize: '1.25rem', letterSpacing: '1px', margin: 0, color: '#0f172a' }}>
-            #{orderDetails?._id || orderDetails?.id}
+            #{orderDetails?.orderNumber || orderDetails?._id || orderDetails?.id}
           </p>
         </div>
         <div style={{ marginTop: '30px', animation: 'fadeUpIn 0.5s ease-out 0.4s both' }}>
