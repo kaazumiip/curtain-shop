@@ -576,12 +576,37 @@ const Checkout = ({ cart, onOrderPlaced }) => {
   if (isSuccess) {
     return (
       <div style={{ padding: '100px 20px', textAlign: 'center' }}>
-        <CheckCircle size={80} color="#16a34a" style={{ marginBottom: '25px' }} />
-        <h2 className="serif" style={{ fontSize: '2.2rem', marginBottom: '16px' }}>{t('order_placed')}</h2>
-        <p style={{ color: '#64748b', maxWidth: '440px', margin: '0 auto', lineHeight: '1.8', fontSize: '0.95rem' }}>
+        <style>{`
+          @keyframes successPop {
+            0% { transform: scale(0.4); opacity: 0; }
+            65% { transform: scale(1.12); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+          }
+          @keyframes successRing {
+            0% { transform: scale(0.85); opacity: 0.7; }
+            100% { transform: scale(1.65); opacity: 0; }
+          }
+          @keyframes fadeUpIn {
+            0% { transform: translateY(16px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+          }
+        `}</style>
+        <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '25px' }}>
+          <div style={{
+            position: 'absolute',
+            width: '92px',
+            height: '92px',
+            borderRadius: '50%',
+            border: '3px solid #16a34a',
+            animation: 'successRing 1.6s cubic-bezier(0.22, 1, 0.36, 1) infinite'
+          }} />
+          <CheckCircle size={80} color="#16a34a" style={{ animation: 'successPop 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards' }} />
+        </div>
+        <h2 className="serif" style={{ fontSize: '2.2rem', marginBottom: '16px', animation: 'fadeUpIn 0.5s ease-out 0.1s both' }}>{t('order_placed')}</h2>
+        <p style={{ color: '#64748b', maxWidth: '440px', margin: '0 auto', lineHeight: '1.8', fontSize: '0.95rem', animation: 'fadeUpIn 0.5s ease-out 0.2s both' }}>
           {t('order_placed_desc')}
         </p>
-        <div style={{ marginTop: '35px', padding: '18px 24px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px', display: 'inline-block' }}>
+        <div style={{ marginTop: '35px', padding: '18px 24px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px', display: 'inline-block', animation: 'fadeUpIn 0.5s ease-out 0.3s both' }}>
           <p style={{ fontSize: '0.72rem', color: '#64748b', marginBottom: '4px', fontWeight: '700' }}>
             {String(t('transaction_id') || 'លេខកូដបញ្ជាទិញ').toUpperCase()}
           </p>
@@ -589,7 +614,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
             #{orderDetails?._id || orderDetails?.id}
           </p>
         </div>
-        <div style={{ marginTop: '30px' }}>
+        <div style={{ marginTop: '30px', animation: 'fadeUpIn 0.5s ease-out 0.4s both' }}>
           <button 
             type="button"
             onClick={() => navigate('/')}
@@ -968,26 +993,63 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                         </div>
                       </div>
 
-                      <div style={{ padding: '14px', backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '220px', position: 'relative' }}>
+                      <div style={{ padding: '14px', backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '220px', position: 'relative', overflow: 'hidden' }}>
+                        <style>{`
+                          @keyframes khqrScanSweep {
+                            0% { top: 14px; opacity: 0; }
+                            15% { opacity: 0.85; }
+                            85% { opacity: 0.85; }
+                            100% { top: 214px; opacity: 0; }
+                          }
+                          @keyframes khqrFadeIn {
+                            0% { opacity: 0; transform: scale(0.95); }
+                            100% { opacity: 1; transform: scale(1); }
+                          }
+                          @keyframes khqrPaidPop {
+                            0% { opacity: 0; transform: scale(0.6); }
+                            70% { opacity: 1; transform: scale(1.08); }
+                            100% { opacity: 1; transform: scale(1); }
+                          }
+                          @keyframes spin {
+                            from { transform: rotate(0deg); }
+                            to { transform: rotate(360deg); }
+                          }
+                        `}</style>
                         {generatingQr ? (
                           <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: '700' }}>
                             {language === 'kh' ? 'កំពុងបង្កើតកូដ KHQR...' : 'Generating KHQR...'}
                           </div>
                         ) : khqrSession?.qrDataUrl ? (
-                          <img
-                            src={khqrSession.qrDataUrl}
-                            alt="Dynamic Bakong KHQR"
-                            style={{
-                              width: '210px',
-                              height: '210px',
-                              objectFit: 'contain',
-                              borderRadius: '8px',
-                              display: 'block',
-                              filter: khqrStatus === 'EXPIRED' ? 'blur(5px) grayscale(100%)' : 'none',
-                              opacity: khqrStatus === 'EXPIRED' ? 0.35 : 1,
-                              transition: 'all 0.3s ease'
-                            }}
-                          />
+                          <>
+                            <img
+                              src={khqrSession.qrDataUrl}
+                              alt="Dynamic Bakong KHQR"
+                              style={{
+                                width: '210px',
+                                height: '210px',
+                                objectFit: 'contain',
+                                borderRadius: '8px',
+                                display: 'block',
+                                filter: khqrStatus === 'EXPIRED' ? 'blur(5px) grayscale(100%)' : 'none',
+                                opacity: khqrStatus === 'EXPIRED' ? 0.35 : 1,
+                                transition: 'all 0.3s ease',
+                                animation: 'khqrFadeIn 0.35s ease-out'
+                              }}
+                            />
+                            {khqrStatus === 'PENDING' && (
+                              <div style={{
+                                position: 'absolute',
+                                left: '28px',
+                                right: '28px',
+                                height: '3px',
+                                borderRadius: '3px',
+                                background: 'linear-gradient(90deg, transparent, #E1232E, transparent)',
+                                boxShadow: '0 0 10px rgba(225, 35, 46, 0.6)',
+                                pointerEvents: 'none',
+                                animation: 'khqrScanSweep 2.4s ease-in-out infinite'
+                              }} />
+                            )}
+                          </>
                         ) : null}
 
                         {/* Expired Overlay */}
@@ -1040,7 +1102,8 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                             alignItems: 'center',
                             justifyContent: 'center',
                             backgroundColor: 'rgba(240,253,244,0.94)',
-                            padding: '16px'
+                            padding: '16px',
+                            animation: 'khqrPaidPop 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards'
                           }}>
                             <CheckCircle size={48} color="#16a34a" style={{ marginBottom: '8px' }} />
                             <div style={{ fontSize: '0.95rem', fontWeight: '900', color: '#15803d' }}>
