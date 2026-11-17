@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { ShoppingBag, Search, Menu, X, Heart } from 'lucide-react';
+import { ShoppingBag, Search, Menu, X, Heart, Send } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -160,6 +160,27 @@ const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuer
         
         {/* Right: Actions */}
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'flex-end', flexShrink: 0 }}>
+          <a
+            href="https://t.me/sreythacurtain"
+            target="_blank"
+            rel="noreferrer"
+            className="nav-action-btn"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '38px',
+              height: '38px',
+              borderRadius: '50%',
+              backgroundColor: '#e0f2fe',
+              border: '1px solid #bae6fd',
+              color: '#0284c7',
+              textDecoration: 'none'
+            }}
+            title="Telegram"
+          >
+            <Send size={16} />
+          </a>
           <button 
             type="button"
             onClick={openSearch} 
