@@ -7,7 +7,7 @@ const About = () => {
   const addressText = language === 'km' 
     ? 'ផ្លូវលេខ ២០៤, រាជធានីភ្នំពេញ, ខេត្តកណ្តាល' 
     : 'Street 204, Phnom Penh, Kandal Province';
-  const mapsSearchUrl = 'https://www.google.com/maps/search/?api=1&query=Street+204,+Phnom+Penh';
+  const mapsSearchUrl = 'https://maps.app.goo.gl/3WhDDjSb6DBcasCB9';
 
   return (
     <div className="about-container">
@@ -157,7 +157,7 @@ const About = () => {
         {/* Right Column: Embedded Responsive Map */}
         <div className="map-container">
           <iframe 
-            src="https://maps.google.com/maps?q=Street+204,+Phnom+Penh&t=&z=16&ie=UTF8&iwloc=&output=embed"
+            src="https://maps.google.com/maps?q=11.4841993,104.9452056&t=&z=18&ie=UTF8&iwloc=&output=embed"
             width="100%" 
             height="100%" 
             style={{ border: 0 }} 
