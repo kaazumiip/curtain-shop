@@ -207,6 +207,74 @@ const About = () => {
           </div>
         </div>
 
+        {/* Dedicated Clickable Facebook Page Card */}
+        <a
+          href="https://www.facebook.com/profile.php?id=100057516936336"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '16px',
+            marginTop: '24px',
+            padding: '24px 28px',
+            borderRadius: '24px',
+            background: 'linear-gradient(135deg, #1877f2 0%, #0d5bd9 100%)',
+            color: '#ffffff',
+            textDecoration: 'none',
+            boxShadow: '0 10px 30px rgba(24, 119, 242, 0.25)',
+            transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 14px 36px rgba(24, 119, 242, 0.35)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 10px 30px rgba(24, 119, 242, 0.25)';
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{
+              width: '50px',
+              height: '50px',
+              borderRadius: '14px',
+              backgroundColor: 'rgba(255,255,255,0.18)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.5rem',
+              fontWeight: '900'
+            }}>
+              f
+            </div>
+            <div>
+              <span style={{ fontSize: '0.75rem', fontWeight: '700', letterSpacing: '1.2px', textTransform: 'uppercase', opacity: 0.85 }}>
+                {language === 'km' ? 'ទំព័រហ្វេសប៊ុកផ្លូវការ' : 'Official Facebook Page'}
+              </span>
+              <h3 style={{ margin: '2px 0 0', fontSize: '1.2rem', fontWeight: '800', color: '#ffffff' }}>
+                Srey Tha Curtain — ស្រីថា វាំងនន
+              </h3>
+            </div>
+          </div>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '10px 20px',
+            borderRadius: '50px',
+            backgroundColor: '#ffffff',
+            color: '#1877f2',
+            fontWeight: '800',
+            fontSize: '0.88rem'
+          }}>
+            <span>{language === 'km' ? 'ចូលមើល Facebook' : 'Visit Facebook'}</span>
+            <ExternalLink size={16} />
+          </div>
+        </a>
+
         {/* Right Column: Embedded Responsive Map */}
         <div className="map-container">
           <iframe 
