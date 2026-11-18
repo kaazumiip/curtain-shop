@@ -11,7 +11,8 @@ const Home = ({ products, onAddToCart, favorites, onToggleFavorite }) => {
 
   const categories = [
     { id: 'All', name: 'ទាំងអស់' },
-    { id: 'Curtain', name: 'វាំងនន' },
+    { id: 'Curtain', name: 'វាំងននកាត់តាមទំហំ' },
+    { id: 'Ready-Made Curtain', name: 'វាំងននស្រាប់' },
     { id: 'Valance', name: 'ដក់' },
     { id: 'Fabric', name: 'ក្រណាត់ម៉ែត្រ' },
     { id: 'Bed Sheet', name: 'កម្រាលពូក' },

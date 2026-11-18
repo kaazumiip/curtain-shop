@@ -20,6 +20,7 @@ const Shop = ({ products, onAddToCart, favorites, onToggleFavorite }) => {
   const categories = [
     'All',
     'Curtain',
+    'Ready-Made Curtain',
     'Valance',
     'Fabric',
     'Bed Sheet',

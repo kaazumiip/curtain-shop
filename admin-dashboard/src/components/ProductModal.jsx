@@ -486,7 +486,8 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                           setFormData(update);
                         }}
                       >
-                        <option value="Curtain">{t('curtain')}</option>
+                        <option value="Curtain">{t('curtain')} (Tailor-Made)</option>
+                        <option value="Ready-Made Curtain">វាំងននស្រាប់ (Ready-Made Curtain)</option>
                         <option value="Valance">{t('valance')}</option>
                         <option value="Fabric">{t('fabric')}</option>
                         <option value="Bed Sheet">{t('bed_sheet')}</option>
