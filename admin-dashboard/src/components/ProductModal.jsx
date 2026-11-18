@@ -756,6 +756,26 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                     </div>
                   )}
 
+                  {/* Ready-Made Curtain Fixed Size */}
+                  {formData.category === 'Ready-Made Curtain' && (
+                    <div style={styles.formRow} className="wizard-form-row">
+                      <div style={styles.rowLabelCol}>
+                        <div style={styles.rowTitle}>ទំហំវាំងននស្រាប់ (Fixed Size)</div>
+                        <div style={styles.rowSub}>បញ្ចូលទំហំថេររបស់វាំងននស្រាប់ (ឧ. 140cm × 260cm)</div>
+                      </div>
+                      <div style={styles.rowInputCol}>
+                        <label style={styles.miniFieldLabel}>ទំហំថេរ (Fixed Size / Length)</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. 140cm × 260cm"
+                          value={formData.fixedDimensions || ''}
+                          onChange={(e) => setFormData({ ...formData, fixedDimensions: e.target.value })}
+                          style={styles.input}
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   {/* Ready-Made Curtain Option */}
                   {formData.category === 'Curtain' && (
                     <div style={styles.formRow} className="wizard-form-row">
