@@ -241,7 +241,7 @@ const LocationPickerMap = ({ onLocationSelected, initialAddress = '' }) => {
         setCoords({ lat: latitude, lng: longitude });
 
         if (mapInstanceRef.current && markerRef.current) {
-          mapInstanceRef.current.flyTo([latitude, longitude], 17, { duration: 1.5 });
+          mapInstanceRef.current.flyTo([latitude, longitude], 18, { duration: 1.5 });
           markerRef.current.setLatLng([latitude, longitude]);
         }
 
@@ -253,7 +253,7 @@ const LocationPickerMap = ({ onLocationSelected, initialAddress = '' }) => {
         console.warn('Geolocation error:', error);
         alert('សូមអនុញ្ញាតបើក Location (GPS) ក្នុង Browser របស់អ្នកដើម្បីចាប់ទីតាំងស្វ័យប្រវត្តិ។');
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
     );
   };
 
@@ -720,6 +720,44 @@ const LocationPickerMap = ({ onLocationSelected, initialAddress = '' }) => {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Quick Telegram Chat with Seller */}
+      <div style={{
+        marginTop: '10px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '8px',
+        padding: '10px 14px',
+        backgroundColor: '#f0f9ff',
+        border: '1px solid #bae6fd',
+        borderRadius: '12px'
+      }}>
+        <span style={{ fontSize: '0.78rem', fontWeight: '600', color: '#0369a1' }}>
+          ត្រូវការជំនួយ ឬចង់ផ្ញើទីតាំងផ្ទាល់តាម Telegram?
+        </span>
+        <a
+          href="https://t.me/sreythacurtain"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '7px 14px',
+            borderRadius: '50px',
+            backgroundColor: '#0284c7',
+            color: '#ffffff',
+            fontSize: '0.78rem',
+            fontWeight: '700',
+            textDecoration: 'none',
+            boxShadow: '0 2px 6px rgba(2,132,199,0.25)'
+          }}
+        >
+          <span>💬 Chat with Seller on Telegram</span>
+        </a>
       </div>
     </div>
   );
