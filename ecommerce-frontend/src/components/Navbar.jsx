@@ -178,20 +178,21 @@ const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuer
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '6px',
-              padding: '7px 12px',
+              gap: 'clamp(4px, 1vw, 6px)',
+              padding: 'clamp(5px, 1.5vw, 7px) clamp(8px, 2.2vw, 12px)',
               borderRadius: '999px',
               backgroundColor: '#e0f2fe',
               border: '1px solid #bae6fd',
               color: '#0284c7',
               textDecoration: 'none',
-              fontSize: '0.78rem',
+              fontSize: 'clamp(0.66rem, 2.6vw, 0.78rem)',
               fontWeight: '700',
-              whiteSpace: 'nowrap'
+              whiteSpace: 'nowrap',
+              flexShrink: 0
             }}
             title="ទាក់ទង Telegram"
           >
-            <Send size={15} />
+            <Send size={14} style={{ flexShrink: 0 }} />
             <span>ទាក់ទង Telegram</span>
           </a>
           <button 
