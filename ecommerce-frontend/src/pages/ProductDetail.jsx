@@ -795,7 +795,7 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
           )}
 
 
-          {(product.category === 'Curtain' || product.category === 'Valance') && (
+          {product.category === 'Curtain' && (
             <div style={{ marginBottom: '40px' }}>
               <label style={{ fontSize: '0.7rem', fontWeight: '800', display: 'block', marginBottom: '15px' }}>{t('pole_ring_color')}</label>
               <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
@@ -904,7 +904,7 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
                       customWidth: widthVal,
                       customHeight: isPole ? null : heightVal,
                       quantity: q,
-                      poleColor: ['Curtain', 'Valance'].includes(product.category) ? (combinedHardwareOptions.find(rc => rc.name === selectedPoleColor) || { name: selectedPoleColor }) : null,
+                      poleColor: product.category === 'Curtain' ? (combinedHardwareOptions.find(rc => rc.name === selectedPoleColor) || { name: selectedPoleColor }) : null,
                       cascadeStyle: product.category === 'Valance' ? selectedCascadeStyle : null,
                       totalPrice: itemCost
                     };
