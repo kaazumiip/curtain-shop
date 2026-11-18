@@ -146,7 +146,7 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
     if (!product) return;
     let basePrice = Number(product.price);
     
-    if (['Curtain', 'Valance'].includes(product.category) || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole')) {
+    if ((product.category === 'Curtain' && !product.isReadyMade) || product.category === 'Valance' || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole')) {
       setTotalPrice(totalWindowsSubtotal.toFixed(2));
     } else if (product.category === 'Fabric') {
       const meters = parseFloat(fabricMeters) || 0;
@@ -407,7 +407,7 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
             </div>
           )}
 
-          {(['Curtain', 'Valance'].includes(product.category) || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole')) && (
+          {((product.category === 'Curtain' && !product.isReadyMade) || product.category === 'Valance' || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole')) && (
             <div style={{ marginBottom: '40px' }}>
               {/* Clear Pricing Instruction Callout Banner */}
               {['Curtain', 'Valance'].includes(product.category) && (
@@ -728,7 +728,7 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
           )}
 
           {/* Standalone Quantity Selector for non-Curtain products */}
-          {!['Curtain', 'Valance'].includes(product.category) && !(product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole') && (
+          {!((product.category === 'Curtain' && !product.isReadyMade) || product.category === 'Valance') && !(product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole') && (
             <div style={{ marginBottom: '40px' }}>
               <label style={{ fontSize: '0.7rem', fontWeight: '800', display: 'block', marginBottom: '15px', letterSpacing: '1px', textTransform: 'uppercase' }}>
                 {t('quantity') || 'Quantity'}
@@ -795,7 +795,7 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
           )}
 
 
-          {product.category === 'Curtain' && (
+          {product.category === 'Curtain' && !product.isReadyMade && (
             <div style={{ marginBottom: '40px' }}>
               <label style={{ fontSize: '0.7rem', fontWeight: '800', display: 'block', marginBottom: '15px' }}>{t('pole_ring_color')}</label>
               <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
@@ -880,7 +880,7 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
               onClick={() => {
                 if (Number(product.stock) <= 0) return;
 
-                if (['Curtain', 'Valance'].includes(product.category) || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole')) {
+                if ((product.category === 'Curtain' && !product.isReadyMade) || product.category === 'Valance' || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole')) {
                   const isPole = product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole';
                   const itemsToAdd = windowSizes.map((w, idx) => {
                     const widthVal = parseFloat(w.width) || 0;
@@ -936,7 +936,7 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
               <ShoppingBag size={20} />
               {Number(product.stock) <= 0 
                 ? 'អស់ពីស្តុក (Out of Stock)' 
-                : (['Curtain', 'Valance'].includes(product.category) || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole'))
+                : ((product.category === 'Curtain' && !product.isReadyMade) || product.category === 'Valance' || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole'))
                   ? (windowSizes.length > 1 
                       ? (language === 'kh' ? `ដាក់ចូលកន្ត្រកទាំងអស់ (${windowSizes.length} បង្អួច) — $${totalWindowsSubtotal.toFixed(2)}` : `Add All to Cart (${windowSizes.length} Windows) — $${totalWindowsSubtotal.toFixed(2)}`)
                       : (language === 'kh' ? `ដាក់ចូលកន្ត្រក — $${totalWindowsSubtotal.toFixed(2)}` : `Add to Cart — $${totalWindowsSubtotal.toFixed(2)}`))

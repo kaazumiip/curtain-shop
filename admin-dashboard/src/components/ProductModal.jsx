@@ -32,6 +32,8 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
     originalPrice: '',
     category: 'Curtain',
     stock: 10,
+    isReadyMade: false,
+    fixedDimensions: '',
     images: [], // Array of {url, color}
     customOptions: {
       hasHeaderOptions: false,
@@ -92,6 +94,8 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
         price: '',
         category: 'Curtain',
         stock: 10,
+        isReadyMade: false,
+        fixedDimensions: '',
         images: [],
         customOptions: {
           hasHeaderOptions: false,
@@ -747,6 +751,39 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                             <Plus size={16} />
                           </button>
                         </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Ready-Made Curtain Option */}
+                  {formData.category === 'Curtain' && (
+                    <div style={styles.formRow} className="wizard-form-row">
+                      <div style={styles.rowLabelCol}>
+                        <div style={styles.rowTitle}>វាំងននស្រាប់ (Ready-Made Curtain)</div>
+                        <div style={styles.rowSub}>បើកជម្រើសនេះប្រសិនបើវាំងននមានទំហំ និងតម្លៃថេរស្រាប់ (មិនបាច់វាស់ទំហំ)</div>
+                      </div>
+                      <div style={styles.rowInputCol}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontWeight: '700', fontSize: '0.9rem', color: '#0f172a', marginBottom: formData.isReadyMade ? '12px' : '0' }}>
+                          <input
+                            type="checkbox"
+                            checked={Boolean(formData.isReadyMade)}
+                            onChange={(e) => setFormData({ ...formData, isReadyMade: e.target.checked })}
+                            style={{ width: '18px', height: '18px', accentColor: '#0f172a', cursor: 'pointer' }}
+                          />
+                          <span>Ready-Made Curtain (Fixed Length & Price)</span>
+                        </label>
+                        {formData.isReadyMade && (
+                          <div>
+                            <label style={styles.miniFieldLabel}>ទំហំថេរ (ឧ. 140cm × 260cm)</label>
+                            <input
+                              type="text"
+                              placeholder="e.g. 140cm × 260cm"
+                              value={formData.fixedDimensions || ''}
+                              onChange={(e) => setFormData({ ...formData, fixedDimensions: e.target.value })}
+                              style={styles.input}
+                            />
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
