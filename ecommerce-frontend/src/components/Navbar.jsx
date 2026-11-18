@@ -74,10 +74,19 @@ const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuer
     setHoveredProduct(null);
   };
 
+  const sanitizeSearchQuery = (raw) =>
+    String(raw || '')
+      .replace(/[<>"'`;{}\$\\\x00-\x1F\x7F]/g, '')
+      .trim()
+      .slice(0, 80);
+
   const handleSearchSubmit = (e) => {
-    if (e.key === 'Enter' && searchQuery.trim()) {
-      setIsExpanded(false);
-      navigate(`/search?q=${searchQuery}`);
+    if (e.key === 'Enter') {
+      const safeQuery = sanitizeSearchQuery(searchQuery);
+      if (safeQuery) {
+        setIsExpanded(false);
+        navigate(`/search?q=${encodeURIComponent(safeQuery)}`);
+      }
     }
     if (e.key === 'Escape') closeSearch();
   };
@@ -163,23 +172,27 @@ const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuer
           <a
             href="https://t.me/sreythacurtain"
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             className="nav-action-btn"
             style={{
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '38px',
-              height: '38px',
-              borderRadius: '50%',
+              gap: '6px',
+              padding: '7px 12px',
+              borderRadius: '999px',
               backgroundColor: '#e0f2fe',
               border: '1px solid #bae6fd',
               color: '#0284c7',
-              textDecoration: 'none'
+              textDecoration: 'none',
+              fontSize: '0.78rem',
+              fontWeight: '700',
+              whiteSpace: 'nowrap'
             }}
-            title="Telegram"
+            title="ទាក់ទង Telegram"
           >
-            <Send size={16} />
+            <Send size={15} />
+            <span>ទាក់ទង Telegram</span>
           </a>
           <button 
             type="button"
