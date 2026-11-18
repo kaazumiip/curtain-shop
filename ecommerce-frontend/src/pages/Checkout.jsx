@@ -658,7 +658,59 @@ const Checkout = ({ cart, onOrderPlaced }) => {
             #{orderDetails?.orderNumber || orderDetails?._id || orderDetails?.id}
           </p>
         </div>
-        <div style={{ marginTop: '30px', animation: 'fadeUpIn 0.5s ease-out 0.4s both' }}>
+        <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap', animation: 'fadeUpIn 0.5s ease-out 0.4s both' }}>
+          <button
+            type="button"
+            onClick={() => {
+              const win = window.open('', '_blank', 'width=720,height=900');
+              if (!win) return;
+              const orderNo = orderDetails?.orderNumber ? `#${orderDetails.orderNumber}` : (orderDetails?._id || '');
+              const itemsHtml = (orderDetails?.items || []).map((item) => `
+                <tr>
+                  <td style="padding:10px 8px;border-bottom:1px solid #e2e8f0;">${item.name || ''}</td>
+                  <td style="padding:10px 8px;border-bottom:1px solid #e2e8f0;text-align:center;">${item.quantity || 1}</td>
+                  <td style="padding:10px 8px;border-bottom:1px solid #e2e8f0;text-align:right;">$${Number(item.price || 0).toFixed(2)}</td>
+                </tr>
+              `).join('');
+              win.document.write(`
+                <html>
+                  <head>
+                    <title>Invoice ${orderNo} - Srey Tha Curtain</title>
+                    <style>
+                      body { font-family: 'Noto Sans Khmer', Arial, sans-serif; padding: 32px; color: #0f172a; }
+                      h1 { margin: 0 0 4px; font-size: 22px; }
+                      table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                      th { text-align: left; padding: 10px 8px; border-bottom: 2px solid #0f172a; font-size: 13px; }
+                      .total { margin-top: 20px; text-align: right; font-size: 18px; font-weight: 800; }
+                    </style>
+                  </head>
+                  <body>
+                    <h1>Srey Tha Curtain — ស្រីថា វាំងនន</h1>
+                    <p style="color:#64748b;margin:0 0 20px;">វិក្កយបត្រ / Invoice ${orderNo} • ${new Date(orderDetails?.createdAt || Date.now()).toLocaleString()}</p>
+                    <p><strong>Phone:</strong> ${orderDetails?.customer?.phone || '-'}</p>
+                    <p><strong>Address:</strong> ${orderDetails?.customer?.address || '-'}</p>
+                    <p><strong>Payment:</strong> ${orderDetails?.paymentMethod || '-'}</p>
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Item</th>
+                          <th style="text-align:center;">Qty</th>
+                          <th style="text-align:right;">Price</th>
+                        </tr>
+                      </thead>
+                      <tbody>${itemsHtml}</tbody>
+                    </table>
+                    <div class="total">Total: $${Number(orderDetails?.totalAmount || 0).toFixed(2)}</div>
+                    <script>window.onload = function() { window.print(); };</script>
+                  </body>
+                </html>
+              `);
+              win.document.close();
+            }}
+            style={{ padding: '14px 28px', borderRadius: '50px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff', color: '#0f172a', cursor: 'pointer', fontWeight: '700', fontSize: '0.9rem' }}
+          >
+            {language === 'kh' ? '🧾 ទាញយក / បោះពុម្ពវិក្កយបត្រ' : '🧾 Save / Print Invoice'}
+          </button>
           <button 
             type="button"
             onClick={() => navigate('/')}
