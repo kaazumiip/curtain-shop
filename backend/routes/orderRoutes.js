@@ -240,15 +240,31 @@ router.post('/', async (req, res) => {
 
 // @route   GET /api/orders
 // @desc    Get all orders (for admin)
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+
+const filterAndCleanupCancelledOrders = (orders) => {
+  const now = Date.now();
+  return orders.filter((order) => {
+    if (String(order.status || '').toLowerCase() === 'cancelled') {
+      const refTime = new Date(order.updatedAt || order.createdAt || 0).getTime();
+      if (refTime > 0 && now - refTime > SEVEN_DAYS_MS) {
+        collection.doc(order._id).delete().catch(() => {});
+        return false;
+      }
+    }
+    return true;
+  });
+};
+
 router.get('/', async (req, res) => {
   try {
     const snapshot = await collection.orderBy('createdAt', 'desc').get();
-    const orders = snapshot.docs.map(formatOrder);
+    const orders = filterAndCleanupCancelledOrders(snapshot.docs.map(formatOrder));
     res.json(orders);
   } catch (err) {
     try {
       const snapshot = await collection.get();
-      const orders = snapshot.docs.map(formatOrder);
+      const orders = filterAndCleanupCancelledOrders(snapshot.docs.map(formatOrder));
       orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       res.json(orders);
     } catch (fallbackErr) {
