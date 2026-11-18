@@ -1,8 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 
 const OrdersTable = ({ orders, onSelectOrder }) => {
   const { t } = useLanguage();
+  const [statusFilter, setStatusFilter] = useState('all');
+
+  const filterGroups = [
+    { id: 'all', label: 'ទាំងអស់ (All)', match: () => true },
+    { id: 'new', label: 'ថ្មី / កំពុងរៀបចំ (New)', match: (s) => ['Pending', 'Preparing'].includes(s || 'Pending') },
+    { id: 'shipping', label: 'កំពុងដឹក / ជិតរួចរាល់ (In Progress)', match: (s) => ['Processing', 'Finishing Touch', 'Shipped', 'To Shipping Place', 'Shipping Processing', 'Head to Location'].includes(s) },
+    { id: 'done', label: 'រួចរាល់ (Completed)', match: (s) => ['Order Arrived', 'Delivered'].includes(s) },
+    { id: 'cancelled', label: 'បានបោះបង់ (Cancelled)', match: (s) => s === 'Cancelled' }
+  ];
+
+  const activeGroup = filterGroups.find((g) => g.id === statusFilter) || filterGroups[0];
+  const displayedOrders = orders.filter((o) => activeGroup.match(o.status));
 
   const getStatusLabel = (status) => {
     const map = {
@@ -29,6 +41,55 @@ const OrdersTable = ({ orders, onSelectOrder }) => {
 
   return (
     <div>
+      {/* Simple, Large Status Filter Tabs for Easy Order Organization */}
+      <div style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: '10px',
+        marginBottom: '20px',
+        padding: '12px',
+        backgroundColor: '#f8fafc',
+        borderRadius: '14px',
+        border: '1px solid #e2e8f0'
+      }}>
+        {filterGroups.map((group) => {
+          const count = orders.filter((o) => group.match(o.status)).length;
+          const isActive = statusFilter === group.id;
+          return (
+            <button
+              key={group.id}
+              type="button"
+              onClick={() => setStatusFilter(group.id)}
+              style={{
+                padding: '10px 16px',
+                borderRadius: '10px',
+                border: isActive ? '2px solid #0f172a' : '1px solid #cbd5e1',
+                backgroundColor: isActive ? '#0f172a' : '#ffffff',
+                color: isActive ? '#ffffff' : '#0f172a',
+                fontWeight: '700',
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              <span>{group.label}</span>
+              <span style={{
+                padding: '2px 8px',
+                borderRadius: '999px',
+                fontSize: '0.78rem',
+                fontWeight: '800',
+                backgroundColor: isActive ? 'rgba(255,255,255,0.2)' : '#e2e8f0',
+                color: isActive ? '#ffffff' : '#0f172a'
+              }}>
+                {count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
       {/* Desktop Table View */}
       <div className="desktop-only-table vanguard-table-container">
         <table className="vanguard-table">
@@ -44,12 +105,12 @@ const OrdersTable = ({ orders, onSelectOrder }) => {
             </tr>
           </thead>
           <tbody>
-            {orders.map(order => {
+            {displayedOrders.map(order => {
               const colors = getStatusColors(order.status);
               return (
                 <tr key={order._id} onClick={() => onSelectOrder(order)} style={{ cursor: 'pointer' }}>
-                  <td style={{ fontSize: '0.7rem', fontWeight: '800', fontFamily: 'monospace', color: '#3498db' }}>
-                    {order._id}
+                  <td style={{ fontSize: '0.95rem', fontWeight: '800', color: '#0f172a' }}>
+                    {order.orderNumber ? `#${order.orderNumber}` : order._id}
                   </td>
                   <td style={{ fontSize: '0.8rem', color: '#666' }}>
                     {new Date(order.createdAt).toLocaleDateString()}
