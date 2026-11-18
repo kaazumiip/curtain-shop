@@ -705,8 +705,8 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                     </div>
                   </div>
 
-                  {/* Row 2: Bed Sheet / Pillow Case Sizes */}
-                  {(formData.category === 'Bed Sheet' || formData.category === 'Pillow Case') && (
+                  {/* Row 2: Bed Sheet / Pillow Case / Ready-Made Curtain Sizes */}
+                  {(formData.category === 'Bed Sheet' || formData.category === 'Pillow Case' || formData.category === 'Ready-Made Curtain') && (
                     <div style={styles.formRow} className="wizard-form-row">
                       <div style={styles.rowLabelCol}>
                         <div style={styles.rowTitle}>{t('size_options_title')}</div>
