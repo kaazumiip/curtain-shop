@@ -57,28 +57,32 @@ const StockTable = ({ products, onEdit, onDelete, onDuplicate, onAddStock }) => 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   <span style={{ fontWeight: '700', color: '#0f172a' }}>{product.stock} {t('in_stock')}</span>
                   {onAddStock && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
-                      {[1, 5, 10].map((amt) => (
-                        <button
-                          key={amt}
-                          type="button"
-                          onClick={() => onAddStock(product, amt)}
-                          title={`Add +${amt} stock`}
-                          style={{
-                            padding: '2px 8px',
-                            fontSize: '0.72rem',
-                            fontWeight: '700',
-                            borderRadius: '6px',
-                            border: '1px solid #cbd5e1',
-                            backgroundColor: '#f8fafc',
-                            color: '#0f172a',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          +{amt}
-                        </button>
-                      ))}
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const input = window.prompt(`Add stock for "${product.name}" (current: ${product.stock}):`, '1');
+                        if (input === null) return;
+                        const amt = parseInt(input, 10);
+                        if (Number.isNaN(amt) || amt === 0) {
+                          alert('Please enter a valid number.');
+                          return;
+                        }
+                        onAddStock(product, amt);
+                      }}
+                      style={{
+                        alignSelf: 'flex-start',
+                        padding: '4px 10px',
+                        fontSize: '0.75rem',
+                        fontWeight: '700',
+                        borderRadius: '8px',
+                        border: '1px solid #0f172a',
+                        backgroundColor: '#0f172a',
+                        color: '#ffffff',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      + Add Stock
+                    </button>
                   )}
                 </div>
               </td>
