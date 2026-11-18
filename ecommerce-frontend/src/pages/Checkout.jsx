@@ -222,6 +222,9 @@ const Checkout = ({ cart, onOrderPlaced }) => {
     setGeneratingQr(false);
     if (!sessionData) return;
     setKhqrSession(sessionData);
+    try {
+      localStorage.setItem('sreytha_pending_khqr', JSON.stringify(sessionData));
+    } catch (e) {}
 
     // 1. Start 1-second visual countdown up to 100s expiration
     const expiryTime = sessionData.expiresAt || (Date.now() + QR_EXPIRATION_SECONDS * 1000);
@@ -241,7 +244,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
     checkTimersRef.current.push(intervalId);
   }, [subtotal, paymentConfig.bakongAccountId, paymentConfig.accountName, clearAllKhqrTimers, triggerCheckAtSecond]);
 
-  const [formData, setFormData] = useState({
+  const defaultFormData = {
     firstName: '',
     lastName: '',
     phone: '',
@@ -258,17 +261,70 @@ const Checkout = ({ cart, onOrderPlaced }) => {
     cardExpiry: '',
     cardCvv: '',
     cardName: ''
+  };
+
+  const [formData, setFormData] = useState(() => {
+    try {
+      const saved = localStorage.getItem('sreytha_checkout_form');
+      if (saved) {
+        return { ...defaultFormData, ...JSON.parse(saved) };
+      }
+    } catch (e) {}
+    return defaultFormData;
   });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('sreytha_checkout_form', JSON.stringify(formData));
+    } catch (e) {}
+  }, [formData]);
 
   useEffect(() => {
     const isKhqr = formData.paymentMethod === 'ABA / ACLEDA / Bakong KHQR' || formData.paymentMethod === 'ABA Bank';
     if (isKhqr && cart.length > 0) {
+      try {
+        const savedRaw = localStorage.getItem('sreytha_pending_khqr');
+        if (savedRaw) {
+          const saved = JSON.parse(savedRaw);
+          // Restore if same amount and created within the last 5 minutes (handles mobile app-switch reloads)
+          if (
+            saved &&
+            saved.md5 &&
+            Number(saved.amount) === Number(subtotal) &&
+            Date.now() - Number(saved.createdAt || 0) < 5 * 60 * 1000
+          ) {
+            clearAllKhqrTimers();
+            setKhqrSession(saved);
+            setKhqrStatus('PENDING');
+            const remaining = Math.max(0, Math.ceil((saved.expiresAt - Date.now()) / 1000));
+            setSecondsLeft(remaining);
+
+            countdownRef.current = setInterval(() => {
+              const rem = Math.max(0, Math.ceil((saved.expiresAt - Date.now()) / 1000));
+              setSecondsLeft(rem);
+              if (rem <= 0) {
+                setKhqrStatus((curr) => (curr === 'PAID' ? 'PAID' : 'EXPIRED'));
+                if (countdownRef.current) clearInterval(countdownRef.current);
+              }
+            }, 1000);
+
+            const intervalId = setInterval(() => {
+              triggerCheckAtSecond(saved.md5, 'interval');
+            }, 7000);
+            checkTimersRef.current.push(intervalId);
+
+            // Immediately check if payment already went through while away
+            triggerCheckAtSecond(saved.md5, 'restore');
+            return () => clearAllKhqrTimers();
+          }
+        }
+      } catch (e) {}
       generateDynamicKhqr();
     } else {
       clearAllKhqrTimers();
     }
     return () => clearAllKhqrTimers();
-  }, [formData.paymentMethod, subtotal, cart.length, generateDynamicKhqr, clearAllKhqrTimers]);
+  }, [formData.paymentMethod, subtotal, cart.length, generateDynamicKhqr, clearAllKhqrTimers, triggerCheckAtSecond]);
 
   // Immediately verify payment with Bakong when the customer switches back from ABA / ACLEDA to the browser!
   useEffect(() => {
@@ -497,6 +553,10 @@ const Checkout = ({ cart, onOrderPlaced }) => {
 
       setOrderDetails(res.data);
       setIsSuccess(true);
+      try {
+        localStorage.removeItem('sreytha_checkout_form');
+        localStorage.removeItem('sreytha_pending_khqr');
+      } catch (e) {}
       if (onOrderPlaced) onOrderPlaced();
     } catch (err) {
       console.error('Failed to place order:', err);
