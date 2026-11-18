@@ -2,7 +2,7 @@ import React from 'react';
 import { Edit2, Trash2, Copy } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
-const StockTable = ({ products, onEdit, onDelete, onDuplicate }) => {
+const StockTable = ({ products, onEdit, onDelete, onDuplicate, onAddStock }) => {
   const { t } = useLanguage();
 
   return (
@@ -53,7 +53,35 @@ const StockTable = ({ products, onEdit, onDelete, onDuplicate }) => {
                   </div>
                 )}
               </td>
-              <td style={{ color: '#8e8e8e' }}>{product.stock} {t('in_stock')}</td>
+              <td style={{ color: '#8e8e8e' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <span style={{ fontWeight: '700', color: '#0f172a' }}>{product.stock} {t('in_stock')}</span>
+                  {onAddStock && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+                      {[1, 5, 10].map((amt) => (
+                        <button
+                          key={amt}
+                          type="button"
+                          onClick={() => onAddStock(product, amt)}
+                          title={`Add +${amt} stock`}
+                          style={{
+                            padding: '2px 8px',
+                            fontSize: '0.72rem',
+                            fontWeight: '700',
+                            borderRadius: '6px',
+                            border: '1px solid #cbd5e1',
+                            backgroundColor: '#f8fafc',
+                            color: '#0f172a',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          +{amt}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </td>
               <td>
                 <span className={`stock-badge ${product.status}`}>
                   {product.status === 'available' ? t('status_available') : product.status === 'low-stock' ? t('status_low_stock') : t('status_sold_out')}

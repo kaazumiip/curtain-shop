@@ -379,6 +379,16 @@ function Dashboard({ onLogout }) {
           onEdit={openEditModal} 
           onDelete={handleDelete} 
           onDuplicate={handleDuplicateProduct}
+          onAddStock={async (product, delta) => {
+            try {
+              const newStock = Math.max(0, Number(product.stock || 0) + delta);
+              await axios.put(`/products/${product._id}`, { stock: newStock });
+              fetchProducts();
+            } catch (err) {
+              console.error('Failed to update stock:', err);
+              alert('Failed to update stock');
+            }
+          }}
         />
       ) : (
         <OrdersTable orders={filteredOrders} onSelectOrder={handleSelectOrder} />
