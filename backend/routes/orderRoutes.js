@@ -319,8 +319,8 @@ router.post('/telegram-webhook', async (req, res) => {
         tgReq.write(payload);
         tgReq.end();
 
-        // Remove inline buttons when order is marked Ready / Delivered / Cancelled
-        if (['Finishing Touch', 'Order Arrived', 'Cancelled'].includes(newStatus) && cb.message?.chat?.id && cb.message?.message_id) {
+        // Remove inline buttons only when order is Delivered or Cancelled
+        if (['Order Arrived', 'Cancelled'].includes(newStatus) && cb.message?.chat?.id && cb.message?.message_id) {
           const removeMarkupPayload = JSON.stringify({
             chat_id: cb.message.chat.id,
             message_id: cb.message.message_id,
