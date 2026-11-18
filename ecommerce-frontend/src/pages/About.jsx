@@ -164,6 +164,29 @@ const About = () => {
                   <p style={{ fontSize: '1.5rem', fontWeight: '700', letterSpacing: '1px', margin: '0' }}>096 812 7590</p>
                   <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase' }}>{t('smart')}</span>
                 </a>
+                <a
+                  href="https://www.facebook.com/profile.php?id=100057516936336"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    marginTop: '6px',
+                    padding: '10px 18px',
+                    borderRadius: '50px',
+                    backgroundColor: '#1877f2',
+                    color: '#ffffff',
+                    fontSize: '0.85rem',
+                    fontWeight: '700',
+                    textDecoration: 'none',
+                    boxShadow: '0 4px 12px rgba(24,119,242,0.3)'
+                  }}
+                >
+                  <span>Facebook Page</span>
+                  <ExternalLink size={14} />
+                </a>
               </div>
             </div>
 
