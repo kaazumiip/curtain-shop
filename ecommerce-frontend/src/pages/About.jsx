@@ -1,9 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { MapPin, Phone, Clock, ExternalLink } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 const About = () => {
   const { t, language } = useLanguage();
+  const [activeLocation, setActiveLocation] = useState(1);
+
+  const locations = {
+    1: {
+      coords: '11.4841993,104.9452056',
+      url: 'https://maps.app.goo.gl/3WhDDjSb6DBcasCB9'
+    },
+    2: {
+      coords: '11.4926089,104.9433344',
+      url: 'https://maps.app.goo.gl/KfHgvVg7VVJd7MdE9'
+    }
+  };
   const addressText = language === 'km' 
     ? 'ផ្លូវលេខ ២០៤, រាជធានីភ្នំពេញ, ខេត្តកណ្តាល' 
     : 'Street 204, Phnom Penh, Kandal Province';
@@ -62,60 +74,48 @@ const About = () => {
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <a
-                href={mapsSearchUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  padding: '12px 20px',
-                  borderRadius: '14px',
-                  backgroundColor: '#111',
-                  color: '#fff',
-                  textDecoration: 'none',
-                  fontWeight: '600',
-                  fontSize: '0.9rem',
-                  transition: 'all 0.2s ease',
-                  width: '100%',
-                  boxSizing: 'border-box'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#333'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#111'}
-              >
-                <ExternalLink size={16} />
-                <span>{language === 'km' ? 'ទីតាំងទី ១ — ' : 'Location 1 — '}{t('open_in_maps')}</span>
-              </a>
-
-              <a
-                href="https://maps.app.goo.gl/KfHgvVg7VVJd7MdE9"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  padding: '12px 20px',
-                  borderRadius: '14px',
-                  backgroundColor: '#f1f5f9',
-                  color: '#0f172a',
-                  border: '1px solid #cbd5e1',
-                  textDecoration: 'none',
-                  fontWeight: '600',
-                  fontSize: '0.9rem',
-                  transition: 'all 0.2s ease',
-                  width: '100%',
-                  boxSizing: 'border-box'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
-              >
-                <ExternalLink size={16} />
-                <span>{language === 'km' ? 'ទីតាំងទី ២ — ' : 'Location 2 — '}{t('open_in_maps')}</span>
-              </a>
+              {[1, 2].map((locNum) => {
+                const isSelected = activeLocation === locNum;
+                const loc = locations[locNum];
+                return (
+                  <button
+                    key={locNum}
+                    type="button"
+                    onClick={() => {
+                      if (isSelected) {
+                        window.open(loc.url, '_blank', 'noopener,noreferrer');
+                      } else {
+                        setActiveLocation(locNum);
+                      }
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      padding: '12px 20px',
+                      borderRadius: '14px',
+                      backgroundColor: isSelected ? '#111' : '#f1f5f9',
+                      color: isSelected ? '#fff' : '#0f172a',
+                      border: isSelected ? '1px solid #111' : '1px solid #cbd5e1',
+                      fontWeight: '600',
+                      fontSize: '0.9rem',
+                      transition: 'all 0.2s ease',
+                      width: '100%',
+                      boxSizing: 'border-box',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <ExternalLink size={16} />
+                    <span>
+                      {language === 'km' ? `ទីតាំងទី ${locNum} — ` : `Location ${locNum} — `}
+                      {isSelected
+                        ? (language === 'km' ? 'ចុចម្តងទៀតដើម្បីបើក Google Maps' : 'Click again to open Google Maps')
+                        : (language === 'km' ? 'ចុចដើម្បីមើលលើផែនទី' : 'Click to preview on map')}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -207,86 +207,92 @@ const About = () => {
           </div>
         </div>
 
-        {/* Dedicated Clickable Facebook Page Card */}
-        <a
-          href="https://www.facebook.com/profile.php?id=100057516936336"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '16px',
-            marginTop: '24px',
-            padding: '24px 28px',
-            borderRadius: '24px',
-            background: 'linear-gradient(135deg, #1877f2 0%, #0d5bd9 100%)',
-            color: '#ffffff',
-            textDecoration: 'none',
-            boxShadow: '0 10px 30px rgba(24, 119, 242, 0.25)',
-            transition: 'transform 0.2s ease, box-shadow 0.2s ease'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 14px 36px rgba(24, 119, 242, 0.35)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 10px 30px rgba(24, 119, 242, 0.25)';
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{
-              width: '50px',
-              height: '50px',
-              borderRadius: '14px',
-              backgroundColor: 'rgba(255,255,255,0.18)',
+        {/* Right Column: Embedded Responsive Map + Facebook Page Preview */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div className="map-container">
+            <iframe 
+              key={activeLocation}
+              src={`https://maps.google.com/maps?q=${locations[activeLocation].coords}&t=&z=18&ie=UTF8&iwloc=&output=embed`}
+              width="100%" 
+              height="100%" 
+              style={{ border: 0 }} 
+              allowFullScreen="" 
+              loading="lazy" 
+              referrerPolicy="no-referrer-when-downgrade"
+              title={t('map_title')}
+            ></iframe>
+          </div>
+
+          {/* Dedicated Clickable Facebook Page Preview Card under Map */}
+          <a
+            href="https://www.facebook.com/profile.php?id=100057516936336"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '1.5rem',
-              fontWeight: '900'
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '16px',
+              padding: '22px 26px',
+              borderRadius: '22px',
+              background: 'linear-gradient(135deg, #1877f2 0%, #0d5bd9 100%)',
+              color: '#ffffff',
+              textDecoration: 'none',
+              boxShadow: '0 10px 30px rgba(24, 119, 242, 0.25)',
+              transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 14px 36px rgba(24, 119, 242, 0.35)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 10px 30px rgba(24, 119, 242, 0.25)';
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{
+                width: '50px',
+                height: '50px',
+                borderRadius: '14px',
+                backgroundColor: 'rgba(255,255,255,0.18)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.6rem',
+                fontWeight: '900',
+                flexShrink: 0
+              }}>
+                f
+              </div>
+              <div>
+                <span style={{ fontSize: '0.72rem', fontWeight: '700', letterSpacing: '1.2px', textTransform: 'uppercase', opacity: 0.85 }}>
+                  {language === 'km' ? 'ទំព័រហ្វេសប៊ុកផ្លូវការ' : 'Official Facebook Page'}
+                </span>
+                <h3 style={{ margin: '2px 0 4px', fontSize: '1.15rem', fontWeight: '800', color: '#ffffff' }}>
+                  Srey Tha Curtain — ស្រីថា វាំងនន
+                </h3>
+                <p style={{ margin: 0, fontSize: '0.82rem', opacity: 0.9 }}>
+                  {language === 'km' ? 'មើលម៉ូដវាំងននថ្មីៗ និងការងារដំឡើងពិតៗរបស់យើងខ្ញុំ' : 'See our latest curtain designs & real installations'}
+                </p>
+              </div>
+            </div>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '10px 20px',
+              borderRadius: '50px',
+              backgroundColor: '#ffffff',
+              color: '#1877f2',
+              fontWeight: '800',
+              fontSize: '0.88rem'
             }}>
-              f
+              <span>{language === 'km' ? 'ចូលមើល Facebook' : 'Visit Facebook'}</span>
+              <ExternalLink size={16} />
             </div>
-            <div>
-              <span style={{ fontSize: '0.75rem', fontWeight: '700', letterSpacing: '1.2px', textTransform: 'uppercase', opacity: 0.85 }}>
-                {language === 'km' ? 'ទំព័រហ្វេសប៊ុកផ្លូវការ' : 'Official Facebook Page'}
-              </span>
-              <h3 style={{ margin: '2px 0 0', fontSize: '1.2rem', fontWeight: '800', color: '#ffffff' }}>
-                Srey Tha Curtain — ស្រីថា វាំងនន
-              </h3>
-            </div>
-          </div>
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '10px 20px',
-            borderRadius: '50px',
-            backgroundColor: '#ffffff',
-            color: '#1877f2',
-            fontWeight: '800',
-            fontSize: '0.88rem'
-          }}>
-            <span>{language === 'km' ? 'ចូលមើល Facebook' : 'Visit Facebook'}</span>
-            <ExternalLink size={16} />
-          </div>
-        </a>
-
-        {/* Right Column: Embedded Responsive Map */}
-        <div className="map-container">
-          <iframe 
-            src="https://maps.google.com/maps?q=11.4841993,104.9452056&t=&z=18&ie=UTF8&iwloc=&output=embed"
-            width="100%" 
-            height="100%" 
-            style={{ border: 0 }} 
-            allowFullScreen="" 
-            loading="lazy" 
-            referrerPolicy="no-referrer-when-downgrade"
-            title={t('map_title')}
-          ></iframe>
+          </a>
         </div>
       </div>
     </div>
