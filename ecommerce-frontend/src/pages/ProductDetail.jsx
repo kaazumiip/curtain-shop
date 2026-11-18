@@ -447,13 +447,13 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
                 <line x1="195" y1="42" x2="195" y2="95" stroke="#cbd5e1" strokeWidth="1.2" />
                 <line x1="215" y1="42" x2="215" y2="95" stroke="#cbd5e1" strokeWidth="1.2" />
 
-                {/* Width Arrow (Top) */}
-                <line x1="136" y1="24" x2="136" y2="42" stroke="#94a3b8" strokeWidth="1" strokeDasharray="3,3" />
+                {/* Width Arrow (Top - Full Window Width) */}
+                <line x1="38" y1="24" x2="38" y2="42" stroke="#94a3b8" strokeWidth="1" strokeDasharray="3,3" />
                 <line x1="232" y1="24" x2="232" y2="42" stroke="#94a3b8" strokeWidth="1" strokeDasharray="3,3" />
-                <line x1="140" y1="26" x2="228" y2="26" stroke="#0f172a" strokeWidth="1.6" />
-                <polygon points="136,26 143,22 143,30" fill="#0f172a" />
+                <line x1="42" y1="26" x2="228" y2="26" stroke="#0f172a" strokeWidth="1.6" />
+                <polygon points="38,26 45,22 45,30" fill="#0f172a" />
                 <polygon points="232,26 225,22 225,30" fill="#0f172a" />
-                <text x="184" y="17" textAnchor="middle" fill="#0f172a" fontSize="12" fontWeight="800" fontFamily="'Noto Sans Khmer', sans-serif">
+                <text x="135" y="17" textAnchor="middle" fill="#0f172a" fontSize="12" fontWeight="800" fontFamily="'Noto Sans Khmer', sans-serif">
                   ទទឹង (Width)
                 </text>
 
