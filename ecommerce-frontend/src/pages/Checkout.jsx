@@ -640,26 +640,23 @@ const Checkout = ({ cart, onOrderPlaced }) => {
         backgroundColor: '#f8fafc',
         border: '1px solid #e2e8f0',
         borderRadius: '16px',
-        padding: '12px 18px',
+        padding: '14px 18px',
         marginBottom: '26px',
-        display: 'flex',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '10px'
+        gap: '12px'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', fontWeight: '700', color: '#0f172a' }}>
-          <span style={{ backgroundColor: '#0f172a', color: '#fff', width: '22px', height: '22px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: '800' }}>1</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.82rem', fontWeight: '700', color: '#0f172a', lineHeight: '1.35' }}>
+          <span style={{ backgroundColor: '#0f172a', color: '#fff', width: '24px', height: '24px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: '800', flexShrink: 0 }}>1</span>
           <span>{language === 'kh' ? 'បំពេញព័ត៌មាន និងទីតាំង' : 'Enter Info & Address'}</span>
         </div>
-        <span style={{ color: '#cbd5e1', fontWeight: '900' }}>→</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', fontWeight: '700', color: '#0f172a' }}>
-          <span style={{ backgroundColor: '#0f172a', color: '#fff', width: '22px', height: '22px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: '800' }}>2</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.82rem', fontWeight: '700', color: '#0f172a', lineHeight: '1.35' }}>
+          <span style={{ backgroundColor: '#0f172a', color: '#fff', width: '24px', height: '24px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: '800', flexShrink: 0 }}>2</span>
           <span>{language === 'kh' ? 'ជ្រើសរើស ABA / ACLEDA (KHQR) ឬ ទូទាត់ពេលដឹកដល់' : 'Choose ABA / ACLEDA (KHQR) or COD'}</span>
         </div>
-        <span style={{ color: '#cbd5e1', fontWeight: '900' }}>→</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', fontWeight: '700', color: '#16a34a' }}>
-          <span style={{ backgroundColor: '#16a34a', color: '#fff', width: '22px', height: '22px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: '800' }}>3</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.82rem', fontWeight: '700', color: '#16a34a', lineHeight: '1.35' }}>
+          <span style={{ backgroundColor: '#16a34a', color: '#fff', width: '24px', height: '24px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: '800', flexShrink: 0 }}>3</span>
           <span>{language === 'kh' ? 'ចុច "បំពេញការបញ្ជាទិញ" ខាងក្រោម' : 'Click "Complete Order" Below'}</span>
         </div>
       </div>
