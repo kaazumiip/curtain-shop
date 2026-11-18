@@ -168,7 +168,7 @@ const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuer
         </Link>
         
         {/* Right: Actions */}
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'flex-end', flexShrink: 0 }}>
+        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'flex-end', flexShrink: 0 }}>
           <a
             href="https://t.me/sreythacurtain"
             target="_blank"
@@ -178,63 +178,75 @@ const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuer
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 'clamp(4px, 1vw, 6px)',
-              padding: 'clamp(5px, 1.5vw, 7px) clamp(8px, 2.2vw, 12px)',
+              gap: '4px',
+              padding: '5px 9px',
               borderRadius: '999px',
               backgroundColor: '#e0f2fe',
               border: '1px solid #bae6fd',
               color: '#0284c7',
               textDecoration: 'none',
-              fontSize: 'clamp(0.66rem, 2.6vw, 0.78rem)',
+              fontSize: '0.68rem',
               fontWeight: '700',
               whiteSpace: 'nowrap',
               flexShrink: 0
             }}
             title="ទាក់ទង Telegram"
           >
-            <Send size={14} style={{ flexShrink: 0 }} />
+            <Send size={13} style={{ flexShrink: 0 }} />
             <span>ទាក់ទង Telegram</span>
           </a>
-          <button 
-            type="button"
-            onClick={openSearch} 
-            className="nav-action-btn"
-            style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              width: '38px', 
-              height: '38px', 
-              borderRadius: '50%', 
-              backgroundColor: '#f8fafc', 
-              border: '1px solid #e2e8f0', 
-              color: '#0f172a', 
-              cursor: 'pointer' 
-            }} 
-            title="Search"
-          >
-            <Search size={17} />
-          </button>
 
-          <Link 
-            to="/favorites" 
-            className="nav-action-btn"
-            style={{ 
-              position: 'relative', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              width: '38px', 
-              height: '38px', 
-              borderRadius: '50%', 
-              backgroundColor: '#f8fafc', 
-              border: '1px solid #e2e8f0', 
-              color: '#0f172a', 
-              textDecoration: 'none' 
-            }}
-            title="Favorites"
-          >
-            <Heart size={18} color="#0f172a" />
+          {/* Combined Search + Favorites Pill */}
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            height: '36px',
+            borderRadius: '999px',
+            backgroundColor: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            padding: '0 2px',
+            flexShrink: 0
+          }}>
+            <button 
+              type="button"
+              onClick={openSearch} 
+              className="nav-action-btn"
+              style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                width: '32px', 
+                height: '32px', 
+                borderRadius: '50%', 
+                backgroundColor: 'transparent', 
+                border: 'none', 
+                color: '#0f172a', 
+                cursor: 'pointer' 
+              }} 
+              title="Search"
+            >
+              <Search size={16} />
+            </button>
+            <div style={{ width: '1px', height: '18px', backgroundColor: '#cbd5e1' }} />
+            <Link 
+              to="/favorites" 
+              className="nav-action-btn"
+              style={{ 
+                position: 'relative', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                width: '32px', 
+                height: '32px', 
+                borderRadius: '50%', 
+                backgroundColor: 'transparent', 
+                border: 'none', 
+                color: '#0f172a', 
+                textDecoration: 'none' 
+              }}
+              title="Favorites"
+            >
+              <Heart size={16} color="#0f172a" />
             {favoriteCount > 0 && (
               <span style={{ 
                 position: 'absolute', 
@@ -255,6 +267,7 @@ const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuer
               </span>
             )}
           </Link>
+          </div>
 
           <Link 
             to="/cart" 
@@ -295,6 +308,7 @@ const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuer
               </span>
             )}
           </Link>
+          </div>
         </div>
       </div>
 
