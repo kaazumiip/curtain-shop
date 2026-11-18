@@ -407,6 +407,75 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
             </div>
           )}
 
+          {/* Visual Curtain Dimension Guide (Khmer) for Custom & Ready-Made Curtains */}
+          {(product.category === 'Curtain' || product.category === 'Ready-Made Curtain') && (
+            <div style={{
+              backgroundColor: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: '16px',
+              padding: '16px',
+              marginBottom: '20px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              <span style={{ fontSize: '0.78rem', fontWeight: '800', color: '#334155' }}>
+                របៀបមើលទំហំវាំងនន (ទទឹង និង កម្ពស់/បណ្ដោយ)
+              </span>
+              <svg viewBox="0 0 320 210" style={{ width: '100%', maxWidth: '280px', height: 'auto' }} xmlns="http://www.w3.org/2000/svg">
+                {/* Curtain Rod */}
+                <line x1="25" y1="38" x2="250" y2="38" stroke="#94a3b8" strokeWidth="3.5" strokeLinecap="round" />
+                <circle cx="25" cy="38" r="4.5" fill="#64748b" />
+                <circle cx="250" cy="38" r="4.5" fill="#64748b" />
+
+                {/* Left Curtain Panel */}
+                <rect x="38" y="42" width="46" height="148" rx="3" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1.5" />
+                <line x1="50" y1="42" x2="50" y2="190" stroke="#e2e8f0" strokeWidth="1.2" />
+                <line x1="62" y1="42" x2="62" y2="190" stroke="#e2e8f0" strokeWidth="1.2" />
+                <line x1="74" y1="42" x2="74" y2="190" stroke="#e2e8f0" strokeWidth="1.2" />
+
+                {/* Window Frame Behind */}
+                <rect x="92" y="55" width="38" height="90" fill="none" stroke="#e2e8f0" strokeWidth="1.5" />
+                <line x1="111" y1="55" x2="111" y2="145" stroke="#e2e8f0" strokeWidth="1.2" />
+                <line x1="92" y1="100" x2="130" y2="100" stroke="#e2e8f0" strokeWidth="1.2" />
+
+                {/* Right Curtain Panel (Main Measured Panel) */}
+                <rect x="136" y="42" width="96" height="148" rx="3" fill="#ffffff" stroke="#64748b" strokeWidth="1.5" />
+                <line x1="155" y1="42" x2="155" y2="95" stroke="#cbd5e1" strokeWidth="1.2" />
+                <line x1="175" y1="42" x2="175" y2="95" stroke="#cbd5e1" strokeWidth="1.2" />
+                <line x1="195" y1="42" x2="195" y2="95" stroke="#cbd5e1" strokeWidth="1.2" />
+                <line x1="215" y1="42" x2="215" y2="95" stroke="#cbd5e1" strokeWidth="1.2" />
+
+                {/* Width Arrow (Top) */}
+                <line x1="136" y1="24" x2="136" y2="42" stroke="#94a3b8" strokeWidth="1" strokeDasharray="3,3" />
+                <line x1="232" y1="24" x2="232" y2="42" stroke="#94a3b8" strokeWidth="1" strokeDasharray="3,3" />
+                <line x1="140" y1="26" x2="228" y2="26" stroke="#0f172a" strokeWidth="1.6" />
+                <polygon points="136,26 143,22 143,30" fill="#0f172a" />
+                <polygon points="232,26 225,22 225,30" fill="#0f172a" />
+                <text x="184" y="17" textAnchor="middle" fill="#0f172a" fontSize="12" fontWeight="800" fontFamily="'Noto Sans Khmer', sans-serif">
+                  ទទឹង (Width)
+                </text>
+
+                {/* Height / Length Arrow (Right) */}
+                <line x1="232" y1="42" x2="264" y2="42" stroke="#94a3b8" strokeWidth="1" strokeDasharray="3,3" />
+                <line x1="232" y1="190" x2="264" y2="190" stroke="#94a3b8" strokeWidth="1" strokeDasharray="3,3" />
+                <line x1="258" y1="46" x2="258" y2="186" stroke="#0f172a" strokeWidth="1.6" />
+                <polygon points="258,42 254,49 262,49" fill="#0f172a" />
+                <polygon points="258,190 254,183 262,183" fill="#0f172a" />
+                <text x="272" y="112" fill="#0f172a" fontSize="11.5" fontWeight="800" fontFamily="'Noto Sans Khmer', sans-serif">
+                  កម្ពស់ /
+                </text>
+                <text x="272" y="128" fill="#0f172a" fontSize="11.5" fontWeight="800" fontFamily="'Noto Sans Khmer', sans-serif">
+                  បណ្ដោយ
+                </text>
+                <text x="272" y="142" fill="#64748b" fontSize="9.5" fontWeight="700" fontFamily="sans-serif">
+                  (Height)
+                </text>
+              </svg>
+            </div>
+          )}
+
           {((product.category === 'Curtain' && !product.isReadyMade) || product.category === 'Valance' || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole')) && (
             <div style={{ marginBottom: '40px' }}>
               {/* Clear Pricing Instruction Callout Banner */}
