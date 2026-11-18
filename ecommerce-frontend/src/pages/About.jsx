@@ -61,32 +61,62 @@ const About = () => {
               {addressText}
             </p>
 
-            <a
-              href={mapsSearchUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                padding: '12px 20px',
-                borderRadius: '14px',
-                backgroundColor: '#111',
-                color: '#fff',
-                textDecoration: 'none',
-                fontWeight: '600',
-                fontSize: '0.9rem',
-                transition: 'all 0.2s ease',
-                width: '100%',
-                boxSizing: 'border-box'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#333'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#111'}
-            >
-              <ExternalLink size={16} />
-              <span>{t('open_in_maps')}</span>
-            </a>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <a
+                href={mapsSearchUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  padding: '12px 20px',
+                  borderRadius: '14px',
+                  backgroundColor: '#111',
+                  color: '#fff',
+                  textDecoration: 'none',
+                  fontWeight: '600',
+                  fontSize: '0.9rem',
+                  transition: 'all 0.2s ease',
+                  width: '100%',
+                  boxSizing: 'border-box'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#333'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#111'}
+              >
+                <ExternalLink size={16} />
+                <span>{language === 'km' ? 'ទីតាំងទី ១ — ' : 'Location 1 — '}{t('open_in_maps')}</span>
+              </a>
+
+              <a
+                href="https://maps.app.goo.gl/KfHgvVg7VVJd7MdE9"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  padding: '12px 20px',
+                  borderRadius: '14px',
+                  backgroundColor: '#f1f5f9',
+                  color: '#0f172a',
+                  border: '1px solid #cbd5e1',
+                  textDecoration: 'none',
+                  fontWeight: '600',
+                  fontSize: '0.9rem',
+                  transition: 'all 0.2s ease',
+                  width: '100%',
+                  boxSizing: 'border-box'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+              >
+                <ExternalLink size={16} />
+                <span>{language === 'km' ? 'ទីតាំងទី ២ — ' : 'Location 2 — '}{t('open_in_maps')}</span>
+              </a>
+            </div>
           </div>
 
           {/* Phone & Availability Card */}
