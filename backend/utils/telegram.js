@@ -15,7 +15,8 @@ const sendTelegramPhoto = (photoUrl, caption = '') => {
     chat_id: chatId,
     photo: photoUrl,
     caption: caption.slice(0, 1000),
-    parse_mode: 'HTML'
+    parse_mode: 'HTML',
+    ...(replyMarkup ? { reply_markup: replyMarkup } : {})
   });
 
   const options = {
@@ -65,7 +66,8 @@ const sendTelegramNotification = (text) => {
   const payload = JSON.stringify({
     chat_id: chatId,
     text: text,
-    parse_mode: 'HTML'
+    parse_mode: 'HTML',
+    ...(replyMarkup ? { reply_markup: replyMarkup } : {})
   });
 
   const options = {

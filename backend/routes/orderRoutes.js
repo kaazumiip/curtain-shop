@@ -274,6 +274,59 @@ router.get('/', async (req, res) => {
   }
 });
 
+// @route   POST /api/orders/telegram-webhook
+// @desc    Handle Telegram inline button callbacks to update order status directly from Telegram
+router.post('/telegram-webhook', async (req, res) => {
+  try {
+    const cb = req.body?.callback_query;
+    if (!cb || !cb.data) {
+      return res.sendStatus(200);
+    }
+
+    const parts = String(cb.data).split(':');
+    if (parts[0] === 'st' && parts.length >= 3) {
+      const newStatus = parts[1];
+      const orderId = parts.slice(2).join(':');
+      const docRef = collection.doc(orderId);
+      const doc = await docRef.get();
+
+      if (doc.exists) {
+        await docRef.set(
+          { status: newStatus, updatedAt: new Date().toISOString() },
+          { merge: true }
+        );
+      }
+
+      const token = process.env.TELEGRAM_BOT_TOKEN;
+      if (token) {
+        const https = require('https');
+        const payload = JSON.stringify({
+          callback_query_id: cb.id,
+          text: doc.exists ? `✅ Order updated to: ${newStatus}` : 'Order not found',
+          show_alert: false
+        });
+        const tgReq = https.request({
+          hostname: 'api.telegram.org',
+          port: 443,
+          path: `/bot${token}/answerCallbackQuery`,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(payload)
+          }
+        });
+        tgReq.on('error', () => {});
+        tgReq.write(payload);
+        tgReq.end();
+      }
+    }
+    return res.sendStatus(200);
+  } catch (err) {
+    console.error('Telegram webhook error:', err);
+    return res.sendStatus(200);
+  }
+});
+
 // @route   GET /api/orders/:id
 // @desc    Get order by ID
 router.get('/:id', async (req, res) => {
