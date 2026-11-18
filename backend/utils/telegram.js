@@ -320,21 +320,60 @@ const sendOrderNotification = (order) => {
         } else {
           console.error('[Telegram Photo Caption Fallback]:', data);
           // If caption rejected, fallback to 1 single sendMessage with rich photo tag
-          sendTelegramNotification(msgText);
+          const statusKeyboard = order._id ? {
+    inline_keyboard: [
+      [
+        { text: '✅ Ready', callback_data: `st:Finishing Touch:${order._id}` },
+        { text: '🚚 Shipping', callback_data: `st:Shipping Processing:${order._id}` }
+      ],
+      [
+        { text: '🎉 Delivered', callback_data: `st:Order Arrived:${order._id}` },
+        { text: '❌ Cancel', callback_data: `st:Cancelled:${order._id}` }
+      ]
+    ]
+  } : null;
+
+  sendTelegramNotification(msgText, statusKeyboard);
         }
       });
     });
 
     req.on('error', (err) => {
       console.error('[Telegram Order Error]:', err.message);
-      sendTelegramNotification(msgText);
+      const statusKeyboard = order._id ? {
+    inline_keyboard: [
+      [
+        { text: '✅ Ready', callback_data: `st:Finishing Touch:${order._id}` },
+        { text: '🚚 Shipping', callback_data: `st:Shipping Processing:${order._id}` }
+      ],
+      [
+        { text: '🎉 Delivered', callback_data: `st:Order Arrived:${order._id}` },
+        { text: '❌ Cancel', callback_data: `st:Cancelled:${order._id}` }
+      ]
+    ]
+  } : null;
+
+  sendTelegramNotification(msgText, statusKeyboard);
     });
 
     req.write(payload);
     req.end();
   } else {
     // If no photo or message > 1020 chars: send 1 single message with embedded photo link
-    sendTelegramNotification(msgText);
+    const statusKeyboard = order._id ? {
+    inline_keyboard: [
+      [
+        { text: '✅ Ready', callback_data: `st:Finishing Touch:${order._id}` },
+        { text: '🚚 Shipping', callback_data: `st:Shipping Processing:${order._id}` }
+      ],
+      [
+        { text: '🎉 Delivered', callback_data: `st:Order Arrived:${order._id}` },
+        { text: '❌ Cancel', callback_data: `st:Cancelled:${order._id}` }
+      ]
+    ]
+  } : null;
+
+  sendTelegramNotification(msgText, statusKeyboard);
   }
 };
 
