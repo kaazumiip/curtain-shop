@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { ShoppingBag, Search, Menu, X, Heart, Send } from 'lucide-react';
+import { ShoppingBag, Search, Menu, X, Heart, Send, Plus } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 
 const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuery }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isQuickMenuOpen, setIsQuickMenuOpen] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [hoveredProduct, setHoveredProduct] = useState(null);
   const inputRef = useRef(null);
@@ -196,77 +197,106 @@ const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuer
             <span>ទាក់ទង Telegram</span>
           </a>
 
-          {/* Combined Search + Favorites Pill */}
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            height: '36px',
-            borderRadius: '999px',
-            backgroundColor: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            padding: '0 2px',
-            flexShrink: 0
-          }}>
-            <button 
+          {/* Single + Button that opens vertical dropdown for Search & Favorites */}
+          <div style={{ position: 'relative', flexShrink: 0 }}>
+            <button
               type="button"
-              onClick={openSearch} 
+              onClick={() => setIsQuickMenuOpen((prev) => !prev)}
               className="nav-action-btn"
-              style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                width: '32px', 
-                height: '32px', 
-                borderRadius: '50%', 
-                backgroundColor: 'transparent', 
-                border: 'none', 
-                color: '#0f172a', 
-                cursor: 'pointer' 
-              }} 
-              title="Search"
-            >
-              <Search size={16} />
-            </button>
-            <div style={{ width: '1px', height: '18px', backgroundColor: '#cbd5e1' }} />
-            <Link 
-              to="/favorites" 
-              className="nav-action-btn"
-              style={{ 
-                position: 'relative', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                width: '32px', 
-                height: '32px', 
-                borderRadius: '50%', 
-                backgroundColor: 'transparent', 
-                border: 'none', 
-                color: '#0f172a', 
-                textDecoration: 'none' 
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                backgroundColor: isQuickMenuOpen ? '#0f172a' : '#f8fafc',
+                border: '1px solid #e2e8f0',
+                color: isQuickMenuOpen ? '#ffffff' : '#0f172a',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
               }}
-              title="Favorites"
+              title="Search & Favorites"
             >
-              <Heart size={16} color="#0f172a" />
-            {favoriteCount > 0 && (
-              <span style={{ 
-                position: 'absolute', 
-                top: '-3px', 
-                right: '-3px', 
-                backgroundColor: '#ef4444', 
-                color: '#fff', 
-                fontSize: '0.62rem', 
-                fontWeight: '800', 
-                width: '18px', 
-                height: '18px', 
-                borderRadius: '50%', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center' 
+              <Plus size={18} style={{ transform: isQuickMenuOpen ? 'rotate(45deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }} />
+            </button>
+
+            {isQuickMenuOpen && (
+              <div style={{
+                position: 'absolute',
+                top: '44px',
+                right: 0,
+                backgroundColor: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '14px',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.12)',
+                padding: '6px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '4px',
+                minWidth: '160px',
+                zIndex: 999
               }}>
-                {favoriteCount}
-              </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsQuickMenuOpen(false);
+                    openSearch();
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '10px 12px',
+                    borderRadius: '10px',
+                    border: 'none',
+                    backgroundColor: 'transparent',
+                    color: '#0f172a',
+                    fontSize: '0.85rem',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    width: '100%'
+                  }}
+                >
+                  <Search size={16} />
+                  <span>ស្វែងរក (Search)</span>
+                </button>
+                <Link
+                  to="/favorites"
+                  onClick={() => setIsQuickMenuOpen(false)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '10px',
+                    padding: '10px 12px',
+                    borderRadius: '10px',
+                    color: '#0f172a',
+                    fontSize: '0.85rem',
+                    fontWeight: '700',
+                    textDecoration: 'none'
+                  }}
+                >
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <Heart size={16} />
+                    <span>ចូលចិត្ត</span>
+                  </span>
+                  {favoriteCount > 0 && (
+                    <span style={{
+                      backgroundColor: '#ef4444',
+                      color: '#fff',
+                      fontSize: '0.68rem',
+                      fontWeight: '800',
+                      padding: '1px 6px',
+                      borderRadius: '999px'
+                    }}>
+                      {favoriteCount}
+                    </span>
+                  )}
+                </Link>
+              </div>
             )}
-          </Link>
           </div>
 
           <Link 
