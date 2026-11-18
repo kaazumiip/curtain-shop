@@ -1,23 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import axios from '../api/axios';
 import LocationPickerMap from './LocationPickerMap';
 
+const defaultMeasurementForm = {
+  name: '',
+  phone: '',
+  phone2: '',
+  preferredDate: '',
+  windowNotes: '',
+  address: '',
+  additionalAddress: '',
+  latitude: null,
+  longitude: null,
+  googleMapsUrl: ''
+};
+
 const BookMeasurementModal = ({ isOpen, onClose }) => {
-  const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    phone2: '',
-    preferredDate: '',
-    windowNotes: '',
-    address: '',
-    additionalAddress: '',
-    latitude: null,
-    longitude: null,
-    googleMapsUrl: ''
+  const [formData, setFormData] = useState(() => {
+    try {
+      const saved = localStorage.getItem('sreytha_measurement_form');
+      if (saved) {
+        return { ...defaultMeasurementForm, ...JSON.parse(saved) };
+      }
+    } catch (e) {}
+    return defaultMeasurementForm;
   });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('sreytha_measurement_form', JSON.stringify(formData));
+    } catch (e) {}
+  }, [formData]);
 
   if (!isOpen || typeof document === 'undefined') return null;
 
@@ -27,6 +43,9 @@ const BookMeasurementModal = ({ isOpen, onClose }) => {
       setSubmitting(true);
       await axios.post('/orders/book-measurement', formData);
       setSubmitted(true);
+      try {
+        localStorage.removeItem('sreytha_measurement_form');
+      } catch (e) {}
     } catch (err) {
       console.error('Failed to book measurement:', err);
       alert('បរាជ័យក្នុងការផ្ញើសំណើ សូមព្យាយាមម្តងទៀត។');
