@@ -13,7 +13,6 @@ import OrderFinish from './pages/OrderFinish';
 import OrderCancel from './pages/OrderCancel';
 import MyOrders from './pages/MyOrders';
 import Favorites from './pages/Favorites';
-import ChatWidget from './components/ChatWidget';
 import About from './pages/About';
 import { CheckCircle } from 'lucide-react';
 import { LanguageProvider } from './context/LanguageContext';
@@ -69,7 +68,6 @@ const AnimatedRoutes = ({ products, addToCart, cart, removeFromCart, updateQuant
         <Route path="/about" element={<About />} />
         <Route path="/my-orders" element={<MyOrders />} />
       </Routes>
-      <ChatWidget />
     </div>
   );
 };

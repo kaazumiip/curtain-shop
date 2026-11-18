@@ -3,7 +3,6 @@ import api from '../api/axios';
 import StockTable from '../components/StockTable';
 import OrdersTable from '../components/OrdersTable';
 import ProductModal from '../components/ProductModal';
-import LiveChat from './LiveChat';
 import HardwareManager from '../components/HardwareManager';
 import { Plus, Package, ChevronRight, Globe, Clock, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -18,7 +17,6 @@ function Dashboard({ onLogout }) {
   const [orderFilter, setOrderFilter] = useState('Pending');
   const [productCategoryFilter, setProductCategoryFilter] = useState('all');
   const [productSearch, setProductSearch] = useState('');
-  const [isChatOpen, setIsChatOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { t, language, toggleLanguage } = useLanguage();
@@ -239,21 +237,6 @@ function Dashboard({ onLogout }) {
               <Clock size={16} />
               {t('history_tab')}
             </span>
-            <span 
-              onClick={() => setIsChatOpen(true)} 
-              style={{ 
-                cursor: 'pointer', 
-                fontSize: '0.85rem',
-                fontWeight: '400', 
-                color: '#8e8e8e',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}
-            >
-              <Plus size={16} />
-              {t('messages')}
-            </span>
           </div>
 
           {view === 'products' && (
@@ -401,7 +384,6 @@ function Dashboard({ onLogout }) {
         onSave={handleSave} 
       />
 
-      {isChatOpen && <LiveChat onClose={() => setIsChatOpen(false)} />}
       
       <footer style={{ marginTop: 'auto', paddingTop: '40px', color: 'var(--border)', fontSize: '0.6rem', textAlign: 'center', letterSpacing: '4px' }}>
         {t('collection_manager_footer')}
