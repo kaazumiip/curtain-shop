@@ -54,7 +54,7 @@ const sendTelegramPhoto = (photoUrl, caption = '') => {
  * Sends a Telegram notification message to the configured bot and chat
  * @param {string} text - Message text (HTML formatted)
  */
-const sendTelegramNotification = (text) => {
+const sendTelegramNotification = (text, replyMarkup = null) => {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
 
