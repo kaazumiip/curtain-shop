@@ -308,7 +308,6 @@ const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuer
               </span>
             )}
           </Link>
-          </div>
         </div>
       </div>
 
