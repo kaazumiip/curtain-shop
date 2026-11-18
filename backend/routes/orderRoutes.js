@@ -318,6 +318,28 @@ router.post('/telegram-webhook', async (req, res) => {
         tgReq.on('error', () => {});
         tgReq.write(payload);
         tgReq.end();
+
+        // Remove inline buttons when order is marked Ready / Delivered / Cancelled
+        if (['Finishing Touch', 'Order Arrived', 'Cancelled'].includes(newStatus) && cb.message?.chat?.id && cb.message?.message_id) {
+          const removeMarkupPayload = JSON.stringify({
+            chat_id: cb.message.chat.id,
+            message_id: cb.message.message_id,
+            reply_markup: { inline_keyboard: [] }
+          });
+          const rmReq = https.request({
+            hostname: 'api.telegram.org',
+            port: 443,
+            path: `/bot${token}/editMessageReplyMarkup`,
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Content-Length': Buffer.byteLength(removeMarkupPayload)
+            }
+          });
+          rmReq.on('error', () => {});
+          rmReq.write(removeMarkupPayload);
+          rmReq.end();
+        }
       }
     }
     return res.sendStatus(200);
