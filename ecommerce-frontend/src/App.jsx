@@ -241,6 +241,33 @@ function App() {
                   : 'ដើម្បីទូទាត់ KHQR បានរលូន សូមចុច ⋯ ឬ Safari រួចជ្រើស "Open in Safari"'}
               </span>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {!isAndroid && typeof window !== 'undefined' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard?.writeText(window.location.href);
+                      alert('បានចម្លងតំណរួចរាល់! សូមបើក Safari ហើយ Paste ដើម្បីចូលទិញទំនិញ។');
+                    }}
+                    style={{
+                      padding: '10px 16px',
+                      borderRadius: '999px',
+                      background: 'linear-gradient(135deg, #6ee7b7 0%, #34d399 100%)',
+                      color: '#064e3b',
+                      border: 'none',
+                      fontWeight: '800',
+                      fontSize: '0.85rem',
+                      whiteSpace: 'nowrap',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 12px rgba(52, 211, 153, 0.35)'
+                    }}
+                  >
+                    <span>📋</span>
+                    <span>ចម្លងតំណបើកក្នុង Safari</span>
+                  </button>
+                )}
                 {isAndroid && typeof window !== 'undefined' && (
                   <a
                     href={`intent://${window.location.host}${window.location.pathname}${window.location.search}#Intent;scheme=https;package=com.android.chrome;end`}
