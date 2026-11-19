@@ -113,9 +113,45 @@ const MyOrders = () => {
 
   if (orders.length === 0) {
     return (
-      <div style={{ padding: '100px 20px', textAlign: 'center', minHeight: '60vh' }}>
-        <h2 className="serif" style={{ fontSize: '2.5rem', marginBottom: '20px' }}>{t('no_orders_yet')}</h2>
-        <p style={{ color: '#666', marginBottom: '40px' }}>{t('no_orders_yet_desc')}</p>
+      <div style={{ padding: '70px 20px', textAlign: 'center', minHeight: '60vh', maxWidth: '640px', margin: '0 auto' }}>
+        <h2 className="serif" style={{ fontSize: '2rem', marginBottom: '12px' }}>{t('no_orders_yet')}</h2>
+        <p style={{ color: '#666', marginBottom: '24px' }}>{t('no_orders_yet_desc')}</p>
+
+        <form onSubmit={handleLookup} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '30px' }}>
+          <input
+            type="text"
+            value={lookupQuery}
+            onChange={(e) => setLookupQuery(e.target.value)}
+            placeholder="ស្វែងរកតាមលេខទូរស័ព្ទ ឬ លេខកុម្ម៉ង់ (Phone or Order #)..."
+            style={{
+              flex: 1,
+              minWidth: '220px',
+              padding: '12px 16px',
+              borderRadius: '14px',
+              border: '1px solid #cbd5e1',
+              fontSize: '0.9rem',
+              outline: 'none'
+            }}
+          />
+          <button
+            type="submit"
+            disabled={searching}
+            style={{
+              padding: '12px 22px',
+              borderRadius: '14px',
+              border: 'none',
+              backgroundColor: '#0f172a',
+              color: '#ffffff',
+              fontWeight: '700',
+              fontSize: '0.9rem',
+              cursor: searching ? 'not-allowed' : 'pointer',
+              opacity: searching ? 0.7 : 1
+            }}
+          >
+            {searching ? 'កំពុងស្វែងរក...' : 'ស្វែងរក (Track)'}
+          </button>
+        </form>
+
         <Link to="/shop" className="btn-primary" style={{ textDecoration: 'none', display: 'inline-block', padding: '15px 40px' }}>
           {t('explore_collection')}
         </Link>
