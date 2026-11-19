@@ -56,49 +56,54 @@ const sendTelegramPhoto = (photoUrl, caption = '') => {
  */
 const sendTelegramNotification = (text, replyMarkup = null) => {
   const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
+  const chatIds = Array.from(new Set([
+    process.env.TELEGRAM_CHAT_ID,
+    process.env.TELEGRAM_GROUP_CHAT_ID
+  ].filter(Boolean)));
 
-  if (!token || !chatId) {
+  if (!token || chatIds.length === 0) {
     console.log('[Telegram Alert Skipped]: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not configured in .env');
     return;
   }
 
-  const payload = JSON.stringify({
-    chat_id: chatId,
-    text: text,
-    parse_mode: 'HTML',
-    ...(replyMarkup ? { reply_markup: replyMarkup } : {})
-  });
-
-  const options = {
-    hostname: 'api.telegram.org',
-    port: 443,
-    path: `/bot${token}/sendMessage`,
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(payload)
-    }
-  };
-
-  const req = https.request(options, (res) => {
-    let data = '';
-    res.on('data', (chunk) => { data += chunk; });
-    res.on('end', () => {
-      if (res.statusCode >= 200 && res.statusCode < 300) {
-        console.log('[Telegram Alert]: Order notification sent successfully.');
-      } else {
-        console.error('[Telegram Alert Failed]:', data);
-      }
+  chatIds.forEach((chatId) => {
+    const payload = JSON.stringify({
+      chat_id: chatId,
+      text: text,
+      parse_mode: 'HTML',
+      ...(replyMarkup ? { reply_markup: replyMarkup } : {})
     });
-  });
 
-  req.on('error', (err) => {
-    console.error('[Telegram Alert Error]:', err.message);
-  });
+    const options = {
+      hostname: 'api.telegram.org',
+      port: 443,
+      path: `/bot${token}/sendMessage`,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(payload)
+      }
+    };
 
-  req.write(payload);
-  req.end();
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          console.log(`[Telegram Alert]: Order notification sent successfully to ${chatId}.`);
+        } else {
+          console.error(`[Telegram Alert Failed ${chatId}]:`, data);
+        }
+      });
+    });
+
+    req.on('error', (err) => {
+      console.error(`[Telegram Alert Error ${chatId}]:`, err.message);
+    });
+
+    req.write(payload);
+    req.end();
+  });
 };
 
 /**
