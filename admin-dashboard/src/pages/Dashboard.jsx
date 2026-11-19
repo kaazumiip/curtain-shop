@@ -19,6 +19,8 @@ function Dashboard({ onLogout }) {
   const [productSearch, setProductSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [measurements, setMeasurements] = useState([]);
+  const [deliveryFee, setDeliveryFee] = useState('0');
+  const [savingDeliveryFee, setSavingDeliveryFee] = useState(false);
   const navigate = useNavigate();
   const { t, language, toggleLanguage } = useLanguage();
 
@@ -28,6 +30,13 @@ function Dashboard({ onLogout }) {
     fetchProducts();
     fetchOrders();
     fetchMeasurements();
+    axios.get('/settings/payment')
+      .then((res) => {
+        if (res.data && res.data.deliveryFee !== undefined) {
+          setDeliveryFee(String(res.data.deliveryFee));
+        }
+      })
+      .catch(() => {});
 
     // Auto-poll orders every 10 seconds so new orders show up live
     const interval = setInterval(() => {
@@ -263,6 +272,37 @@ function Dashboard({ onLogout }) {
             >
               <span>📏 ណាត់វាស់វាំងនន ({measurements.filter((m) => m.status !== 'Completed').length})</span>
             </span>
+
+            {/* Delivery Fee Quick Input */}
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '4px 8px' }}>
+              <span style={{ fontSize: '0.78rem', fontWeight: '700', color: '#334155', whiteSpace: 'nowrap' }}>🚚 ថ្លៃដឹក ($):</span>
+              <input
+                type="number"
+                min="0"
+                step="0.5"
+                value={deliveryFee}
+                onChange={(e) => setDeliveryFee(e.target.value)}
+                style={{ width: '64px', padding: '4px 6px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.82rem', fontWeight: '700' }}
+              />
+              <button
+                type="button"
+                disabled={savingDeliveryFee}
+                onClick={async () => {
+                  try {
+                    setSavingDeliveryFee(true);
+                    await axios.put('/settings/payment', { deliveryFee: Number(deliveryFee) || 0 });
+                    alert('បានរក្សាទុកថ្លៃដឹកជញ្ជូនរួចរាល់! (Delivery fee saved)');
+                  } catch (err) {
+                    alert('Failed to save delivery fee');
+                  } finally {
+                    setSavingDeliveryFee(false);
+                  }
+                }}
+                style={{ padding: '4px 10px', borderRadius: '6px', border: 'none', backgroundColor: '#0f172a', color: '#fff', fontSize: '0.75rem', fontWeight: '700', cursor: 'pointer' }}
+              >
+                {savingDeliveryFee ? '...' : 'Save'}
+              </button>
+            </div>
           </div>
 
           {view === 'products' && (

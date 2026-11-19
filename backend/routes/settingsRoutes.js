@@ -72,6 +72,7 @@ router.get('/payment', async (req, res) => {
       ...DEFAULT_PAYMENT_SETTINGS,
       ...data,
       bakongAccountId: data.bakongAccountId || 'lim_sitha1@bkrt',
+      deliveryFee: Number(data.deliveryFee) || 0,
       accountName: data.accountName || 'LIM SITHA'
     });
   } catch (err) {
@@ -100,6 +101,7 @@ router.put('/payment', async (req, res) => {
     };
 
     if (bakongAccountId !== undefined) updates.bakongAccountId = String(bakongAccountId).trim() || 'lim_sitha1@bkrt';
+    if (req.body.deliveryFee !== undefined) updates.deliveryFee = Math.max(0, Number(req.body.deliveryFee) || 0);
     if (accountName !== undefined) updates.accountName = String(accountName).trim() || 'LIM SITHA';
     if (merchantId !== undefined) updates.merchantId = String(merchantId).trim() || '14463116';
     if (bakongToken !== undefined) updates.bakongToken = String(bakongToken).trim();
