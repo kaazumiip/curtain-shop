@@ -216,6 +216,60 @@ function App() {
     <LanguageProvider>
       <Router>
         <div className="store-container">
+          {showInAppBanner && (
+            <div style={{
+              backgroundColor: '#0f172a',
+              color: '#ffffff',
+              padding: '10px 14px',
+              fontSize: '0.8rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '10px',
+              flexWrap: 'wrap',
+              zIndex: 99999
+            }}>
+              <span style={{ flex: 1, minWidth: '180px', lineHeight: '1.35' }}>
+                {isAndroid
+                  ? 'ដើម្បីទូទាត់ KHQR និងប្រើផែនទីបានរលូន សូមបើកក្នុង Chrome:'
+                  : 'ដើម្បីទូទាត់ KHQR បានរលូន សូមចុច ⋯ ឬ Safari រួចជ្រើស "Open in Safari"'}
+              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {isAndroid && typeof window !== 'undefined' && (
+                  <a
+                    href={`intent://${window.location.host}${window.location.pathname}${window.location.search}#Intent;scheme=https;package=com.android.chrome;end`}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '999px',
+                      backgroundColor: '#22c55e',
+                      color: '#0f172a',
+                      fontWeight: '800',
+                      textDecoration: 'none',
+                      fontSize: '0.78rem',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    បើកក្នុង Chrome
+                  </a>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowInAppBanner(false)}
+                  style={{
+                    background: 'none',
+                    border: '1px solid rgba(255,255,255,0.35)',
+                    color: '#ffffff',
+                    borderRadius: '999px',
+                    padding: '4px 10px',
+                    fontSize: '0.75rem',
+                    cursor: 'pointer'
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          )}
           <Navbar 
             products={products}
             cartCount={cart.length} 
