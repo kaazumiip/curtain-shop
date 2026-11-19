@@ -18,6 +18,7 @@ function Dashboard({ onLogout }) {
   const [productCategoryFilter, setProductCategoryFilter] = useState('all');
   const [productSearch, setProductSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [measurements, setMeasurements] = useState([]);
   const navigate = useNavigate();
   const { t, language, toggleLanguage } = useLanguage();
 
@@ -26,10 +27,12 @@ function Dashboard({ onLogout }) {
   useEffect(() => {
     fetchProducts();
     fetchOrders();
+    fetchMeasurements();
 
     // Auto-poll orders every 10 seconds so new orders show up live
     const interval = setInterval(() => {
       fetchOrders();
+      fetchMeasurements();
     }, 10000);
 
     return () => clearInterval(interval);
@@ -44,6 +47,15 @@ function Dashboard({ onLogout }) {
       console.error('Error fetching products:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchMeasurements = async () => {
+    try {
+      const res = await axios.get('/orders/measurements');
+      setMeasurements(res.data || []);
+    } catch (err) {
+      console.error('Error fetching measurements:', err);
     }
   };
 
@@ -237,6 +249,20 @@ function Dashboard({ onLogout }) {
               <Clock size={16} />
               {t('history_tab')}
             </span>
+            <span
+              onClick={() => setView('measurements')}
+              style={{
+                cursor: 'pointer',
+                fontSize: '0.85rem',
+                fontWeight: view === 'measurements' ? '700' : '400',
+                color: view === 'measurements' ? '#0f172a' : '#8e8e8e',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              <span>📏 ណាត់វាស់វាំងនន ({measurements.filter((m) => m.status !== 'Completed').length})</span>
+            </span>
           </div>
 
           {view === 'products' && (
@@ -373,6 +399,100 @@ function Dashboard({ onLogout }) {
             }
           }}
         />
+      ) : view === 'measurements' ? (
+        <div style={{ display: 'grid', gap: '14px' }}>
+          {measurements.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px', color: '#64748b', backgroundColor: '#f8fafc', borderRadius: '16px' }}>
+              មិនទាន់មានការណាត់វាស់វាំងនននៅឡើយទេ (No measurement appointments yet)
+            </div>
+          ) : (
+            measurements.map((m) => (
+              <div key={m._id} style={{
+                backgroundColor: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '16px',
+                padding: '18px 20px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '14px'
+              }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                    <span style={{ fontWeight: '800', fontSize: '1.05rem', color: '#0f172a' }}>{m.name}</span>
+                    <span style={{
+                      padding: '2px 10px',
+                      borderRadius: '999px',
+                      fontSize: '0.75rem',
+                      fontWeight: '700',
+                      backgroundColor: m.status === 'Completed' ? '#dcfce7' : '#fef3c7',
+                      color: m.status === 'Completed' ? '#15803d' : '#92400e'
+                    }}>
+                      {m.status === 'Completed' ? 'រួចរាល់ (Done)' : 'កំពុងរង់ចាំ (Pending)'}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: '700', color: '#0284c7' }}>📞 {m.phone}</div>
+                  <div style={{ fontSize: '0.85rem', color: '#475569' }}>
+                    📅 ថ្ងៃណាត់: <strong>{m.preferredDate || 'ពេលណាក៏បាន'}</strong>
+                  </div>
+                  {m.windowNotes && (
+                    <div style={{ fontSize: '0.85rem', color: '#334155' }}>📝 {m.windowNotes}</div>
+                  )}
+                  {m.address && (
+                    <div style={{ fontSize: '0.85rem', color: '#64748b' }}>📍 {m.address}</div>
+                  )}
+                </div>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  {m.googleMapsUrl && (
+                    <a
+                      href={m.googleMapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        padding: '8px 14px',
+                        borderRadius: '10px',
+                        border: '1px solid #cbd5e1',
+                        backgroundColor: '#f8fafc',
+                        color: '#0f172a',
+                        textDecoration: 'none',
+                        fontWeight: '700',
+                        fontSize: '0.82rem'
+                      }}
+                    >
+                      🗺️ Google Maps
+                    </a>
+                  )}
+                  {m.status !== 'Completed' && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          await axios.put(`/orders/measurements/${m._id}`, { status: 'Completed' });
+                          fetchMeasurements();
+                        } catch (err) {
+                          alert('Failed to update appointment');
+                        }
+                      }}
+                      style={{
+                        padding: '8px 16px',
+                        borderRadius: '10px',
+                        border: 'none',
+                        backgroundColor: '#0f172a',
+                        color: '#ffffff',
+                        fontWeight: '700',
+                        fontSize: '0.82rem',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      ✅ រួចរាល់ (Mark Done)
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       ) : (
         <OrdersTable orders={filteredOrders} onSelectOrder={handleSelectOrder} />
       )}

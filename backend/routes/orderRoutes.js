@@ -84,6 +84,44 @@ router.post('/book-measurement', async (req, res) => {
   }
 });
 
+// @route   GET /api/orders/measurements
+// @desc    Get all measurement appointments (Admin)
+router.get('/measurements', async (req, res) => {
+  try {
+    const snapshot = await measurementsCollection.orderBy('createdAt', 'desc').get();
+    const list = snapshot.docs.map((doc) => ({ _id: doc.id, id: doc.id, ...doc.data() }));
+    res.json(list);
+  } catch (err) {
+    try {
+      const snapshot = await measurementsCollection.get();
+      const list = snapshot.docs.map((doc) => ({ _id: doc.id, id: doc.id, ...doc.data() }));
+      list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      res.json(list);
+    } catch (fallbackErr) {
+      console.error('Get measurements error:', fallbackErr);
+      res.status(500).json({ error: 'Server error' });
+    }
+  }
+});
+
+// @route   PUT /api/orders/measurements/:id
+// @desc    Update measurement appointment status
+router.put('/measurements/:id', async (req, res) => {
+  try {
+    const docRef = measurementsCollection.doc(req.params.id);
+    const doc = await docRef.get();
+    if (!doc.exists) return res.status(404).json({ error: 'Measurement booking not found' });
+
+    const { status } = req.body;
+    await docRef.set({ status: status || 'Completed', updatedAt: new Date().toISOString() }, { merge: true });
+    const updated = await docRef.get();
+    res.json({ _id: updated.id, id: updated.id, ...updated.data() });
+  } catch (err) {
+    console.error('Update measurement error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // @route   POST /api/orders
 // @desc    Create a new order and automatically deduct product stock with server-verified pricing
 router.post('/', async (req, res) => {
@@ -235,6 +273,44 @@ router.post('/', async (req, res) => {
   } catch (err) {
     console.error('Create order error:', err);
     res.status(500).json({ error: 'Server error: ' + err.message });
+  }
+});
+
+// @route   GET /api/orders/measurements
+// @desc    Get all measurement appointments (Admin)
+router.get('/measurements', async (req, res) => {
+  try {
+    const snapshot = await measurementsCollection.orderBy('createdAt', 'desc').get();
+    const list = snapshot.docs.map((doc) => ({ _id: doc.id, id: doc.id, ...doc.data() }));
+    res.json(list);
+  } catch (err) {
+    try {
+      const snapshot = await measurementsCollection.get();
+      const list = snapshot.docs.map((doc) => ({ _id: doc.id, id: doc.id, ...doc.data() }));
+      list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      res.json(list);
+    } catch (fallbackErr) {
+      console.error('Get measurements error:', fallbackErr);
+      res.status(500).json({ error: 'Server error' });
+    }
+  }
+});
+
+// @route   PUT /api/orders/measurements/:id
+// @desc    Update measurement appointment status
+router.put('/measurements/:id', async (req, res) => {
+  try {
+    const docRef = measurementsCollection.doc(req.params.id);
+    const doc = await docRef.get();
+    if (!doc.exists) return res.status(404).json({ error: 'Measurement booking not found' });
+
+    const { status } = req.body;
+    await docRef.set({ status: status || 'Completed', updatedAt: new Date().toISOString() }, { merge: true });
+    const updated = await docRef.get();
+    res.json({ _id: updated.id, id: updated.id, ...updated.data() });
+  } catch (err) {
+    console.error('Update measurement error:', err);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
