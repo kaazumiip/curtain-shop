@@ -425,6 +425,39 @@ router.post('/telegram-webhook', async (req, res) => {
   }
 });
 
+// @route   GET /api/orders/lookup?q=...
+// @desc    Track orders by phone number or order number without an account
+router.get('/lookup', async (req, res) => {
+  try {
+    const rawQuery = String(req.query.q || '').trim();
+    const cleanQuery = rawQuery.replace(/[\s\-#]/g, '');
+    if (!cleanQuery || cleanQuery.length < 1) {
+      return res.json([]);
+    }
+
+    const snapshot = await collection.get();
+    const allOrders = snapshot.docs.map(formatOrder);
+    const matched = allOrders.filter((order) => {
+      const phone1 = String(order.customer?.phone || '').replace(/[\s\-]/g, '');
+      const phone2 = String(order.customer?.phone2 || '').replace(/[\s\-]/g, '');
+      const orderNum = String(order.orderNumber || '');
+      const orderId = String(order._id || '');
+      return (
+        (phone1 && phone1 === cleanQuery) ||
+        (phone2 && phone2 === cleanQuery) ||
+        (orderNum && orderNum === cleanQuery) ||
+        orderId === rawQuery
+      );
+    });
+
+    matched.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    res.json(matched);
+  } catch (err) {
+    console.error('Order lookup error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // @route   GET /api/orders/:id
 // @desc    Get order by ID
 router.get('/:id', async (req, res) => {

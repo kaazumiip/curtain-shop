@@ -9,6 +9,33 @@ const MyOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('Active');
+  const [lookupQuery, setLookupQuery] = useState('');
+  const [searching, setSearching] = useState(false);
+
+  const handleLookup = async (e) => {
+    e.preventDefault();
+    const q = lookupQuery.trim();
+    if (!q) return;
+    try {
+      setSearching(true);
+      const res = await axios.get(`/orders/lookup?q=${encodeURIComponent(q)}`);
+      const found = res.data || [];
+      if (found.length === 0) {
+        alert('រកមិនឃើញការបញ្ជាទិញសម្រាប់លេខនេះទេ (No orders found)');
+        return;
+      }
+      setOrders((prev) => {
+        const existingIds = new Set(prev.map((o) => o._id));
+        const merged = [...found.filter((f) => !existingIds.has(f._id)), ...prev];
+        return merged;
+      });
+    } catch (err) {
+      console.error('Order lookup failed:', err);
+      alert('បរាជ័យក្នុងការស្វែងរក សូមព្យាយាមម្តងទៀត');
+    } finally {
+      setSearching(false);
+    }
+  };
 
   useEffect(() => {
     const fetchOrdersData = async () => {
@@ -132,6 +159,43 @@ const MyOrders = () => {
             <CheckCircle size={16} /> {t('history').toUpperCase()} ({historyOrders.length})
           </button>
         </div>
+      </div>
+
+      <div style={{ maxWidth: '800px', margin: '0 auto 24px' }}>
+        <form onSubmit={handleLookup} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <input
+            type="text"
+            value={lookupQuery}
+            onChange={(e) => setLookupQuery(e.target.value)}
+            placeholder="ស្វែងរកតាមលេខទូរស័ព្ទ ឬ លេខកុម្ម៉ង់ (Phone or Order #)..."
+            style={{
+              flex: 1,
+              minWidth: '220px',
+              padding: '12px 16px',
+              borderRadius: '14px',
+              border: '1px solid #cbd5e1',
+              fontSize: '0.9rem',
+              outline: 'none'
+            }}
+          />
+          <button
+            type="submit"
+            disabled={searching}
+            style={{
+              padding: '12px 22px',
+              borderRadius: '14px',
+              border: 'none',
+              backgroundColor: '#0f172a',
+              color: '#ffffff',
+              fontWeight: '700',
+              fontSize: '0.9rem',
+              cursor: searching ? 'not-allowed' : 'pointer',
+              opacity: searching ? 0.7 : 1
+            }}
+          >
+            {searching ? 'កំពុងស្វែងរក...' : 'ស្វែងរក (Track)'}
+          </button>
+        </form>
       </div>
 
       <div style={{ maxWidth: '800px', margin: '0 auto', display: 'grid', gap: '16px' }}>
