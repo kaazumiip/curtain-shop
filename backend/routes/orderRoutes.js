@@ -441,16 +441,23 @@ router.get('/lookup', async (req, res) => {
       return res.json([]);
     }
 
+    const normalizePhone = (p) => {
+      const digits = String(p || '').replace(/\D/g, '');
+      if (digits.startsWith('855') && digits.length >= 11) return '0' + digits.slice(3);
+      return digits;
+    };
+    const normQueryPhone = normalizePhone(rawQuery);
+
     const snapshot = await collection.get();
     const allOrders = snapshot.docs.map(formatOrder);
     const matched = allOrders.filter((order) => {
-      const phone1 = String(order.customer?.phone || '').replace(/[\s\-]/g, '');
-      const phone2 = String(order.customer?.phone2 || '').replace(/[\s\-]/g, '');
+      const phone1 = normalizePhone(order.customer?.phone);
+      const phone2 = normalizePhone(order.customer?.phone2);
       const orderNum = String(order.orderNumber || '');
       const orderId = String(order._id || '');
       return (
-        (phone1 && phone1 === cleanQuery) ||
-        (phone2 && phone2 === cleanQuery) ||
+        (phone1 && normQueryPhone && (phone1 === normQueryPhone || (normQueryPhone.length >= 6 && phone1.endsWith(normQueryPhone)))) ||
+        (phone2 && normQueryPhone && (phone2 === normQueryPhone || (normQueryPhone.length >= 6 && phone2.endsWith(normQueryPhone)))) ||
         (orderNum && orderNum === cleanQuery) ||
         orderId === rawQuery
       );
