@@ -776,3 +776,19 @@
   }
 }
 
+
+/* Desktop/Laptop Hover Effects for Navbar & Hamburger Menu */
+@media (hover: hover) {
+  .hamburger-nav-link:hover {
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+    transform: translateX(3px);
+  }
+  .nav-action-btn {
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+  }
+  .nav-action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+  }
+}
