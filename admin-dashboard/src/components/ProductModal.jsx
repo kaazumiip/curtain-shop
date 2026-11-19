@@ -756,25 +756,56 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                     </div>
                   )}
 
-                  {/* Ready-Made Curtain Fixed Size */}
-                  {formData.category === 'Ready-Made Curtain' && (
-                    <div style={styles.formRow} className="wizard-form-row">
-                      <div style={styles.rowLabelCol}>
-                        <div style={styles.rowTitle}>ទំហំវាំងននស្រាប់ (Fixed Size)</div>
-                        <div style={styles.rowSub}>បញ្ចូលទំហំថេររបស់វាំងននស្រាប់ (ឧ. 140cm × 260cm)</div>
+                  {/* Ready-Made Curtain Fixed Size (Width x Height) */}
+                  {formData.category === 'Ready-Made Curtain' && (() => {
+                    const parts = String(formData.fixedDimensions || '').split(/\s*[x×]\s*/i);
+                    const wVal = parts[0] !== undefined ? parts[0] : '';
+                    const hVal = parts[1] !== undefined ? parts[1] : '';
+                    const updateDim = (newW, newH) => {
+                      const cleanW = String(newW ?? '').trim();
+                      const cleanH = String(newH ?? '').trim();
+                      setFormData({
+                        ...formData,
+                        fixedDimensions: `${cleanW || '0'} x ${cleanH || '0'}`
+                      });
+                    };
+                    return (
+                      <div style={styles.formRow} className="wizard-form-row">
+                        <div style={styles.rowLabelCol}>
+                          <div style={styles.rowTitle}>ទំហំវាំងននស្រាប់ (Width × Height)</div>
+                          <div style={styles.rowSub}>បញ្ចូលទទឹង និងកម្ពស់វាំងននស្រាប់ — បង្ហាញជា: <strong>{wVal || '0'} x {hVal || '0'}</strong></div>
+                        </div>
+                        <div style={styles.rowInputCol}>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: '8px', alignItems: 'end' }}>
+                            <div>
+                              <label style={styles.miniFieldLabel}>ទទឹង (Width)</label>
+                              <input
+                                type="text"
+                                placeholder="0"
+                                value={wVal}
+                                onChange={(e) => updateDim(e.target.value, hVal)}
+                                style={styles.input}
+                              />
+                            </div>
+                            <span style={{ paddingBottom: '12px', fontWeight: '800', color: '#64748b' }}>x</span>
+                            <div>
+                              <label style={styles.miniFieldLabel}>កម្ពស់ (Height)</label>
+                              <input
+                                type="text"
+                                placeholder="0"
+                                value={hVal}
+                                onChange={(e) => updateDim(wVal, e.target.value)}
+                                style={styles.input}
+                              />
+                            </div>
+                          </div>
+                          <div style={{ marginTop: '8px', fontSize: '0.82rem', fontWeight: '700', color: '#0f172a' }}>
+                            បង្ហាញលើវេបសាយ (Preview): <span style={{ padding: '3px 10px', borderRadius: '8px', backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1' }}>{wVal || '0'} x {hVal || '0'}</span>
+                          </div>
+                        </div>
                       </div>
-                      <div style={styles.rowInputCol}>
-                        <label style={styles.miniFieldLabel}>ទំហំថេរ (Fixed Size / Length)</label>
-                        <input
-                          type="text"
-                          placeholder="e.g. 140cm × 260cm"
-                          value={formData.fixedDimensions || ''}
-                          onChange={(e) => setFormData({ ...formData, fixedDimensions: e.target.value })}
-                          style={styles.input}
-                        />
-                      </div>
-                    </div>
-                  )}
+                    );
+                  })()}
 
                   {/* Ready-Made Curtain Option */}
                   {formData.category === 'Curtain' && (
