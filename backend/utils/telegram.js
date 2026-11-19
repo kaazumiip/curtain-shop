@@ -56,10 +56,8 @@ const sendTelegramPhoto = (photoUrl, caption = '') => {
  */
 const sendTelegramNotification = (text, replyMarkup = null) => {
   const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatIds = Array.from(new Set([
-    process.env.TELEGRAM_CHAT_ID,
-    process.env.TELEGRAM_GROUP_CHAT_ID
-  ].filter(Boolean)));
+  const targetChatId = process.env.TELEGRAM_GROUP_CHAT_ID || process.env.TELEGRAM_CHAT_ID;
+  const chatIds = targetChatId ? [targetChatId] : [];
 
   if (!token || chatIds.length === 0) {
     console.log('[Telegram Alert Skipped]: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not configured in .env');
