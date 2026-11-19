@@ -3,6 +3,7 @@ const router = express.Router();
 const https = require('https');
 const crypto = require('crypto');
 const { db } = require('../config/firebase');
+const requireAdmin = require('../middleware/requireAdmin');
 
 const settingsCollection = db.collection('settings');
 const khqrSessionsCollection = db.collection('khqr_sessions');
@@ -83,7 +84,7 @@ router.get('/payment', async (req, res) => {
 
 // @desc    Update payment settings (Admin)
 // @route   PUT /api/settings/payment
-router.put('/payment', async (req, res) => {
+router.put('/payment', requireAdmin, async (req, res) => {
   try {
     const {
       bakongAccountId,

@@ -486,7 +486,7 @@ router.get('/:id', async (req, res) => {
 
 // @route   PUT /api/orders/:id
 // @desc    Update order status (and restore stock if Cancelled, plus notify Telegram)
-router.put('/:id', async (req, res) => {
+router.put('/:id', requireAdmin, async (req, res) => {
   try {
     const { status, actionType, note } = req.body;
     const docRef = collection.doc(req.params.id);

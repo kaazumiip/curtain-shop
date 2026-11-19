@@ -80,7 +80,7 @@ router.get('/:id', async (req, res) => {
 
 // @desc    Create a product (CRUD - Admin)
 // @route   POST /api/products
-router.post('/', async (req, res) => {
+router.post('/', requireAdmin, async (req, res) => {
   try {
     const productData = { ...req.body };
     delete productData._id;
@@ -139,7 +139,7 @@ router.put('/:id', requireAdmin, async (req, res) => {
 
 // @desc    Delete a product (Delete - Admin)
 // @route   DELETE /api/products/:id
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireAdmin, async (req, res) => {
   try {
     const docRef = collection.doc(req.params.id);
     const doc = await docRef.get();
