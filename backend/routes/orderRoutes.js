@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { db } = require('../config/firebase');
+const requireAdmin = require('../middleware/requireAdmin');
 const {
   sendTelegramNotification,
   sendOrderNotification,
@@ -86,7 +87,7 @@ router.post('/book-measurement', async (req, res) => {
 
 // @route   GET /api/orders/measurements
 // @desc    Get all measurement appointments (Admin)
-router.get('/measurements', async (req, res) => {
+router.get('/measurements', requireAdmin, async (req, res) => {
   try {
     const snapshot = await measurementsCollection.orderBy('createdAt', 'desc').get();
     const list = snapshot.docs.map((doc) => ({ _id: doc.id, id: doc.id, ...doc.data() }));
@@ -106,7 +107,7 @@ router.get('/measurements', async (req, res) => {
 
 // @route   PUT /api/orders/measurements/:id
 // @desc    Update measurement appointment status
-router.put('/measurements/:id', async (req, res) => {
+router.put('/measurements/:id', requireAdmin, async (req, res) => {
   try {
     const docRef = measurementsCollection.doc(req.params.id);
     const doc = await docRef.get();
@@ -278,7 +279,7 @@ router.post('/', async (req, res) => {
 
 // @route   GET /api/orders/measurements
 // @desc    Get all measurement appointments (Admin)
-router.get('/measurements', async (req, res) => {
+router.get('/measurements', requireAdmin, async (req, res) => {
   try {
     const snapshot = await measurementsCollection.orderBy('createdAt', 'desc').get();
     const list = snapshot.docs.map((doc) => ({ _id: doc.id, id: doc.id, ...doc.data() }));
@@ -298,7 +299,7 @@ router.get('/measurements', async (req, res) => {
 
 // @route   PUT /api/orders/measurements/:id
 // @desc    Update measurement appointment status
-router.put('/measurements/:id', async (req, res) => {
+router.put('/measurements/:id', requireAdmin, async (req, res) => {
   try {
     const docRef = measurementsCollection.doc(req.params.id);
     const doc = await docRef.get();
@@ -332,7 +333,7 @@ const filterAndCleanupCancelledOrders = (orders) => {
   });
 };
 
-router.get('/', async (req, res) => {
+router.get('/', requireAdmin, async (req, res) => {
   try {
     const snapshot = await collection.orderBy('createdAt', 'desc').get();
     const orders = filterAndCleanupCancelledOrders(snapshot.docs.map(formatOrder));
@@ -354,6 +355,11 @@ router.get('/', async (req, res) => {
 // @desc    Handle Telegram inline button callbacks to update order status directly from Telegram
 router.post('/telegram-webhook', async (req, res) => {
   try {
+    const expectedSecret = process.env.TELEGRAM_WEBHOOK_SECRET || 'sreytha_tg_wh_2026';
+    const receivedSecret = req.headers['x-telegram-bot-api-secret-token'];
+    if (receivedSecret !== expectedSecret) {
+      return res.sendStatus(403);
+    }
     const cb = req.body?.callback_query;
     if (!cb || !cb.data) {
       return res.sendStatus(200);

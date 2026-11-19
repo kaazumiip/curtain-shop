@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { db } = require('../config/firebase');
+const requireAdmin = require('../middleware/requireAdmin');
 const upload = require('../config/cloudinary');
 
 const collection = db.collection('products');
@@ -103,7 +104,7 @@ router.post('/', async (req, res) => {
 
 // @desc    Update a product (Edit/Stock - Admin)
 // @route   PUT /api/products/:id
-router.put('/:id', async (req, res) => {
+router.put('/:id', requireAdmin, async (req, res) => {
   try {
     const docRef = collection.doc(req.params.id);
     const doc = await docRef.get();
