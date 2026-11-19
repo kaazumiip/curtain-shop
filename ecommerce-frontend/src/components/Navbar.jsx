@@ -174,30 +174,28 @@ const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuer
             href="https://t.me/sreythacurtain"
             target="_blank"
             rel="noopener noreferrer"
-            className="nav-action-btn"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 'clamp(3px, 1vw, 6px)',
-              padding: 'clamp(4px, 1.2vw, 7px) clamp(7px, 2vw, 12px)',
+              gap: '5px',
+              width: 'auto',
+              height: '34px',
+              padding: '0 10px',
               borderRadius: '999px',
               backgroundColor: '#e0f2fe',
               border: '1px solid #bae6fd',
               color: '#0284c7',
               textDecoration: 'none',
-              fontSize: 'clamp(0.62rem, 2.5vw, 0.78rem)',
+              fontSize: '0.75rem',
               fontWeight: '700',
               whiteSpace: 'nowrap',
-              maxWidth: 'clamp(96px, 28vw, 160px)',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
               flexShrink: 0
             }}
             title="ទាក់ទង Telegram"
           >
             <Send size={13} style={{ flexShrink: 0 }} />
-            <span>ទាក់ទង Telegram</span>
+            <span>Telegram</span>
           </a>
 
           {/* Single + Button that opens vertical dropdown for Search & Favorites */}
