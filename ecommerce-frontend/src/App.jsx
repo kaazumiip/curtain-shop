@@ -352,9 +352,64 @@ function App() {
                 <Link to="/my-orders">ការបញ្ជាទិញរបស់ខ្ញុំ</Link>
                 <Link to="/order-status">តាមដានការបញ្ជាទិញ</Link>
                 <a href="https://t.me/sreythacurtain" target="_blank" rel="noreferrer">ទំនាក់ទំនងតាម Telegram</a>
+                <a href="tel:089902001" style={{ fontWeight: '700', color: '#0f172a' }}>📞 089 902 001 (Cellcard)</a>
+                <a href="tel:0968127590" style={{ fontWeight: '700', color: '#0f172a' }}>📞 096 812 7590 (Smart)</a>
               </div>
             </div>
           </footer>
+
+          {/* Floating Call & Telegram Help Button for Easy 1-Tap Support */}
+          <div style={{
+            position: 'fixed',
+            bottom: '18px',
+            right: '16px',
+            zIndex: 9990,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+            alignItems: 'flex-end'
+          }}>
+            <a
+              href="tel:089902001"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '10px 16px',
+                borderRadius: '999px',
+                backgroundColor: '#16a34a',
+                color: '#ffffff',
+                fontWeight: '800',
+                fontSize: '0.82rem',
+                textDecoration: 'none',
+                boxShadow: '0 6px 18px rgba(22, 163, 74, 0.35)'
+              }}
+            >
+              <span>📞</span>
+              <span>ទូរស័ព្ទ</span>
+            </a>
+            <a
+              href="https://t.me/sreythacurtain"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '10px 16px',
+                borderRadius: '999px',
+                backgroundColor: '#0284c7',
+                color: '#ffffff',
+                fontWeight: '800',
+                fontSize: '0.82rem',
+                textDecoration: 'none',
+                boxShadow: '0 6px 18px rgba(2, 132, 199, 0.35)'
+              }}
+            >
+              <span>💬</span>
+              <span>Telegram</span>
+            </a>
+          </div>
         </div>
         <Toast message={toast.message} visible={toast.visible} />
       </Router>
