@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { ShoppingBag, Search, Menu, X, Heart, Send, Plus } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 
 const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuery }) => {
@@ -14,6 +14,7 @@ const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuer
   const capsuleRef = useRef(null);
   const { t, language } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const categories = ['All', 'Curtain', 'Valance', 'Fabric', 'Bed Sheet', 'Pillow Case', 'Accessories'];
 
@@ -396,17 +397,46 @@ const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuer
             </div>
 
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '30px', borderBottom: '1px solid #f1f5f9', paddingBottom: '22px' }}>
-                <Link to="/" onClick={() => setIsMenuOpen(false)} style={{ color: '#0f172a', textDecoration: 'none', fontSize: '0.92rem', fontWeight: '700' }}>{t('home')}</Link>
-                <Link to="/my-orders" onClick={() => setIsMenuOpen(false)} style={{ color: '#0f172a', textDecoration: 'none', fontSize: '0.92rem', fontWeight: '700' }}>{t('my_orders')}</Link>
-                <Link to="/about" onClick={() => setIsMenuOpen(false)} style={{ color: '#0f172a', textDecoration: 'none', fontSize: '0.92rem', fontWeight: '700' }}>{t('about_us')}</Link>
-                <Link to="/favorites" onClick={() => setIsMenuOpen(false)} style={{ color: '#0f172a', textDecoration: 'none', fontSize: '0.92rem', fontWeight: '700' }}>{t('my_favorites')} ({favoriteCount})</Link>
-                <Link to="/cart" onClick={() => setIsMenuOpen(false)} style={{ color: '#0f172a', textDecoration: 'none', fontSize: '0.92rem', fontWeight: '700' }}>{t('my_cart')} ({cartCount})</Link>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '26px', borderBottom: '1px solid #f1f5f9', paddingBottom: '20px' }}>
+                {[
+                  { to: '/', label: t('home') },
+                  { to: '/my-orders', label: t('my_orders') },
+                  { to: '/about', label: t('about_us') },
+                  { to: '/favorites', label: `${t('my_favorites')} (${favoriteCount})` },
+                  { to: '/cart', label: `${t('my_cart')} (${cartCount})` }
+                ].map((item) => {
+                  const isActive = location.pathname === item.to;
+                  return (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      onClick={() => setIsMenuOpen(false)}
+                      className="hamburger-nav-link"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '10px 14px',
+                        borderRadius: '10px',
+                        backgroundColor: isActive ? '#0f172a' : 'transparent',
+                        color: isActive ? '#ffffff' : '#0f172a',
+                        textDecoration: 'none',
+                        fontSize: '0.92rem',
+                        fontWeight: isActive ? '800' : '700',
+                        transition: 'all 0.18s ease'
+                      }}
+                    >
+                      <span>{item.label}</span>
+                      {isActive && <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#22c55e' }} />}
+                    </Link>
+                  );
+                })}
                 <a 
                   href="https://t.me/sreythacurtain" 
                   target="_blank" 
                   rel="noreferrer" 
-                  style={{ color: '#0284c7', textDecoration: 'none', fontSize: '0.92rem', fontWeight: '800' }}
+                  className="hamburger-nav-link"
+                  style={{ color: '#0284c7', textDecoration: 'none', fontSize: '0.92rem', fontWeight: '800', padding: '10px 14px', borderRadius: '10px', transition: 'all 0.18s ease' }}
                 >
                   {t('telegram_support')}
                 </a>
