@@ -427,7 +427,6 @@ const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuer
                       }}
                     >
                       <span>{item.label}</span>
-                      {isActive && <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#22c55e' }} />}
                     </Link>
                   );
                 })}
