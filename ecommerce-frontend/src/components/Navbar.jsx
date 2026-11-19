@@ -179,16 +179,19 @@ const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuer
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '4px',
-              padding: '5px 9px',
+              gap: 'clamp(3px, 1vw, 6px)',
+              padding: 'clamp(4px, 1.2vw, 7px) clamp(7px, 2vw, 12px)',
               borderRadius: '999px',
               backgroundColor: '#e0f2fe',
               border: '1px solid #bae6fd',
               color: '#0284c7',
               textDecoration: 'none',
-              fontSize: '0.68rem',
+              fontSize: 'clamp(0.62rem, 2.5vw, 0.78rem)',
               fontWeight: '700',
               whiteSpace: 'nowrap',
+              maxWidth: 'clamp(96px, 28vw, 160px)',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
               flexShrink: 0
             }}
             title="ទាក់ទង Telegram"
