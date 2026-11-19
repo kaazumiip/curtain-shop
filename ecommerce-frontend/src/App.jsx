@@ -81,6 +81,12 @@ function App() {
     return /FBAN|FBAV|FB_IAB|Messenger|Telegram/i.test(ua);
   });
   const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent || '');
+
+  useEffect(() => {
+    if (showInAppBanner && isAndroid && typeof window !== 'undefined') {
+      window.location.href = `intent://${window.location.host}${window.location.pathname}${window.location.search}#Intent;scheme=https;package=com.android.chrome;end`;
+    }
+  }, [showInAppBanner, isAndroid]);
   const [cart, setCart] = useState(() => {
     try {
       const saved = localStorage.getItem('srey_tha_cart');
