@@ -200,8 +200,71 @@ const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuer
             <span>Telegram</span>
           </a>
 
-          {/* Single + Button that opens vertical dropdown for Search & Favorites */}
-          <div style={{ position: 'relative', flexShrink: 0 }}>
+          {/* Tablet & Laptop: Separate Search & Favorites Buttons */}
+          <div className="desktop-only-quick-actions">
+            <button
+              type="button"
+              onClick={openSearch}
+              className="nav-action-btn"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '38px',
+                height: '38px',
+                borderRadius: '50%',
+                backgroundColor: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                color: '#0f172a',
+                cursor: 'pointer'
+              }}
+              title="Search"
+            >
+              <Search size={17} />
+            </button>
+            <Link
+              to="/favorites"
+              className="nav-action-btn"
+              style={{
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '38px',
+                height: '38px',
+                borderRadius: '50%',
+                backgroundColor: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                color: '#0f172a',
+                textDecoration: 'none'
+              }}
+              title="Favorites"
+            >
+              <Heart size={18} color="#0f172a" />
+              {favoriteCount > 0 && (
+                <span style={{
+                  position: 'absolute',
+                  top: '-3px',
+                  right: '-3px',
+                  backgroundColor: '#ef4444',
+                  color: '#fff',
+                  fontSize: '0.62rem',
+                  fontWeight: '800',
+                  width: '18px',
+                  height: '18px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  {favoriteCount}
+                </span>
+              )}
+            </Link>
+          </div>
+
+          {/* Mobile Only: Single + Button that opens vertical dropdown for Search & Favorites */}
+          <div className="mobile-only-quick-menu" style={{ position: 'relative', flexShrink: 0 }}>
             <button
               type="button"
               onClick={() => setIsQuickMenuOpen((prev) => !prev)}

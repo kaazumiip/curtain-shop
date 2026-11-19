@@ -792,3 +792,21 @@
     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
   }
 }
+
+/* Mobile vs Tablet/Laptop Search & Favorites Layout */
+.mobile-only-quick-menu {
+  display: block;
+}
+.desktop-only-quick-actions {
+  display: none;
+  align-items: center;
+  gap: 8px;
+}
+@media (min-width: 768px) {
+  .mobile-only-quick-menu {
+    display: none;
+  }
+  .desktop-only-quick-actions {
+    display: flex;
+  }
+}
