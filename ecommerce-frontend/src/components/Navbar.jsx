@@ -135,9 +135,10 @@ const Navbar = ({ products, cartCount, favoriteCount, searchQuery, setSearchQuer
           </button>
         </div>
         
-        {/* Center: Branding (Natural Flex Flow - Zero Overlap!) */}
+        {/* Center: Branding (Hidden on mobile, visible on desktop) */}
         <Link 
           to="/" 
+          className="desktop-menu-label"
           style={{ 
             textDecoration: 'none', 
             display: 'flex',
