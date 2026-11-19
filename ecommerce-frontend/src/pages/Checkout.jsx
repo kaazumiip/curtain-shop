@@ -55,6 +55,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
   const [isSuccess, setIsSuccess] = useState(false);
+  const [showReceiptModal, setShowReceiptModal] = useState(false);
   const [orderDetails, setOrderDetails] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -661,55 +662,10 @@ const Checkout = ({ cart, onOrderPlaced }) => {
         <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap', animation: 'fadeUpIn 0.5s ease-out 0.4s both' }}>
           <button
             type="button"
-            onClick={() => {
-              const win = window.open('', '_blank', 'width=720,height=900');
-              if (!win) return;
-              const orderNo = orderDetails?.orderNumber ? `#${orderDetails.orderNumber}` : (orderDetails?._id || '');
-              const itemsHtml = (orderDetails?.items || []).map((item) => `
-                <tr>
-                  <td style="padding:10px 8px;border-bottom:1px solid #e2e8f0;">${item.name || ''}</td>
-                  <td style="padding:10px 8px;border-bottom:1px solid #e2e8f0;text-align:center;">${item.quantity || 1}</td>
-                  <td style="padding:10px 8px;border-bottom:1px solid #e2e8f0;text-align:right;">$${Number(item.price || 0).toFixed(2)}</td>
-                </tr>
-              `).join('');
-              win.document.write(`
-                <html>
-                  <head>
-                    <title>Invoice ${orderNo} - Srey Tha Curtain</title>
-                    <style>
-                      body { font-family: 'Noto Sans Khmer', Arial, sans-serif; padding: 32px; color: #0f172a; }
-                      h1 { margin: 0 0 4px; font-size: 22px; }
-                      table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                      th { text-align: left; padding: 10px 8px; border-bottom: 2px solid #0f172a; font-size: 13px; }
-                      .total { margin-top: 20px; text-align: right; font-size: 18px; font-weight: 800; }
-                    </style>
-                  </head>
-                  <body>
-                    <h1>Srey Tha Curtain — ស្រីថា វាំងនន</h1>
-                    <p style="color:#64748b;margin:0 0 20px;">វិក្កយបត្រ / Invoice ${orderNo} • ${new Date(orderDetails?.createdAt || Date.now()).toLocaleString()}</p>
-                    <p><strong>Phone:</strong> ${orderDetails?.customer?.phone || '-'}</p>
-                    <p><strong>Address:</strong> ${orderDetails?.customer?.address || '-'}</p>
-                    <p><strong>Payment:</strong> ${orderDetails?.paymentMethod || '-'}</p>
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Item</th>
-                          <th style="text-align:center;">Qty</th>
-                          <th style="text-align:right;">Price</th>
-                        </tr>
-                      </thead>
-                      <tbody>${itemsHtml}</tbody>
-                    </table>
-                    <div class="total">Total: $${Number(orderDetails?.totalAmount || 0).toFixed(2)}</div>
-                    <script>window.onload = function() { window.print(); };</script>
-                  </body>
-                </html>
-              `);
-              win.document.close();
-            }}
+            onClick={() => setShowReceiptModal(true)}
             style={{ padding: '14px 28px', borderRadius: '50px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff', color: '#0f172a', cursor: 'pointer', fontWeight: '700', fontSize: '0.9rem' }}
           >
-            {language === 'kh' ? '🧾 ទាញយក / បោះពុម្ពវិក្កយបត្រ' : '🧾 Save / Print Invoice'}
+            {language === 'kh' ? '🧾 មើល និងទាញយកវិក្កយបត្រ' : '🧾 View & Download Receipt'}
           </button>
           <button 
             type="button"
@@ -719,6 +675,138 @@ const Checkout = ({ cart, onOrderPlaced }) => {
             {String(t('return_to_shop') || 'ត្រឡប់ទៅទំព័រដើម')}
           </button>
         </div>
+
+        {/* Receipt Review & Download Modal */}
+        {showReceiptModal && (
+          <div style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.6)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 99999,
+            padding: '16px'
+          }}>
+            <div style={{
+              width: '100%',
+              maxWidth: '440px',
+              backgroundColor: '#ffffff',
+              borderRadius: '20px',
+              padding: '24px',
+              textAlign: 'left',
+              boxShadow: '0 20px 50px rgba(0,0,0,0.25)',
+              maxHeight: '90vh',
+              overflowY: 'auto'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', borderBottom: '1px solid #e2e8f0', paddingBottom: '12px' }}>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '800', color: '#0f172a' }}>Srey Tha Curtain — ស្រីថា វាំងនន</h3>
+                  <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px' }}>
+                    វិក្កយបត្រ / Receipt {orderDetails?.orderNumber ? `#${orderDetails.orderNumber}` : ''} • {new Date(orderDetails?.createdAt || Date.now()).toLocaleDateString()}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowReceiptModal(false)}
+                  style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#64748b' }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div style={{ fontSize: '0.84rem', color: '#334155', display: 'grid', gap: '4px', marginBottom: '14px' }}>
+                <div><strong>ទូរស័ព្ទ (Phone):</strong> {orderDetails?.customer?.phone || '-'}</div>
+                <div><strong>អាសយដ្ឋាន (Address):</strong> {orderDetails?.customer?.address || '-'}</div>
+                <div><strong>ការទូទាត់ (Payment):</strong> {orderDetails?.paymentMethod || '-'}</div>
+              </div>
+
+              <div style={{ borderTop: '1px dashed #cbd5e1', borderBottom: '1px dashed #cbd5e1', padding: '10px 0', marginBottom: '14px' }}>
+                {(orderDetails?.items || []).map((item, i) => (
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.84rem', marginBottom: '6px', gap: '8px' }}>
+                    <span>{item.name} × {item.quantity || 1}</span>
+                    <strong>${Number(item.price || 0).toFixed(2)}</strong>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.05rem', fontWeight: '800', color: '#0f172a', marginBottom: '20px' }}>
+                <span>សរុប (Total)</span>
+                <span>${Number(orderDetails?.totalAmount || 0).toFixed(2)}</span>
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowReceiptModal(false)}
+                  style={{ flex: 1, padding: '11px', borderRadius: '12px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff', fontWeight: '700', cursor: 'pointer' }}
+                >
+                  បិទ (Close)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const items = orderDetails?.items || [];
+                    const canvas = document.createElement('canvas');
+                    const width = 640;
+                    const height = 340 + items.length * 36;
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, width, height);
+
+                    ctx.fillStyle = '#0f172a';
+                    ctx.font = 'bold 26px sans-serif';
+                    ctx.fillText('SREY THA CURTAIN', 36, 54);
+                    ctx.fillStyle = '#64748b';
+                    ctx.font = '16px sans-serif';
+                    const orderNo = orderDetails?.orderNumber ? `#${orderDetails.orderNumber}` : (orderDetails?._id || '');
+                    ctx.fillText(`Receipt ${orderNo}  |  ${new Date(orderDetails?.createdAt || Date.now()).toLocaleString()}`, 36, 84);
+
+                    ctx.strokeStyle = '#e2e8f0';
+                    ctx.beginPath(); ctx.moveTo(36, 102); ctx.lineTo(width - 36, 102); ctx.stroke();
+
+                    ctx.fillStyle = '#1e293b';
+                    ctx.font = '16px sans-serif';
+                    ctx.fillText(`Phone: ${orderDetails?.customer?.phone || '-'}`, 36, 134);
+                    ctx.fillText(`Payment: ${orderDetails?.paymentMethod || '-'}`, 36, 162);
+                    ctx.fillText(`Address: ${String(orderDetails?.customer?.address || '-').slice(0, 58)}`, 36, 190);
+
+                    ctx.beginPath(); ctx.moveTo(36, 212); ctx.lineTo(width - 36, 212); ctx.stroke();
+
+                    let y = 244;
+                    items.forEach((item) => {
+                      ctx.fillStyle = '#0f172a';
+                      ctx.font = '16px sans-serif';
+                      ctx.fillText(`${String(item.name || '').slice(0, 38)} x${item.quantity || 1}`, 36, y);
+                      ctx.font = 'bold 16px sans-serif';
+                      const priceStr = `$${Number(item.price || 0).toFixed(2)}`;
+                      ctx.fillText(priceStr, width - 36 - ctx.measureText(priceStr).width, y);
+                      y += 34;
+                    });
+
+                    ctx.beginPath(); ctx.moveTo(36, y); ctx.lineTo(width - 36, y); ctx.stroke();
+                    y += 38;
+                    ctx.fillStyle = '#0f172a';
+                    ctx.font = 'bold 22px sans-serif';
+                    ctx.fillText('TOTAL', 36, y);
+                    const totalStr = `$${Number(orderDetails?.totalAmount || 0).toFixed(2)}`;
+                    ctx.fillText(totalStr, width - 36 - ctx.measureText(totalStr).width, y);
+
+                    const link = document.createElement('a');
+                    link.download = `SreyTha-Receipt-${orderNo.replace('#', '') || 'order'}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                  }}
+                  style={{ flex: 1.4, padding: '11px', borderRadius: '12px', border: 'none', backgroundColor: '#0f172a', color: '#ffffff', fontWeight: '700', cursor: 'pointer' }}
+                >
+                  📥 ទាញយក (Download PNG)
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
