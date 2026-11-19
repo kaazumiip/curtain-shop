@@ -8,8 +8,8 @@ const settingsCollection = db.collection('settings');
 const khqrSessionsCollection = db.collection('khqr_sessions');
 
 const DEFAULT_PAYMENT_SETTINGS = {
-  bakongAccountId: 'chanmonyroth_hout@bkrt',
-  accountName: 'CHANMONYROTH HOUT',
+  bakongAccountId: 'lim_sitha1@bkrt',
+  accountName: 'LIM SITHA',
   merchantCity: 'Phnom Penh',
   merchantId: '14463116',
   bakongToken: process.env.BAKONG_TOKEN || '',
@@ -71,8 +71,8 @@ router.get('/payment', async (req, res) => {
     res.json({
       ...DEFAULT_PAYMENT_SETTINGS,
       ...data,
-      bakongAccountId: data.bakongAccountId || 'chanmonyroth_hout@bkrt',
-      accountName: data.accountName || 'CHANMONYROTH HOUT'
+      bakongAccountId: data.bakongAccountId || 'lim_sitha1@bkrt',
+      accountName: data.accountName || 'LIM SITHA'
     });
   } catch (err) {
     console.error('Get payment settings error:', err);
@@ -99,8 +99,8 @@ router.put('/payment', async (req, res) => {
       updatedAt: new Date().toISOString()
     };
 
-    if (bakongAccountId !== undefined) updates.bakongAccountId = String(bakongAccountId).trim() || 'chanmonyroth_hout@bkrt';
-    if (accountName !== undefined) updates.accountName = String(accountName).trim() || 'CHANMONYROTH HOUT';
+    if (bakongAccountId !== undefined) updates.bakongAccountId = String(bakongAccountId).trim() || 'lim_sitha1@bkrt';
+    if (accountName !== undefined) updates.accountName = String(accountName).trim() || 'LIM SITHA';
     if (merchantId !== undefined) updates.merchantId = String(merchantId).trim() || '14463116';
     if (bakongToken !== undefined) updates.bakongToken = String(bakongToken).trim();
     if (bakongQrUrl !== undefined) updates.bakongQrUrl = bakongQrUrl;
@@ -133,8 +133,8 @@ router.post('/khqr/generate', async (req, res) => {
       }
     } catch (e) {}
 
-    const bakongAccountId = config.bakongAccountId || 'chanmonyroth_hout@bkrt';
-    const merchantName = (config.accountName || 'CHANMONYROTH HOUT').slice(0, 25);
+    const bakongAccountId = config.bakongAccountId || 'lim_sitha1@bkrt';
+    const merchantName = (config.accountName || 'LIM SITHA').slice(0, 25);
     const merchantCity = (config.merchantCity || 'Phnom Penh').slice(0, 15);
     const now = Date.now();
     const expiresAt = now + 100 * 1000; // 100 seconds expiration

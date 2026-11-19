@@ -32,8 +32,8 @@ const formatTag = (tag, val) => {
 };
 
 const buildLocalBakongKhqr = (bakongId, merchantName, amountUsd, expiresAtMs) => {
-  const cleanId = bakongId || 'chanmonyroth_hout@bkrt';
-  const cleanName = (merchantName || 'CHANMONYROTH HOUT').slice(0, 25);
+  const cleanId = bakongId || 'lim_sitha1@bkrt';
+  const cleanName = (merchantName || 'LIM SITHA').slice(0, 25);
   const rounded = Math.round(Number(amountUsd || 0) * 100) / 100;
   const amtStr = Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(2);
   const tag29 = formatTag('29', formatTag('00', cleanId));
@@ -64,8 +64,8 @@ const Checkout = ({ cart, onOrderPlaced }) => {
   const [downloadingQr, setDownloadingQr] = useState(false);
 
   const [paymentConfig, setPaymentConfig] = useState({
-    bakongAccountId: 'chanmonyroth_hout@bkrt',
-    accountName: 'CHANMONYROTH HOUT',
+    bakongAccountId: 'lim_sitha1@bkrt',
+    accountName: 'LIM SITHA',
     merchantId: '14463116',
     acledaAccountNumber: '089 902 001'
   });
@@ -98,8 +98,8 @@ const Checkout = ({ cart, onOrderPlaced }) => {
         if (res.data) {
           setPaymentConfig((prev) => ({
             ...prev,
-            bakongAccountId: res.data.bakongAccountId || 'chanmonyroth_hout@bkrt',
-            accountName: res.data.accountName || 'CHANMONYROTH HOUT',
+            bakongAccountId: res.data.bakongAccountId || 'lim_sitha1@bkrt',
+            accountName: res.data.accountName || 'LIM SITHA',
             merchantId: res.data.merchantId || '14463116',
             acledaAccountNumber: res.data.acledaAccountNumber || '089 902 001',
             bakongToken: res.data.bakongToken || prev.bakongToken
@@ -182,8 +182,8 @@ const Checkout = ({ cart, onOrderPlaced }) => {
     try {
       const now = Date.now();
       const expiresAt = now + QR_EXPIRATION_SECONDS * 1000;
-      const accountId = paymentConfig.bakongAccountId || 'chanmonyroth_hout@bkrt';
-      const merchantName = (paymentConfig.accountName || 'CHANMONYROTH HOUT').slice(0, 25);
+      const accountId = paymentConfig.bakongAccountId || 'lim_sitha1@bkrt';
+      const merchantName = (paymentConfig.accountName || 'LIM SITHA').slice(0, 25);
 
       const qrString = buildLocalBakongKhqr(
         accountId,
@@ -368,7 +368,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
     ctx.textAlign = 'left';
     ctx.fillStyle = '#64748B';
     ctx.font = 'bold 22px Arial, sans-serif';
-    ctx.fillText(merchantNameStr || khqrSession?.merchantName || paymentConfig.accountName || 'CHANMONYROTH HOUT', 50, 155);
+    ctx.fillText(merchantNameStr || khqrSession?.merchantName || paymentConfig.accountName || 'LIM SITHA', 50, 155);
 
     ctx.fillStyle = '#0F172A';
     ctx.font = 'bold 48px Arial, sans-serif';
@@ -525,8 +525,8 @@ const Checkout = ({ cart, onOrderPlaced }) => {
       customer: customerData,
       paymentMethod: paymentMethod,
       paymentDetails: isKhqrBank ? {
-        bakongAccountId: khqrSession?.bakongAccountId || paymentConfig.bakongAccountId || 'chanmonyroth_hout@bkrt',
-        accountName: khqrSession?.merchantName || paymentConfig.accountName || 'CHANMONYROTH HOUT',
+        bakongAccountId: khqrSession?.bakongAccountId || paymentConfig.bakongAccountId || 'lim_sitha1@bkrt',
+        accountName: khqrSession?.merchantName || paymentConfig.accountName || 'LIM SITHA',
         md5: khqrSession?.md5 || null,
         khqrStatus: overrideKhqrStatus || khqrStatus,
         transactionRef: abaTxRef.trim() || null,
@@ -854,8 +854,8 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                   id: 'ABA / ACLEDA / Bakong KHQR',
                   label: language === 'kh' ? 'ABA / ACLEDA / Bakong KHQR (ស្កេន QR ទូទាត់ប្រាក់)' : 'ABA / ACLEDA / Bakong KHQR (Scan & Pay)',
                   sub: language === 'kh'
-                    ? `គណនី Bakong: ${paymentConfig.bakongAccountId || 'chanmonyroth_hout@bkrt'}`
-                    : `Bakong ID: ${paymentConfig.bakongAccountId || 'chanmonyroth_hout@bkrt'}`
+                    ? `គណនី Bakong: ${paymentConfig.bakongAccountId || 'lim_sitha1@bkrt'}`
+                    : `Bakong ID: ${paymentConfig.bakongAccountId || 'lim_sitha1@bkrt'}`
                 },
                 {
                   id: 'Cash on Delivery',
@@ -1009,7 +1009,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                           {language === 'kh' ? 'គណនីទទួលប្រាក់ (BAKONG KHQR)' : 'MERCHANT BAKONG ACCOUNT'}
                         </span>
                         <p style={{ margin: '2px 0 0', fontSize: '1.15rem', fontWeight: '900', color: '#0f172a' }}>
-                          {khqrSession?.merchantName || paymentConfig.accountName || 'CHANMONYROTH HOUT'}
+                          {khqrSession?.merchantName || paymentConfig.accountName || 'LIM SITHA'}
                         </p>
                       </div>
                       <div style={{ textAlign: 'right' }}>
@@ -1029,12 +1029,12 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                       </span>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px', flexWrap: 'wrap', gap: '10px' }}>
                         <span style={{ fontSize: 'clamp(0.95rem, 3.8vw, 1.2rem)', fontWeight: '900', color: '#004B6E', fontFamily: 'monospace' }}>
-                          {khqrSession?.bakongAccountId || paymentConfig.bakongAccountId || 'chanmonyroth_hout@bkrt'}
+                          {khqrSession?.bakongAccountId || paymentConfig.bakongAccountId || 'lim_sitha1@bkrt'}
                         </span>
                         <button
                           type="button"
                           onClick={() => {
-                            navigator.clipboard.writeText(khqrSession?.bakongAccountId || paymentConfig.bakongAccountId || 'chanmonyroth_hout@bkrt');
+                            navigator.clipboard.writeText(khqrSession?.bakongAccountId || paymentConfig.bakongAccountId || 'lim_sitha1@bkrt');
                             setCopied(true);
                             setTimeout(() => setCopied(false), 2000);
                           }}
@@ -1092,7 +1092,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                       </div>
                       <div style={{ padding: '12px 16px 8px', textAlign: 'left', borderBottom: '1px dashed #e2e8f0' }}>
                         <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: '800', textTransform: 'uppercase' }}>
-                          {khqrSession?.merchantName || paymentConfig.accountName || 'CHANMONYROTH HOUT'}
+                          {khqrSession?.merchantName || paymentConfig.accountName || 'LIM SITHA'}
                         </div>
                         <div style={{ fontSize: '1.35rem', fontWeight: '900', color: '#0f172a', marginTop: '2px' }}>
                           ${subtotal} <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b' }}>USD</span>
@@ -1569,7 +1569,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
               </div>
               <div style={{ padding: '8px 14px 6px', textAlign: 'left', borderBottom: '1px dashed #e2e8f0' }}>
                 <div style={{ fontSize: '0.62rem', color: '#64748b', fontWeight: '800', textTransform: 'uppercase' }}>
-                  {khqrSession?.merchantName || paymentConfig.accountName || 'CHANMONYROTH HOUT'}
+                  {khqrSession?.merchantName || paymentConfig.accountName || 'LIM SITHA'}
                 </div>
                 <div style={{ fontSize: '1.1rem', fontWeight: '900', color: '#0f172a' }}>
                   ${subtotal} <span style={{ fontSize: '0.68rem', fontWeight: '700', color: '#64748b' }}>USD</span>

@@ -252,7 +252,7 @@ router.post('/', async (req, res) => {
       items: verifiedItems,
       subtotal: finalSubtotal,
       paymentMethod: paymentMethod || 'ABA / ACLEDA / Bakong KHQR',
-      paymentDetails: req.body.paymentDetails || ((paymentMethod === 'ABA Bank' || paymentMethod === 'ABA / ACLEDA / Bakong KHQR') ? { bakongAccountId: 'chanmonyroth_hout@bkrt', accountName: 'CHANMONYROTH HOUT' } : null),
+      paymentDetails: req.body.paymentDetails || ((paymentMethod === 'ABA Bank' || paymentMethod === 'ABA / ACLEDA / Bakong KHQR') ? { bakongAccountId: 'lim_sitha1@bkrt', accountName: 'LIM SITHA' } : null),
       status: 'Preparing',
       stockDeducted: true,
       createdAt: new Date().toISOString(),
