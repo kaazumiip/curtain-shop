@@ -6,10 +6,20 @@ const Login = ({ onLoginSuccess }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const ADMIN_PASSWORD_HASHES = [
+    'bddd6b538f8a91550049ae3252ef6068d5859df3c80f93bc8fc38a4b63d2bc73',
+    '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9'
+  ];
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Simple secure check for admin panel
-    if (username === 'admin' && (password === 'sreytha2026' || password === 'admin123')) {
+    const encoded = new TextEncoder().encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', encoded);
+    const hashHex = Array.from(new Uint8Array(hashBuffer))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+
+    if (username === 'admin' && ADMIN_PASSWORD_HASHES.includes(hashHex)) {
       localStorage.setItem('srey_tha_admin_auth', 'true');
       onLoginSuccess();
     } else {
