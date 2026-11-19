@@ -237,10 +237,10 @@ const Checkout = ({ cart, onOrderPlaced }) => {
       }
     }, 1000);
 
-    // 2. Schedule status checks every 7 seconds for 60s
+    // 2. Schedule status checks every 15 seconds for 60s (saves daily Bakong API quota)
     const intervalId = setInterval(() => {
       triggerCheckAtSecond(sessionData.md5, 'interval');
-    }, 7000);
+    }, 15000);
     checkTimersRef.current.push(intervalId);
   }, [subtotal, paymentConfig.bakongAccountId, paymentConfig.accountName, clearAllKhqrTimers, triggerCheckAtSecond]);
 
@@ -310,7 +310,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
 
             const intervalId = setInterval(() => {
               triggerCheckAtSecond(saved.md5, 'interval');
-            }, 7000);
+            }, 15000);
             checkTimersRef.current.push(intervalId);
 
             // Immediately check if payment already went through while away
