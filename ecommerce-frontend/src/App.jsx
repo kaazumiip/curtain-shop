@@ -245,17 +245,22 @@ function App() {
                   <a
                     href={`intent://${window.location.host}${window.location.pathname}${window.location.search}#Intent;scheme=https;package=com.android.chrome;end`}
                     style={{
-                      padding: '6px 12px',
+                      padding: '10px 18px',
                       borderRadius: '999px',
-                      backgroundColor: '#22c55e',
-                      color: '#0f172a',
+                      background: 'linear-gradient(135deg, #6ee7b7 0%, #34d399 100%)',
+                      color: '#064e3b',
                       fontWeight: '800',
                       textDecoration: 'none',
-                      fontSize: '0.78rem',
-                      whiteSpace: 'nowrap'
+                      fontSize: '0.88rem',
+                      whiteSpace: 'nowrap',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      boxShadow: '0 4px 12px rgba(52, 211, 153, 0.35)'
                     }}
                   >
-                    បើកក្នុង Chrome
+                    <span>🌐</span>
+                    <span>បើកក្នុង Chrome</span>
                   </a>
                 )}
                 <button
