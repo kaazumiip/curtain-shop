@@ -68,7 +68,8 @@ const Checkout = ({ cart, onOrderPlaced }) => {
     bakongAccountId: 'lim_sitha1@bkrt',
     accountName: 'LIM SITHA',
     merchantId: '14463116',
-    acledaAccountNumber: '089 902 001'
+    acledaAccountNumber: '089 902 001',
+    deliveryFee: 0
   });
 
   // Dynamic KHQR session state
@@ -88,7 +89,9 @@ const Checkout = ({ cart, onOrderPlaced }) => {
   const prebuiltCardBlobRef = useRef(null);
   const autoSubmittedRef = useRef(false);
 
-  const subtotal = cart.reduce((acc, item) => acc + Number(item.totalPrice || item.price), 0).toFixed(2);
+  const itemsSubtotal = cart.reduce((acc, item) => acc + Number(item.totalPrice || item.price), 0);
+  const deliveryFee = Number(paymentConfig.deliveryFee) || 0;
+  const subtotal = (itemsSubtotal + deliveryFee).toFixed(2);
 
   useEffect(() => {
     const ua = navigator.userAgent || '';
@@ -103,6 +106,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
             accountName: res.data.accountName || 'LIM SITHA',
             merchantId: res.data.merchantId || '14463116',
             acledaAccountNumber: res.data.acledaAccountNumber || '089 902 001',
+            deliveryFee: Number(res.data.deliveryFee) || 0,
             bakongToken: res.data.bakongToken || prev.bakongToken
           }));
         }
