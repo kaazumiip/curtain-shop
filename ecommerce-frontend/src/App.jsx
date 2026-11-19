@@ -75,6 +75,12 @@ const AnimatedRoutes = ({ products, addToCart, cart, removeFromCart, updateQuant
 function App() {
   const [products, setProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showInAppBanner, setShowInAppBanner] = useState(() => {
+    if (typeof navigator === 'undefined') return false;
+    const ua = navigator.userAgent || '';
+    return /FBAN|FBAV|FB_IAB|Messenger|Telegram/i.test(ua);
+  });
+  const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent || '');
   const [cart, setCart] = useState(() => {
     try {
       const saved = localStorage.getItem('srey_tha_cart');
