@@ -302,6 +302,32 @@ const BookMeasurementModal = ({ isOpen, onClose }) => {
             >
               {submitting ? 'កំពុងផ្ញើសំណើ...' : 'បញ្ជាក់ការណាត់ជាងចុះវាស់វែង'}
             </button>
+
+            <a
+              href="https://t.me/sreythacurtain"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                marginTop: '8px',
+                width: '100%',
+                padding: '12px',
+                borderRadius: '50px',
+                backgroundColor: '#e0f2fe',
+                border: '1px solid #bae6fd',
+                color: '#0284c7',
+                fontSize: '0.88rem',
+                fontWeight: '800',
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                boxSizing: 'border-box',
+                fontFamily: "'Poppins', 'Noto Sans Khmer', 'Kdam Thmor Pro', sans-serif"
+              }}
+            >
+              <span>💬 ណាត់ជាងតាម Telegram (Chat on Telegram)</span>
+            </a>
           </form>
         )}
       </div>
