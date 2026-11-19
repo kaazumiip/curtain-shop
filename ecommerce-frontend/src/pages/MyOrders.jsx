@@ -29,6 +29,12 @@ const MyOrders = () => {
         const merged = [...found.filter((f) => !existingIds.has(f._id)), ...prev];
         return merged;
       });
+      const hasActive = found.some((o) => !['Order Arrived', 'Delivered', 'Cancelled'].includes(o.status));
+      if (!hasActive) {
+        setActiveTab('History');
+      } else {
+        setActiveTab('Active');
+      }
     } catch (err) {
       console.error('Order lookup failed:', err);
       alert('បរាជ័យក្នុងការស្វែងរក សូមព្យាយាមម្តងទៀត');
