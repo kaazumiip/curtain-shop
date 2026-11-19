@@ -301,24 +301,40 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
               </span>
             )}
           </div>
-          {(selectedSize || product.fixedDimensions) && !['Curtain', 'Valance', 'Accessories'].includes(product.category) && (
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '10px 16px',
-              borderRadius: '12px',
-              backgroundColor: '#f8fafc',
-              border: '1.5px solid #cbd5e1',
-              fontSize: '1.1rem',
-              fontWeight: '800',
-              color: '#0f172a',
-              marginBottom: '12px'
-            }}>
-              <span>ទំហំ (Size):</span>
-              <span>{selectedSize ? selectedSize.name : product.fixedDimensions}</span>
-            </div>
-          )}
+          {(selectedSize || product.fixedDimensions) && !['Curtain', 'Valance', 'Accessories'].includes(product.category) && (() => {
+            const rawSize = String(selectedSize ? selectedSize.name : product.fixedDimensions || '').trim();
+            const dimParts = rawSize.split(/\s*[x×]\s*/i);
+            const hasWH = dimParts.length === 2 && dimParts[0] && dimParts[1];
+            return (
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '8px',
+                padding: '10px 16px',
+                borderRadius: '12px',
+                backgroundColor: '#f8fafc',
+                border: '1.5px solid #cbd5e1',
+                fontSize: '1.08rem',
+                fontWeight: '800',
+                color: '#0f172a',
+                marginBottom: '12px'
+              }}>
+                {hasWH ? (
+                  <>
+                    <span>ទទឹង (Width): <strong>{dimParts[0]}</strong></span>
+                    <span style={{ color: '#64748b' }}>×</span>
+                    <span>កម្ពស់ (Height): <strong>{dimParts[1]}</strong></span>
+                  </>
+                ) : (
+                  <>
+                    <span>ទំហំ (Size):</span>
+                    <span>{rawSize}</span>
+                  </>
+                )}
+              </div>
+            );
+          })()}
           
           <div style={{ width: '100%', height: '1px', backgroundColor: '#f0f0f0', marginBottom: '30px', marginTop: '30px' }}></div>
           
