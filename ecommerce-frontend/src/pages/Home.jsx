@@ -103,10 +103,12 @@ const Home = ({ products, onAddToCart, favorites, onToggleFavorite }) => {
             </div>
 
             <div>
-              <button
-                type="button"
-                onClick={() => setIsMeasurementOpen(true)}
+              <a
+                href="https://t.me/sreythacurtain"
+                target="_blank"
+                rel="noopener noreferrer"
                 style={{
+                  display: 'inline-block',
                   backgroundColor: '#ffffff',
                   color: '#000000',
                   border: 'none',
@@ -114,12 +116,13 @@ const Home = ({ products, onAddToCart, favorites, onToggleFavorite }) => {
                   padding: '9px 20px',
                   fontSize: '0.78rem',
                   fontWeight: '800',
+                  textDecoration: 'none',
                   cursor: 'pointer',
                   fontFamily: "'Poppins', 'Noto Sans Khmer', 'Kdam Thmor Pro', sans-serif"
                 }}
               >
-                ណាត់ជាងចុះវាស់វែងដល់ផ្ទះ &gt;
-              </button>
+                ណាត់ជាងចុះវាស់វែងដល់ផ្ទះ (Telegram) &gt;
+              </a>
             </div>
           </div>
         </div>
