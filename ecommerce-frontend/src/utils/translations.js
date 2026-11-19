@@ -270,6 +270,8 @@ export const translations = {
     pillow_case: 'ស្រោមខ្នើយ',
     accessories: 'គ្រឿងបន្លាស់',
     valance: 'ដក់',
+    'ready-made_curtain': 'វាំងននស្រាប់',
+    ready_made_curtain: 'វាំងននស្រាប់',
     cascade_style: 'ស្ទីលកាត់ថ្នាក់',
     fabric: 'ក្រណាត់ម៉ែត្រ',
     pole: 'ដង',

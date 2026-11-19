@@ -239,8 +239,8 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
         </div>
 
         <div>
-          <span style={{ fontSize: '0.7rem', letterSpacing: '3px', color: 'var(--accent-pink)', fontWeight: '700', textTransform: 'uppercase' }}>
-            {t(product.category.toLowerCase().replace(' ', '_'))}
+          <span style={{ fontSize: '0.85rem', letterSpacing: '1.5px', color: 'var(--accent-pink)', fontWeight: '800', textTransform: 'uppercase' }}>
+            {product.category === 'Ready-Made Curtain' ? 'វាំងននស្រាប់' : t(product.category.toLowerCase().replace(' ', '_'))}
           </span>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '20px 0' }}>
             <h1 className="serif" style={{ fontSize: '2.5rem', margin: 0 }}>
@@ -301,7 +301,24 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
               </span>
             )}
           </div>
-          {selectedSize && !['Curtain', 'Valance', 'Accessories'].includes(product.category) && <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '10px' }}>Size: {selectedSize.name}</p>}
+          {(selectedSize || product.fixedDimensions) && !['Curtain', 'Valance', 'Accessories'].includes(product.category) && (
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '10px 16px',
+              borderRadius: '12px',
+              backgroundColor: '#f8fafc',
+              border: '1.5px solid #cbd5e1',
+              fontSize: '1.1rem',
+              fontWeight: '800',
+              color: '#0f172a',
+              marginBottom: '12px'
+            }}>
+              <span>ទំហំ (Size):</span>
+              <span>{selectedSize ? selectedSize.name : product.fixedDimensions}</span>
+            </div>
+          )}
           
           <div style={{ width: '100%', height: '1px', backgroundColor: '#f0f0f0', marginBottom: '30px', marginTop: '30px' }}></div>
           
