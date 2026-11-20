@@ -30,7 +30,7 @@ function Dashboard({ onLogout }) {
     fetchProducts();
     fetchOrders();
     fetchMeasurements();
-    axios.get('/settings/payment')
+    api.get('/settings/payment')
       .then((res) => {
         if (res.data && res.data.deliveryFee !== undefined) {
           setDeliveryFee(String(res.data.deliveryFee));
@@ -61,7 +61,7 @@ function Dashboard({ onLogout }) {
 
   const fetchMeasurements = async () => {
     try {
-      const res = await axios.get('/orders/measurements');
+      const res = await api.get('/orders/measurements');
       setMeasurements(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error('Error fetching measurements:', err);
@@ -291,7 +291,7 @@ function Dashboard({ onLogout }) {
                 onClick={async () => {
                   try {
                     setSavingDeliveryFee(true);
-                    await axios.put('/settings/payment', { deliveryFee: Number(deliveryFee) || 0 });
+                    await api.put('/settings/payment', { deliveryFee: Number(deliveryFee) || 0 });
                     alert('បានរក្សាទុកថ្លៃដឹកជញ្ជូនរួចរាល់! (Delivery fee saved)');
                   } catch (err) {
                     alert('Failed to save delivery fee');
@@ -432,7 +432,7 @@ function Dashboard({ onLogout }) {
           onAddStock={async (product, delta) => {
             try {
               const newStock = Math.max(0, Number(product.stock || 0) + delta);
-              await axios.put(`/products/${product._id}`, { stock: newStock });
+              await api.put(`/products/${product._id}`, { stock: newStock });
               fetchProducts();
             } catch (err) {
               console.error('Failed to update stock:', err);
@@ -509,7 +509,7 @@ function Dashboard({ onLogout }) {
                       type="button"
                       onClick={async () => {
                         try {
-                          await axios.put(`/orders/measurements/${m._id}`, { status: 'Completed' });
+                          await api.put(`/orders/measurements/${m._id}`, { status: 'Completed' });
                           fetchMeasurements();
                         } catch (err) {
                           alert('Failed to update appointment');
