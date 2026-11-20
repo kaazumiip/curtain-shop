@@ -33,7 +33,8 @@ app.use(cors({
       return callback(null, true);
     }
     return callback(new Error('Not allowed by CORS'));
-  }
+  },
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-admin-token']
 }));
 
 // 3. Body size limit (1MB)

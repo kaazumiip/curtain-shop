@@ -62,9 +62,10 @@ function Dashboard({ onLogout }) {
   const fetchMeasurements = async () => {
     try {
       const res = await axios.get('/orders/measurements');
-      setMeasurements(res.data || []);
+      setMeasurements(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error('Error fetching measurements:', err);
+      setMeasurements([]);
     }
   };
 
