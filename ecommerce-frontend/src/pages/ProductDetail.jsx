@@ -281,7 +281,7 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
             </div>
           )}
 
-          {['Curtain', 'Valance', 'Accessories'].includes(product.category) && (
+          {product.category === 'Curtain' && (
             <div style={{ 
               position: 'absolute', 
               bottom: '50px', 
