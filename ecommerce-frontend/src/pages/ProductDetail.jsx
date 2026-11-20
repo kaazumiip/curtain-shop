@@ -221,6 +221,66 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
             ))}
           </div>
 
+          {/* Color / Model Selector Strip right under the Product Picture Catalogue */}
+          {product.images && product.images.length > 1 && (
+            <div style={{ padding: '10px 14px 14px', backgroundColor: '#ffffff', borderTop: '1px solid #f1f5f9' }}>
+              <div style={{ fontSize: '0.78rem', fontWeight: '800', color: '#334155', marginBottom: '10px' }}>
+                ជ្រើសរើសពណ៌ / ម៉ូដ (Select Color / Model){selectedColorName ? `: ${selectedColorName}` : ''}
+              </div>
+              <div className="no-scrollbar" style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '4px' }}>
+                {product.images.map((img, idx) => {
+                  const label = img.color || `ម៉ូដទី ${idx + 1}`;
+                  const isSelected = selectedColorName === label;
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        setSelectedColorName(label);
+                        if (galleryRef.current) {
+                          galleryRef.current.scrollTo({
+                            left: idx * galleryRef.current.offsetWidth,
+                            behavior: 'smooth'
+                          });
+                        }
+                      }}
+                      style={{
+                        flexShrink: 0,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '5px',
+                        padding: '4px',
+                        borderRadius: '12px',
+                        border: isSelected ? '2.5px solid #0f172a' : '1.5px solid #e2e8f0',
+                        backgroundColor: isSelected ? '#f8fafc' : '#ffffff',
+                        cursor: 'pointer',
+                        width: '74px'
+                      }}
+                    >
+                      <img
+                        src={img.url}
+                        alt={label}
+                        style={{ width: '62px', height: '62px', objectFit: 'cover', borderRadius: '8px' }}
+                      />
+                      <span style={{
+                        fontSize: '0.7rem',
+                        fontWeight: isSelected ? '800' : '600',
+                        color: isSelected ? '#0f172a' : '#64748b',
+                        maxWidth: '66px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {['Curtain', 'Valance', 'Accessories'].includes(product.category) && (
             <div style={{ 
               position: 'absolute', 
@@ -996,8 +1056,10 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
                         ? (Number(product.price) * widthVal * heightMultiplier * q).toFixed(2)
                         : (Number(product.price) * widthVal * heightVal * q).toFixed(2);
 
+                    const chosenImg = product.images?.find((img, i) => (img.color || `ម៉ូដទី ${i + 1}`) === selectedColorName) || product.images?.[0];
                     return {
                       ...product,
+                      imageUrl: chosenImg?.url || product.imageUrl,
                       windowLabel: w.label || `បង្អួចទី ${idx + 1}`,
                       selectedSize: isPole
                         ? { name: `${w.label || `បង្អួចទី ${idx + 1}`}: ${widthVal}m × ${q} គ្រឿង` }
@@ -1013,8 +1075,10 @@ const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
                   });
                   onAddToCart(itemsToAdd);
                 } else {
+                  const chosenImg = product.images?.find((img, i) => (img.color || `ម៉ូដទី ${i + 1}`) === selectedColorName) || product.images?.[0];
                   onAddToCart({
                     ...product,
+                    imageUrl: chosenImg?.url || product.imageUrl,
                     selectedSize: product.category === 'Fabric' ? { name: `${fabricMeters}m × ${quantity} គ្រឿង` } : (selectedSize ? { name: `${selectedSize.name} × ${quantity} គ្រឿង` } : { name: `${quantity} គ្រឿង` }),
                     selectedColorName,
                     fabricMeters: product.category === 'Fabric' ? (parseFloat(fabricMeters) || 0) : null,
