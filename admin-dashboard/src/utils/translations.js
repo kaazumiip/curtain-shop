@@ -555,7 +555,7 @@ export const translations = {
     method_label: 'វិធីទូទាត់៖',
     timeline_label: 'ពេលវេលា',
     created_at_label: 'កាលបរិច្ឆេទបញ្ជាទិញ៖',
-    collection_manager_footer: 'ស្រីថា វាំងនន © 2026 ប្រព័ន្ធគ្រប់គ្រងហាង',
+    collection_manager_footer: 'ស្រីថា វាំងនន  2026 ប្រព័ន្ធគ្រប់គ្រងហាង',
     step_photos: 'រូបភាព & ពណ៌',
     step_general: 'ព័ត៌មានទូទៅ',
     step_price_options: 'តម្លៃ & ជម្រើស',

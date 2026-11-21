@@ -353,9 +353,9 @@ const OrderDetails = () => {
           <div style={{ marginBottom: '20px' }}>
             <p style={{ fontSize: '1.15rem', fontWeight: '800', color: '#0f172a', margin: '0 0 4px 0' }}>{customer.firstName || ''} {customer.lastName || ''}</p>
             <p style={{ fontSize: '0.95rem', fontWeight: '700', color: '#16a34a', margin: '0 0 4px 0' }}>
-              📞 {customer.phone || 'N/A'}{customer.phone2 ? ` / ${customer.phone2}` : ''}
+               {customer.phone || 'N/A'}{customer.phone2 ? ` / ${customer.phone2}` : ''}
             </p>
-            {customer.email && <p style={{ fontSize: '0.85rem', color: '#64748b', margin: 0 }}>✉️ {customer.email}</p>}
+            {customer.email && <p style={{ fontSize: '0.85rem', color: '#64748b', margin: 0 }}> {customer.email}</p>}
           </div>
 
           <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '18px' }}>
@@ -425,7 +425,7 @@ const OrderDetails = () => {
               </p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: '0.85rem', color: '#475569', fontWeight: '600' }}>
-                  💳 {order.paymentMethod || 'ABA / ACLEDA / Bakong KHQR'}
+                   {order.paymentMethod || 'ABA / ACLEDA / Bakong KHQR'}
                 </span>
                 {order.cardDetails && (
                   <span style={{ padding: '4px 10px', backgroundColor: '#f1f5f9', borderRadius: '6px', fontSize: '0.75rem', fontWeight: '700', color: '#0f172a' }}>
@@ -435,7 +435,7 @@ const OrderDetails = () => {
               </div>
               {order.paymentDetails?.transactionRef && (
                 <div style={{ marginTop: '8px', fontSize: '0.82rem', color: '#0f172a', fontWeight: '700' }}>
-                  🔢 លេខកូដប្រតិបត្តិការ: <code style={{ backgroundColor: '#f1f5f9', padding: '2px 8px', borderRadius: '6px' }}>{order.paymentDetails.transactionRef}</code>
+                   លេខកូដប្រតិបត្តិការ: <code style={{ backgroundColor: '#f1f5f9', padding: '2px 8px', borderRadius: '6px' }}>{order.paymentDetails.transactionRef}</code>
                 </div>
               )}
               {order.paymentDetails?.receiptUrl && (
@@ -580,7 +580,7 @@ const OrderDetails = () => {
                   {/* Dimensions */}
                   {(item.customWidth || item.customHeight) && (
                     <div style={specChipStyle}>
-                      <span style={specLabelStyle}>📐 {t('dimension')}</span>
+                      <span style={specLabelStyle}> {t('dimension')}</span>
                       <span style={specValueStyle}>{item.customWidth || '-'}m (W) × {item.customHeight || '-'}m (H)</span>
                     </div>
                   )}
@@ -588,7 +588,7 @@ const OrderDetails = () => {
                   {/* Fabric length */}
                   {item.category === 'Fabric' && item.fabricMeters && (
                     <div style={specChipStyle}>
-                      <span style={specLabelStyle}>📏 {t('quantity')}</span>
+                      <span style={specLabelStyle}> {t('quantity')}</span>
                       <span style={specValueStyle}>{item.fabricMeters} {t('meters')}</span>
                     </div>
                   )}
@@ -596,7 +596,7 @@ const OrderDetails = () => {
                   {/* Color */}
                   {colorName && (
                     <div style={specChipStyle}>
-                      <span style={specLabelStyle}>🎨 {t('color')}</span>
+                      <span style={specLabelStyle}> {t('color')}</span>
                       <span style={specValueStyle}>{colorName}</span>
                     </div>
                   )}
@@ -604,7 +604,7 @@ const OrderDetails = () => {
                   {/* Hardware */}
                   {hardwareName && item.category !== 'Fabric' && (
                     <div style={specChipStyle}>
-                      <span style={specLabelStyle}>⚙️ {t('pole_ring')}</span>
+                      <span style={specLabelStyle}> {t('pole_ring')}</span>
                       <span style={specValueStyle}>{hardwareName}</span>
                     </div>
                   )}
@@ -612,7 +612,7 @@ const OrderDetails = () => {
                   {/* Cascade style */}
                   {cascadeName && (
                     <div style={specChipStyle}>
-                      <span style={specLabelStyle}>✨ {t('cascade_style')}</span>
+                      <span style={specLabelStyle}> {t('cascade_style')}</span>
                       <span style={specValueStyle}>{cascadeName}</span>
                     </div>
                   )}
@@ -620,7 +620,7 @@ const OrderDetails = () => {
                   {/* Standalone size (for items without custom dimensions) */}
                   {sizeName && !item.customWidth && !item.customHeight && (
                     <div style={specChipStyle}>
-                      <span style={specLabelStyle}>🏷️ {t('size') || 'Size'}</span>
+                      <span style={specLabelStyle}> {t('size') || 'Size'}</span>
                       <span style={specValueStyle}>{sizeName}</span>
                     </div>
                   )}

@@ -326,7 +326,7 @@ const BookMeasurementModal = ({ isOpen, onClose }) => {
                 fontFamily: "'Poppins', 'Noto Sans Khmer', 'Kdam Thmor Pro', sans-serif"
               }}
             >
-              <span>💬 ណាត់ជាងតាម Telegram (Chat on Telegram)</span>
+              <span> ណាត់ជាងតាម Telegram (Chat on Telegram)</span>
             </a>
           </form>
         )}

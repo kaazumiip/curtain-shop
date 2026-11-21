@@ -43,7 +43,7 @@ const createCustomIcon = () => {
           align-items: center;
           gap: 4px;
         ">
-          <span>📍</span> ទីតាំងដឹកជញ្ជូន
+          <span></span> ទីតាំងដឹកជញ្ជូន
         </div>
         <svg width="36" height="44" viewBox="0 0 24 30" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 4px 8px rgba(0,0,0,0.35));">
           <path d="M12 0C5.37258 0 0 5.37258 0 12C0 19.5 12 30 12 30C12 30 24 19.5 24 12C24 5.37258 18.6274 0 12 0Z" fill="#111827"/>
@@ -163,7 +163,7 @@ const LocationPickerMap = ({ onLocationSelected, initialAddress = '' }) => {
     // High quality standard tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
-      attribution: '© OpenStreetMap contributors'
+      attribution: ' OpenStreetMap contributors'
     }).addTo(map);
 
     // Draggable custom marker
@@ -393,7 +393,7 @@ const LocationPickerMap = ({ onLocationSelected, initialAddress = '' }) => {
                   ជ្រើសរើសទីតាំងដឹកជញ្ជូន
                 </h3>
                 <p style={{ margin: 0, fontSize: '0.72rem', color: '#64748b' }}>
-                  ចុចលើផែនទី ឬទាញ Marker 📍 ដើម្បីកំណត់ទីតាំងជាក់ស្តែង
+                  ចុចលើផែនទី ឬទាញ Marker  ដើម្បីកំណត់ទីតាំងជាក់ស្តែង
                 </p>
               </div>
             </div>
@@ -639,7 +639,7 @@ const LocationPickerMap = ({ onLocationSelected, initialAddress = '' }) => {
             alignItems: 'center'
           }}>
             <span style={{ fontWeight: '700', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              📍 {detectedAddress || 'កំពុងកំណត់អាសយដ្ឋាន...'}
+               {detectedAddress || 'កំពុងកំណត់អាសយដ្ឋាន...'}
             </span>
             <span style={{ fontSize: '0.68rem', color: '#64748b', flexShrink: 0, marginLeft: '10px', fontWeight: '600' }}>
               {coords.lat.toFixed(4)}, {coords.lng.toFixed(4)}
@@ -756,7 +756,7 @@ const LocationPickerMap = ({ onLocationSelected, initialAddress = '' }) => {
             boxShadow: '0 2px 6px rgba(2,132,199,0.25)'
           }}
         >
-          <span>💬 Chat with Seller on Telegram</span>
+          <span> Chat with Seller on Telegram</span>
         </a>
       </div>
     </div>

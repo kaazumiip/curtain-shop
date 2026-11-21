@@ -274,12 +274,12 @@ function Dashboard({ onLogout }) {
                 gap: '6px'
               }}
             >
-              <span>📏 ណាត់វាស់វាំងនន ({measurements.filter((m) => m.status !== 'Completed').length})</span>
+              <span> ណាត់វាស់វាំងនន ({measurements.filter((m) => m.status !== 'Completed').length})</span>
             </span>
 
             {/* Delivery Fee Quick Input */}
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '4px 8px' }}>
-              <span style={{ fontSize: '0.78rem', fontWeight: '700', color: '#334155', whiteSpace: 'nowrap' }}>🚚 ថ្លៃដឹក ($):</span>
+              <span style={{ fontSize: '0.78rem', fontWeight: '700', color: '#334155', whiteSpace: 'nowrap' }}> ថ្លៃដឹក ($):</span>
               <input
                 type="number"
                 min="0"
@@ -477,15 +477,15 @@ function Dashboard({ onLogout }) {
                       {m.status === 'Completed' ? 'រួចរាល់ (Done)' : 'កំពុងរង់ចាំ (Pending)'}
                     </span>
                   </div>
-                  <div style={{ fontSize: '0.9rem', fontWeight: '700', color: '#0284c7' }}>📞 {m.phone}</div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: '700', color: '#0284c7' }}> {m.phone}</div>
                   <div style={{ fontSize: '0.85rem', color: '#475569' }}>
-                    📅 ថ្ងៃណាត់: <strong>{m.preferredDate || 'ពេលណាក៏បាន'}</strong>
+                     ថ្ងៃណាត់: <strong>{m.preferredDate || 'ពេលណាក៏បាន'}</strong>
                   </div>
                   {m.windowNotes && (
-                    <div style={{ fontSize: '0.85rem', color: '#334155' }}>📝 {m.windowNotes}</div>
+                    <div style={{ fontSize: '0.85rem', color: '#334155' }}> {m.windowNotes}</div>
                   )}
                   {m.address && (
-                    <div style={{ fontSize: '0.85rem', color: '#64748b' }}>📍 {m.address}</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b' }}> {m.address}</div>
                   )}
                 </div>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -505,7 +505,7 @@ function Dashboard({ onLogout }) {
                         fontSize: '0.82rem'
                       }}
                     >
-                      🗺️ Google Maps
+                       Google Maps
                     </a>
                   )}
                   {m.status !== 'Completed' && (
@@ -530,7 +530,7 @@ function Dashboard({ onLogout }) {
                         cursor: 'pointer'
                       }}
                     >
-                      ✅ រួចរាល់ (Mark Done)
+                       រួចរាល់ (Mark Done)
                     </button>
                   )}
                 </div>

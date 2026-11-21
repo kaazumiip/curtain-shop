@@ -264,7 +264,7 @@ function App() {
                       boxShadow: '0 4px 12px rgba(52, 211, 153, 0.35)'
                     }}
                   >
-                    <span>📋</span>
+                    <span></span>
                     <span>ចម្លងតំណបើកក្នុង Safari</span>
                   </button>
                 )}
@@ -286,7 +286,7 @@ function App() {
                       boxShadow: '0 4px 12px rgba(52, 211, 153, 0.35)'
                     }}
                   >
-                    <span>🌐</span>
+                    <span></span>
                     <span>បើកក្នុង Chrome</span>
                   </a>
                 )}
@@ -352,8 +352,8 @@ function App() {
                 <Link to="/my-orders">ការបញ្ជាទិញរបស់ខ្ញុំ</Link>
                 <Link to="/order-status">តាមដានការបញ្ជាទិញ</Link>
                 <a href="https://t.me/sreythacurtain" target="_blank" rel="noreferrer">ទំនាក់ទំនងតាម Telegram</a>
-                <a href="tel:089902001" style={{ fontWeight: '700', color: '#0f172a' }}>📞 089 902 001 (Cellcard)</a>
-                <a href="tel:0968127590" style={{ fontWeight: '700', color: '#0f172a' }}>📞 096 812 7590 (Smart)</a>
+                <a href="tel:089902001" style={{ fontWeight: '700', color: '#0f172a' }}> 089 902 001 (Cellcard)</a>
+                <a href="tel:0968127590" style={{ fontWeight: '700', color: '#0f172a' }}> 096 812 7590 (Smart)</a>
               </div>
             </div>
           </footer>

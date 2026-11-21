@@ -669,7 +669,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
             onClick={() => setShowReceiptModal(true)}
             style={{ padding: '14px 28px', borderRadius: '50px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff', color: '#0f172a', cursor: 'pointer', fontWeight: '700', fontSize: '0.9rem' }}
           >
-            {language === 'kh' ? '🧾 មើល និងទាញយកវិក្កយបត្រ' : '🧾 View & Download Receipt'}
+            {language === 'kh' ? ' មើល និងទាញយកវិក្កយបត្រ' : ' View & Download Receipt'}
           </button>
           <button 
             type="button"
@@ -805,7 +805,7 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                   }}
                   style={{ flex: 1.4, padding: '11px', borderRadius: '12px', border: 'none', backgroundColor: '#0f172a', color: '#ffffff', fontWeight: '700', cursor: 'pointer' }}
                 >
-                  📥 ទាញយក (Download PNG)
+                   ទាញយក (Download PNG)
                 </button>
               </div>
             </div>
@@ -1428,11 +1428,11 @@ const Checkout = ({ cart, onOrderPlaced }) => {
                     <p style={{ margin: '10px 0 0', fontSize: '0.74rem', color: '#64748b', lineHeight: '1.55' }}>
                       {isMobileDevice
                         ? (language === 'kh'
-                            ? '📱 លើទូរស័ព្ទ៖ ចុចប៊ូតុង "ABA" ឬ "ACLEDA" ខាងលើ → ជ្រើសរើសកម្មវិធីធនាគារក្នុងប្រអប់ដើម្បីបើក និងបង់ប្រាក់។ ពេលបង់ប្រាក់រួចរាល់ ប្រព័ន្ធនឹងបញ្ជាក់ការកម្មង់ដោយស្វ័យប្រវត្តិ!'
-                            : '📱 On Phone: Tap "ABA" or "ACLEDA" above → choose your banking app in the dialog to open and pay. Once paid, your order completes automatically!')
+                            ? ' លើទូរស័ព្ទ៖ ចុចប៊ូតុង "ABA" ឬ "ACLEDA" ខាងលើ → ជ្រើសរើសកម្មវិធីធនាគារក្នុងប្រអប់ដើម្បីបើក និងបង់ប្រាក់។ ពេលបង់ប្រាក់រួចរាល់ ប្រព័ន្ធនឹងបញ្ជាក់ការកម្មង់ដោយស្វ័យប្រវត្តិ!'
+                            : ' On Phone: Tap "ABA" or "ACLEDA" above → choose your banking app in the dialog to open and pay. Once paid, your order completes automatically!')
                         : (language === 'kh'
-                            ? '💻 លើកុំព្យូទ័រ (Laptop)៖ សូមបើកកម្មវិធី ABA ឬ ACLEDA លើទូរស័ព្ទរបស់អ្នក ហើយស្កេនកូដ QR ខាងលើមុនពេលផុតកំណត់ 100 វិនាទី។ ពេលបង់ប្រាក់រួចរាល់ ប្រព័ន្ធនឹងបញ្ជាក់ការកម្មង់ដោយស្វ័យប្រវត្តិ!'
-                            : '💻 On Laptop: Scan the QR code above with ABA or ACLEDA before the 100s timer expires. Once paid, your order completes automatically!')}
+                            ? ' លើកុំព្យូទ័រ (Laptop)៖ សូមបើកកម្មវិធី ABA ឬ ACLEDA លើទូរស័ព្ទរបស់អ្នក ហើយស្កេនកូដ QR ខាងលើមុនពេលផុតកំណត់ 100 វិនាទី។ ពេលបង់ប្រាក់រួចរាល់ ប្រព័ន្ធនឹងបញ្ជាក់ការកម្មង់ដោយស្វ័យប្រវត្តិ!'
+                            : ' On Laptop: Scan the QR code above with ABA or ACLEDA before the 100s timer expires. Once paid, your order completes automatically!')}
                     </p>
                   </div>
                 </div>
@@ -1487,8 +1487,8 @@ const Checkout = ({ cart, onOrderPlaced }) => {
 
                   <p style={{ margin: 0, fontSize: '0.9rem', color: '#334155', lineHeight: '1.7' }}>
                     {language === 'kh' 
-                      ? '👉 អ្នកអាចទូទាត់ជាសាច់ប្រាក់សុទ្ធ ឬ ស្កេន ABA ផ្ទាល់ជាមួយអ្នកដឹកជញ្ជូន នៅពេលទំនិញត្រូវបានដឹកជញ្ជូនដល់គេហដ្ឋានរបស់អ្នក។ ខាងហាងនឹងទាក់ទងទូរស័ព្ទទៅកាន់អ្នកមុនពេលចេញដំណើរដឹកជញ្ជូន។'
-                      : '👉 You can pay in cash or scan ABA directly with the courier when your package arrives at your address. We will call your phone before heading out for delivery.'}
+                      ? ' អ្នកអាចទូទាត់ជាសាច់ប្រាក់សុទ្ធ ឬ ស្កេន ABA ផ្ទាល់ជាមួយអ្នកដឹកជញ្ជូន នៅពេលទំនិញត្រូវបានដឹកជញ្ជូនដល់គេហដ្ឋានរបស់អ្នក។ ខាងហាងនឹងទាក់ទងទូរស័ព្ទទៅកាន់អ្នកមុនពេលចេញដំណើរដឹកជញ្ជូន។'
+                      : ' You can pay in cash or scan ABA directly with the courier when your package arrives at your address. We will call your phone before heading out for delivery.'}
                   </p>
                 </div>
               </div>
