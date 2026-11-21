@@ -250,25 +250,25 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
-                        gap: '5px',
-                        padding: '4px',
-                        borderRadius: '12px',
+                        gap: '6px',
+                        padding: '6px',
+                        borderRadius: '14px',
                         border: isSelected ? '2.5px solid #0f172a' : '1.5px solid #e2e8f0',
                         backgroundColor: isSelected ? '#f8fafc' : '#ffffff',
                         cursor: 'pointer',
-                        width: '74px'
+                        width: 'clamp(78px, 10vw, 106px)'
                       }}
                     >
                       <img
                         src={img.url}
                         alt={label}
-                        style={{ width: '62px', height: '62px', objectFit: 'cover', borderRadius: '8px' }}
+                        style={{ width: 'clamp(66px, 8.5vw, 92px)', height: 'clamp(66px, 8.5vw, 92px)', objectFit: 'cover', borderRadius: '10px' }}
                       />
                       <span style={{
-                        fontSize: '0.7rem',
+                        fontSize: '0.76rem',
                         fontWeight: isSelected ? '800' : '600',
                         color: isSelected ? '#0f172a' : '#64748b',
-                        maxWidth: '66px',
+                        maxWidth: '94px',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap'
@@ -283,18 +283,19 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
           )}
 
           {product.category === 'Curtain' && (
-            <div style={{ 
-              position: 'absolute', 
-              bottom: '50px', 
-              left: '20px', 
-              backgroundColor: 'rgba(255,255,255,0.9)', 
-              padding: '12px 20px', 
-              borderRadius: '50px',
-              fontSize: '0.7rem',
-              fontWeight: '800',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.05)'
-            }}>
-              {t('pole_included')}
+            <div style={{ padding: '8px 14px 12px', backgroundColor: '#ffffff' }}>
+              <span style={{
+                display: 'inline-block',
+                backgroundColor: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                padding: '8px 16px',
+                borderRadius: '50px',
+                fontSize: '0.78rem',
+                fontWeight: '800',
+                color: '#0f172a'
+              }}>
+                ✓ {t('pole_included')}
+              </span>
             </div>
           )}
         </div>
