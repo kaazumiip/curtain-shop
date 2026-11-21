@@ -756,8 +756,8 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                     </div>
                   )}
 
-                  {/* Ready-Made Curtain Fixed Size (Width x Height) */}
-                  {formData.category === 'Ready-Made Curtain' && (() => {
+                  {/* Ready-Made Curtain & Bed Sheet Fixed Size (Width x Height) */}
+                  {(formData.category === 'Ready-Made Curtain' || formData.category === 'Bed Sheet') && (() => {
                     const parts = String(formData.fixedDimensions || '').split(/\s*[x×]\s*/i);
                     const wVal = parts[0] !== undefined ? parts[0] : '';
                     const hVal = parts[1] !== undefined ? parts[1] : '';
