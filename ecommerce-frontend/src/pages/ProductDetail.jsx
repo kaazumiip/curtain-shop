@@ -599,7 +599,7 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
                     fontWeight: '900',
                     flexShrink: 0
                   }}>
-                    
+                    💡
                   </div>
                   <div style={{ fontSize: '0.82rem', lineHeight: '1.6', color: '#166534' }}>
                     <strong style={{ display: 'block', fontSize: '0.88rem', marginBottom: '2px', color: '#14532d' }}>
