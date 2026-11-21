@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api/axios';
-import { Plus, Trash2, X, Upload, Check } from 'lucide-react';
+import { Plus, Trash2, Edit2, X, Upload, Check } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 const PRESET_COLORS = [
@@ -16,6 +16,7 @@ const HardwareManager = ({ isCompact }) => {
   const [hardware, setHardware] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [uploadingPole, setUploadingPole] = useState(false);
   const [uploadingRing, setUploadingRing] = useState(false);
   const [newSet, setNewSet] = useState({ name: '', poleImageUrl: '', ringImageUrl: '' });
@@ -67,12 +68,18 @@ const HardwareManager = ({ isCompact }) => {
       return alert('សូមដាក់រូបដង ឬ រូបកងយ៉ាងហោចណាស់ ១ សន្លឹក!');
     }
     try {
-      await api.post('/hardware', {
+      const payload = {
         name: newSet.name.trim(),
         poleImageUrl: newSet.poleImageUrl || '',
         ringImageUrl: newSet.ringImageUrl || ''
-      });
+      };
+      if (editingId) {
+        await api.put(`/hardware/${editingId}`, payload);
+      } else {
+        await api.post('/hardware', payload);
+      }
       setNewSet({ name: '', poleImageUrl: '', ringImageUrl: '' });
+      setEditingId(null);
       setShowAddForm(false);
       fetchHardware();
     } catch (err) {
@@ -200,6 +207,31 @@ const HardwareManager = ({ isCompact }) => {
             <span style={{ fontSize: '0.84rem', fontWeight: '700', color: '#111111' }}>
               {set.name}
             </span>
+
+            <button
+              type="button"
+              onClick={() => {
+                setEditingId(set._id);
+                setNewSet({
+                  name: set.name || '',
+                  poleImageUrl: set.poleImageUrl || '',
+                  ringImageUrl: set.ringImageUrl || ''
+                });
+                setShowAddForm(true);
+              }}
+              title="កែសម្រួល (Edit)"
+              style={{
+                border: 'none',
+                background: 'transparent',
+                color: '#0f172a',
+                cursor: 'pointer',
+                padding: '4px',
+                display: 'flex',
+                alignItems: 'center'
+              }}
+            >
+              <Edit2 size={14} />
+            </button>
 
             <button
               type="button"

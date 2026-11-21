@@ -50,6 +50,30 @@ router.post('/', async (req, res) => {
   }
 });
 
+// @desc    Update a hardware item
+// @route   PUT /api/hardware/:id
+router.put('/:id', async (req, res) => {
+  try {
+    const docRef = collection.doc(req.params.id);
+    const doc = await docRef.get();
+    if (!doc.exists) {
+      return res.status(404).json({ message: 'Hardware item not found' });
+    }
+    const { name, ringImageUrl, poleImageUrl } = req.body;
+    const updates = { updatedAt: new Date().toISOString() };
+    if (name !== undefined) updates.name = name;
+    if (ringImageUrl !== undefined) updates.ringImageUrl = ringImageUrl;
+    if (poleImageUrl !== undefined) updates.poleImageUrl = poleImageUrl;
+
+    await docRef.set(updates, { merge: true });
+    const updated = await docRef.get();
+    res.json(formatHardware(updated));
+  } catch (err) {
+    console.error('Update hardware error:', err);
+    res.status(400).json({ message: err.message });
+  }
+});
+
 // @desc    Delete a hardware item
 // @route   DELETE /api/hardware/:id
 router.delete('/:id', async (req, res) => {
