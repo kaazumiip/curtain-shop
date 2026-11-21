@@ -93,12 +93,15 @@ function Dashboard({ onLogout }) {
   const handleSave = async (formData) => {
     try {
       if (editingProduct) {
-        await api.put(`/products/${editingProduct._id}`, formData);
+        const res = await api.put(`/products/${editingProduct._id}`, formData);
+        const updated = res.data;
+        setProducts((prev) => prev.map((p) => (p._id === updated._id ? updated : p)));
       } else {
-        await api.post('/products', formData);
+        const res = await api.post('/products', formData);
+        const created = res.data;
+        setProducts((prev) => [created, ...prev]);
       }
       setIsModalOpen(false);
-      window.location.reload();
     } catch (err) {
       console.error('Error saving product:', err);
       const msg = err.response?.data?.message || t('check_info_try_again');
@@ -432,8 +435,9 @@ function Dashboard({ onLogout }) {
           onAddStock={async (product, delta) => {
             try {
               const newStock = Math.max(0, Number(product.stock || 0) + delta);
-              await api.put(`/products/${product._id}`, { stock: newStock });
-              fetchProducts();
+              const res = await api.put(`/products/${product._id}`, { stock: newStock });
+              const updated = res.data;
+              setProducts((prev) => prev.map((p) => (p._id === updated._id ? updated : p)));
             } catch (err) {
               console.error('Failed to update stock:', err);
               alert('Failed to update stock');
