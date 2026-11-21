@@ -5,11 +5,12 @@ import { ChevronLeft, ShoppingBag, ArrowRight, Heart, Plus, Trash2 } from 'lucid
 import { useLanguage } from '../context/LanguageContext';
 import BookMeasurementModal from '../components/BookMeasurementModal';
 
-const ProductDetail = ({ onAddToCart, favorites, onToggleFavorite }) => {
+const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite }) => {
   const { id } = useParams();
   const { t, language } = useLanguage();
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const cachedProduct = React.useMemo(() => products.find((p) => p._id === id) || null, [products, id]);
+  const [product, setProduct] = useState(cachedProduct);
+  const [loading, setLoading] = useState(!cachedProduct);
   const [isMeasurementOpen, setIsMeasurementOpen] = useState(false);
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedColorName, setSelectedColorName] = useState(null);

@@ -58,7 +58,7 @@ const AnimatedRoutes = ({ products, addToCart, cart, removeFromCart, updateQuant
         <Route path="/" element={<Home products={products} onAddToCart={addToCart} favorites={favorites} onToggleFavorite={toggleFavorite} />} />
         <Route path="/shop" element={<Shop products={products} onAddToCart={addToCart} favorites={favorites} onToggleFavorite={toggleFavorite} />} />
         <Route path="/search" element={<SearchResults products={products} onAddToCart={addToCart} favorites={favorites} onToggleFavorite={toggleFavorite} />} />
-        <Route path="/product/:id" element={<ProductDetail onAddToCart={addToCart} favorites={favorites} onToggleFavorite={toggleFavorite} />} />
+        <Route path="/product/:id" element={<ProductDetail products={products} onAddToCart={addToCart} favorites={favorites} onToggleFavorite={toggleFavorite} />} />
         <Route path="/favorites" element={<Favorites favorites={favorites} onToggleFavorite={toggleFavorite} onAddToCart={addToCart} />} />
         <Route path="/cart" element={<Cart cart={cart} onRemoveFromCart={removeFromCart} onUpdateQuantity={updateQuantity} />} />
         <Route path="/checkout" element={<Checkout cart={cart} onOrderPlaced={clearCart} />} />
