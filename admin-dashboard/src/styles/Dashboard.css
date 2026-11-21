@@ -576,3 +576,38 @@
     gap: 30px !important;
   }
 }
+
+/* Mobile Responsive Admin Dashboard Enhancements (<= 768px) */
+@media (max-width: 768px) {
+  .vanguard-dashboard,
+  .dashboard-container {
+    padding: 12px !important;
+    overflow-x: hidden !important;
+  }
+
+  .vanguard-header,
+  .dashboard-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  .vanguard-table-container {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .wizard-form-row {
+    grid-template-columns: 1fr !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}
