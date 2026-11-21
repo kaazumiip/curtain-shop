@@ -12,9 +12,21 @@ const ProductCard = ({ product }) => {
   const displayImage = images[0]?.url;
   const secondImage = images[1]?.url || displayImage;
 
-  const categoryLabel = product.subCategory
-    ? t(product.subCategory.toLowerCase())
-    : t(product.category?.toLowerCase().replace(' ', '_'));
+  const categoryLabel = product.category === 'Ready-Made Curtain'
+    ? 'វាំងននស្រាប់'
+    : product.category === 'Curtain'
+      ? 'វាំងននកាត់តាមទំហំ'
+      : product.subCategory
+        ? t(product.subCategory.toLowerCase())
+        : t(product.category?.toLowerCase().replace(' ', '_'));
+
+  const sizeOptions = product.customOptions?.sizeOptions || [];
+  const hasMultipleSizes = sizeOptions.length > 0;
+  const lowestPrice = hasMultipleSizes
+    ? Math.min(...sizeOptions.map((s) => Number(s.price) || 0).filter((p) => p > 0), Number(product.price) || Infinity)
+    : Number(product.price) || 0;
+  const displayPriceValue = Number.isFinite(lowestPrice) ? lowestPrice : (Number(product.price) || 0);
+  const isTailorCurtain = product.category === 'Curtain' && !product.isReadyMade;
 
   const isOutOfStock = Number(product.stock) <= 0;
   const hasDiscount = Number(product.originalPrice) > Number(product.price);
@@ -149,7 +161,11 @@ const ProductCard = ({ product }) => {
               color: hasDiscount ? '#dc2626' : '#000000'
             }}
           >
-            ${Number(product.price).toFixed(2)}
+            {isTailorCurtain
+              ? `$${displayPriceValue.toFixed(2)} / m`
+              : hasMultipleSizes
+                ? `ចាប់ពី $${displayPriceValue.toFixed(2)}`
+                : `$${displayPriceValue.toFixed(2)}`}
           </div>
           {hasDiscount && (
             <div
