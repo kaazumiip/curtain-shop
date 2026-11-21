@@ -98,7 +98,7 @@ function Dashboard({ onLogout }) {
         await api.post('/products', formData);
       }
       setIsModalOpen(false);
-      fetchProducts();
+      window.location.reload();
     } catch (err) {
       console.error('Error saving product:', err);
       const msg = err.response?.data?.message || t('check_info_try_again');
