@@ -14,11 +14,13 @@ const ProductCard = ({ product }) => {
 
   const categoryLabel = product.category === 'Ready-Made Curtain'
     ? 'វាំងននស្រាប់'
-    : product.category === 'Curtain'
-      ? 'វាំងននកាត់តាមទំហំ'
-      : product.subCategory
-        ? t(product.subCategory.toLowerCase())
-        : t(product.category?.toLowerCase().replace(' ', '_'));
+    : product.category === 'Sheer Curtain'
+      ? 'ស្បៃ'
+      : product.category === 'Curtain'
+        ? 'វាំងននកាត់តាមទំហំ'
+        : product.subCategory
+          ? t(product.subCategory.toLowerCase())
+          : t(product.category?.toLowerCase().replace(' ', '_'));
 
   const sizeOptions = product.customOptions?.sizeOptions || [];
   const hasMultipleSizes = sizeOptions.length > 0;

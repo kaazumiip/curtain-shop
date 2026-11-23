@@ -13,6 +13,7 @@ const Home = ({ products, onAddToCart, favorites, onToggleFavorite }) => {
     { id: 'All', name: 'ទាំងអស់' },
     { id: 'Curtain', name: 'វាំងននកាត់តាមទំហំ' },
     { id: 'Ready-Made Curtain', name: 'វាំងននស្រាប់' },
+    { id: 'Sheer Curtain', name: 'ស្បៃ' },
     { id: 'Valance', name: 'ដក់' },
     { id: 'Fabric', name: 'ក្រណាត់ម៉ែត្រ' },
     { id: 'Bed Sheet', name: 'កម្រាលពូក' },
@@ -55,8 +56,8 @@ const Home = ({ products, onAddToCart, favorites, onToggleFavorite }) => {
         }
         return copy;
       };
-      const curtains = list.filter((p) => ['curtain', 'ready-made curtain'].includes((p.category || '').toLowerCase()));
-      const others = list.filter((p) => !['curtain', 'ready-made curtain'].includes((p.category || '').toLowerCase()));
+      const curtains = list.filter((p) => ['curtain', 'ready-made curtain', 'sheer curtain'].includes((p.category || '').toLowerCase()));
+      const others = list.filter((p) => !['curtain', 'ready-made curtain', 'sheer curtain'].includes((p.category || '').toLowerCase()));
       return [...shuffle(curtains), ...shuffle(others)];
     }
     return list;

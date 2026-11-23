@@ -516,6 +516,7 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                       >
                         <option value="Curtain">វាំងននកាត់តាមទំហំ (Tailor-Made Curtain)</option>
                         <option value="Ready-Made Curtain">វាំងននស្រាប់ (Ready-Made Curtain)</option>
+                        <option value="Sheer Curtain">ស្បៃ (Sheer Curtain)</option>
                         <option value="Valance">{t('valance')}</option>
                         <option value="Fabric">{t('fabric')}</option>
                         <option value="Bed Sheet">{t('bed_sheet')}</option>

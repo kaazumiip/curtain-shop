@@ -272,6 +272,7 @@ export const translations = {
     valance: 'ដក់',
     'ready-made_curtain': 'វាំងននស្រាប់',
     ready_made_curtain: 'វាំងននស្រាប់',
+    sheer_curtain: 'ស្បៃ',
     cascade_style: 'ស្ទីលកាត់ថ្នាក់',
     fabric: 'ក្រណាត់ម៉ែត្រ',
     pole: 'ដង',
