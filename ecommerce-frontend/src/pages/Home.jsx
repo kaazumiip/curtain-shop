@@ -47,12 +47,17 @@ const Home = ({ products, onAddToCart, favorites, onToggleFavorite }) => {
     });
 
     if (selectedCategory === 'All') {
-      const shuffled = [...list];
-      for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-      }
-      return shuffled;
+      const shuffle = (arr) => {
+        const copy = [...arr];
+        for (let i = copy.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+      };
+      const curtains = list.filter((p) => ['curtain', 'ready-made curtain'].includes((p.category || '').toLowerCase()));
+      const others = list.filter((p) => !['curtain', 'ready-made curtain'].includes((p.category || '').toLowerCase()));
+      return [...shuffle(curtains), ...shuffle(others)];
     }
     return list;
   }, [products, selectedCategory, selectedSubCategory]);
