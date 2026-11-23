@@ -30,14 +30,34 @@ const Home = ({ products, onAddToCart, favorites, onToggleFavorite }) => {
     { id: 'Other', name: 'ផ្សេងៗ' }
   ];
 
-  const filteredProducts = products.filter(p => {
-    if (selectedCategory === 'All') return true;
-    const matchCategory = p.category?.toLowerCase() === selectedCategory.toLowerCase();
-    if (selectedCategory === 'Accessories' && selectedSubCategory !== 'All') {
-      return matchCategory && p.subCategory?.toLowerCase() === selectedSubCategory.toLowerCase();
+  const [visibleCount, setVisibleCount] = useState(12);
+
+  React.useEffect(() => {
+    setVisibleCount(12);
+  }, [selectedCategory, selectedSubCategory]);
+
+  const filteredProducts = React.useMemo(() => {
+    const list = products.filter(p => {
+      if (selectedCategory === 'All') return true;
+      const matchCategory = p.category?.toLowerCase() === selectedCategory.toLowerCase();
+      if (selectedCategory === 'Accessories' && selectedSubCategory !== 'All') {
+        return matchCategory && p.subCategory?.toLowerCase() === selectedSubCategory.toLowerCase();
+      }
+      return matchCategory;
+    });
+
+    if (selectedCategory === 'All') {
+      const shuffled = [...list];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
     }
-    return matchCategory;
-  });
+    return list;
+  }, [products, selectedCategory, selectedSubCategory]);
+
+  const visibleProducts = filteredProducts.slice(0, visibleCount);
 
   return (
     <div style={{ width: '100%', backgroundColor: '#ffffff' }}>
@@ -277,7 +297,7 @@ const Home = ({ products, onAddToCart, favorites, onToggleFavorite }) => {
       {/* 3. Full-Width 5-Column Product Grid */}
       <section style={{ width: '100%', padding: '14px clamp(12px, 3vw, 24px) 36px', boxSizing: 'border-box' }}>
         <div className="editorial-product-grid">
-          {filteredProducts.map(product => (
+          {visibleProducts.map(product => (
             <ProductCard
               key={product._id}
               product={product}
@@ -287,6 +307,27 @@ const Home = ({ products, onAddToCart, favorites, onToggleFavorite }) => {
             />
           ))}
         </div>
+
+        {visibleCount < filteredProducts.length && (
+          <div style={{ textAlign: 'center', marginTop: '28px' }}>
+            <button
+              type="button"
+              onClick={() => setVisibleCount((prev) => prev + 12)}
+              style={{
+                padding: '12px 32px',
+                borderRadius: '999px',
+                border: '1.5px solid #0f172a',
+                backgroundColor: '#ffffff',
+                color: '#0f172a',
+                fontWeight: '800',
+                fontSize: '0.88rem',
+                cursor: 'pointer'
+              }}
+            >
+              មើលបន្ថែមទៀត (View More)
+            </button>
+          </div>
+        )}
 
         {filteredProducts.length === 0 && (
           <div
