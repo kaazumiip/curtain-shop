@@ -275,21 +275,6 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
                           alt={model.label}
                           style={{ width: 'clamp(66px, 8.5vw, 92px)', height: 'clamp(66px, 8.5vw, 92px)', objectFit: 'cover', borderRadius: '10px' }}
                         />
-                        {model.count > 1 && (
-                          <span style={{
-                            position: 'absolute',
-                            top: '8px',
-                            right: '8px',
-                            backgroundColor: 'rgba(15, 23, 42, 0.78)',
-                            color: '#ffffff',
-                            fontSize: '0.62rem',
-                            fontWeight: '800',
-                            padding: '1px 6px',
-                            borderRadius: '999px'
-                          }}>
-                            +{model.count - 1}
-                          </span>
-                        )}
                         <span style={{
                           fontSize: '0.76rem',
                           fontWeight: isSelected ? '800' : '600',
