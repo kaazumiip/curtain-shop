@@ -484,76 +484,7 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
             {(language === 'kh' && product.descriptionKh) ? product.descriptionKh : (product.description || t('default_desc'))}
           </p>
 
-          {/* Derived Colors from Images */}
-          {product.images?.some(img => img.color) && (
-            <div style={{ marginBottom: '40px' }}>
-              <label style={{ fontSize: '0.75rem', fontWeight: '800', display: 'block', marginBottom: '20px', letterSpacing: '1px', textTransform: 'uppercase' }}>
-                {t('product_color')}
-              </label>
-              <div 
-                className="no-scrollbar"
-                style={{ 
-                  display: 'flex', 
-                  gap: '20px', 
-                  overflowX: 'auto', 
-                  paddingBottom: '10px',
-                  scrollSnapType: 'x mandatory',
-                  WebkitOverflowScrolling: 'touch'
-                }}
-              >
-                {/* Unique Colors Derived from Image Tags */}
-                {[...new Set(product.images.map(img => img.color).filter(c => c))].map((colorName, idx) => (
-                  <div 
-                    key={idx}
-                    onClick={() => {
-                      setSelectedColorName(colorName);
-                      // Scroll to first image of this color
-                      const colorIdx = product.images.findIndex(img => img.color === colorName);
-                      if (colorIdx !== -1 && galleryRef.current) {
-                        const width = galleryRef.current.offsetWidth;
-                        galleryRef.current.scrollTo({
-                          left: colorIdx * width,
-                          behavior: 'smooth'
-                        });
-                      }
-                    }}
-                    style={{ 
-                      flexShrink: 0,
-                      width: '80px',
-                      cursor: 'pointer',
-                      scrollSnapAlign: 'start'
-                    }}
-                  >
-                    <div style={{ 
-                      width: '80px', 
-                      height: '80px', 
-                      borderRadius: '50%', 
-                      overflow: 'hidden',
-                      border: selectedColorName === colorName ? '3px solid #000' : '1px solid #eee',
-                      transition: 'all 0.3s ease',
-                      padding: '3px',
-                      backgroundColor: '#fff'
-                    }}>
-                      <img 
-                        src={product.images.find(img => img.color === colorName)?.url} 
-                        style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '50%' }} 
-                        alt={colorName} 
-                      />
-                    </div>
-                    <p style={{ 
-                      fontSize: '0.6rem', 
-                      textAlign: 'center', 
-                      marginTop: '8px', 
-                      fontWeight: selectedColorName === colorName ? '800' : '500',
-                      color: selectedColorName === colorName ? '#000' : '#999',
-                      textTransform: 'uppercase',
-                      letterSpacing: '1px'
-                    }}>{colorName}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Color selector is shown at the top under the main product gallery */}
 
           {product.category === 'Fabric' && (
             <div style={{ marginBottom: '30px' }}>
