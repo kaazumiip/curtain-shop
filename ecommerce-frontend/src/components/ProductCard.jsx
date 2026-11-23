@@ -28,7 +28,7 @@ const ProductCard = ({ product }) => {
     ? Math.min(...sizeOptions.map((s) => Number(s.price) || 0).filter((p) => p > 0), Number(product.price) || Infinity)
     : Number(product.price) || 0;
   const displayPriceValue = Number.isFinite(lowestPrice) ? lowestPrice : (Number(product.price) || 0);
-  const isTailorCurtain = product.category === 'Curtain' && !product.isReadyMade;
+  const isTailorCurtain = (product.category === 'Curtain' || product.category === 'Sheer Curtain') && !product.isReadyMade;
 
   const isOutOfStock = Number(product.stock) <= 0;
   const hasDiscount = Number(product.originalPrice) > Number(product.price);

@@ -953,8 +953,8 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                     </div>
                   )}
 
-                  {/* Row 3: Curtain Hardware (Curtain only) */}
-                  {formData.category === 'Curtain' && (
+                  {/* Row 3: Curtain Hardware (Curtain & Sheer Curtain) */}
+                  {(formData.category === 'Curtain' || formData.category === 'Sheer Curtain') && (
                     <div style={{ ...styles.formRow, borderBottom: formData.category === 'Valance' ? '1px dashed #e5e7eb' : 'none' }} className="wizard-form-row">
                       <div style={styles.rowLabelCol}>
                         <div style={styles.rowTitle}>{t('pole_ring_color')}</div>

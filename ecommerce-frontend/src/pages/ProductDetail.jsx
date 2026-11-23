@@ -128,7 +128,7 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
       let itemCost = 0;
       if (isPole) {
         itemCost = basePrice * widthVal * q;
-      } else if (product.category === 'Curtain' || product.category === 'Valance') {
+      } else if (product.category === 'Curtain' || product.category === 'Sheer Curtain' || product.category === 'Valance') {
         const excessHeight = heightVal > 2.5 ? (heightVal - 2.5) : 0;
         const heightMultiplier = 1 + excessHeight;
         itemCost = basePrice * widthVal * heightMultiplier * q;
@@ -147,7 +147,7 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
     if (!product) return;
     let basePrice = Number(product.price);
     
-    if ((product.category === 'Curtain' && !product.isReadyMade) || product.category === 'Valance' || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole')) {
+    if (((product.category === 'Curtain' || product.category === 'Sheer Curtain') && !product.isReadyMade) || product.category === 'Valance' || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole')) {
       setTotalPrice(totalWindowsSubtotal.toFixed(2));
     } else if (product.category === 'Fabric') {
       const meters = parseFloat(fabricMeters) || 0;
@@ -363,7 +363,7 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
             );
           })()}
 
-          {product.category === 'Curtain' && (
+          {(product.category === 'Curtain' || product.category === 'Sheer Curtain') && (
             <div style={{ padding: '8px 14px 12px', backgroundColor: '#ffffff' }}>
               <span style={{
                 display: 'inline-block',
@@ -583,8 +583,8 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
             </div>
           )}
 
-          {/* Visual Curtain Dimension Guide (Khmer) for Custom & Ready-Made Curtains */}
-          {(product.category === 'Curtain' || product.category === 'Ready-Made Curtain') && (
+          {/* Visual Curtain Dimension Guide (Khmer) for Custom, Sheer & Ready-Made Curtains */}
+          {(product.category === 'Curtain' || product.category === 'Sheer Curtain' || product.category === 'Ready-Made Curtain') && (
             <div style={{
               backgroundColor: '#f8fafc',
               border: '1px solid #e2e8f0',
@@ -652,7 +652,7 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
             </div>
           )}
 
-          {((product.category === 'Curtain' && !product.isReadyMade) || product.category === 'Valance' || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole')) && (
+          {(((product.category === 'Curtain' || product.category === 'Sheer Curtain') && !product.isReadyMade) || product.category === 'Valance' || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole')) && (
             <div style={{ marginBottom: '40px' }}>
               {/* Clear Pricing Instruction Callout Banner */}
               {['Curtain', 'Valance'].includes(product.category) && (
@@ -973,7 +973,7 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
           )}
 
           {/* Standalone Quantity Selector for non-Curtain products */}
-          {!((product.category === 'Curtain' && !product.isReadyMade) || product.category === 'Valance') && !(product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole') && (
+          {!(((product.category === 'Curtain' || product.category === 'Sheer Curtain') && !product.isReadyMade) || product.category === 'Valance') && !(product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole') && (
             <div style={{ marginBottom: '40px' }}>
               <label style={{ fontSize: '0.7rem', fontWeight: '800', display: 'block', marginBottom: '15px', letterSpacing: '1px', textTransform: 'uppercase' }}>
                 {t('quantity') || 'Quantity'}
@@ -1040,7 +1040,7 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
           )}
 
 
-          {product.category === 'Curtain' && !product.isReadyMade && (
+          {(product.category === 'Curtain' || product.category === 'Sheer Curtain') && !product.isReadyMade && (
             <div style={{ marginBottom: '40px' }}>
               <label style={{ fontSize: '0.7rem', fontWeight: '800', display: 'block', marginBottom: '15px' }}>{t('pole_ring_color')}</label>
               <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
@@ -1125,7 +1125,7 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
               onClick={() => {
                 if (Number(product.stock) <= 0) return;
 
-                if ((product.category === 'Curtain' && !product.isReadyMade) || product.category === 'Valance' || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole')) {
+                if (((product.category === 'Curtain' || product.category === 'Sheer Curtain') && !product.isReadyMade) || product.category === 'Valance' || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole')) {
                   const isPole = product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole';
                   const itemsToAdd = windowSizes.map((w, idx) => {
                     const widthVal = parseFloat(w.width) || 0;
@@ -1185,7 +1185,7 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
               <ShoppingBag size={20} />
               {Number(product.stock) <= 0 
                 ? 'អស់ពីស្តុក (Out of Stock)' 
-                : ((product.category === 'Curtain' && !product.isReadyMade) || product.category === 'Valance' || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole'))
+                : (((product.category === 'Curtain' || product.category === 'Sheer Curtain') && !product.isReadyMade) || product.category === 'Valance' || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole'))
                   ? (windowSizes.length > 1 
                       ? (language === 'kh' ? `ដាក់ចូលកន្ត្រកទាំងអស់ (${windowSizes.length} បង្អួច) — $${totalWindowsSubtotal.toFixed(2)}` : `Add All to Cart (${windowSizes.length} Windows) — $${totalWindowsSubtotal.toFixed(2)}`)
                       : (language === 'kh' ? `ដាក់ចូលកន្ត្រក — $${totalWindowsSubtotal.toFixed(2)}` : `Add to Cart — $${totalWindowsSubtotal.toFixed(2)}`))
