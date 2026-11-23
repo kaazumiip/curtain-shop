@@ -222,65 +222,92 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
             ))}
           </div>
 
-          {/* Color / Model Selector Strip right under the Product Picture Catalogue */}
-          {product.images && product.images.length > 1 && (
-            <div style={{ padding: '10px 14px 14px', backgroundColor: '#ffffff', borderTop: '1px solid #f1f5f9' }}>
-              <div style={{ fontSize: '0.78rem', fontWeight: '800', color: '#334155', marginBottom: '10px' }}>
-                ជ្រើសរើសពណ៌ / ម៉ូដ (Select Color / Model){selectedColorName ? `: ${selectedColorName}` : ''}
+          {/* Color / Model Selector Strip right under the Product Picture Catalogue (grouped by unique color) */}
+          {product.images && product.images.length > 1 && (() => {
+            const uniqueModels = [];
+            const seen = new Set();
+            product.images.forEach((img, idx) => {
+              const label = (img.color || '').trim() || `ម៉ូដទី ${idx + 1}`;
+              if (!seen.has(label)) {
+                seen.add(label);
+                const count = product.images.filter((i, k) => ((i.color || '').trim() || `ម៉ូដទី ${k + 1}`) === label).length;
+                uniqueModels.push({ label, url: img.url, firstIdx: idx, count });
+              }
+            });
+            return (
+              <div style={{ padding: '10px 14px 14px', backgroundColor: '#ffffff', borderTop: '1px solid #f1f5f9' }}>
+                <div style={{ fontSize: '0.78rem', fontWeight: '800', color: '#334155', marginBottom: '10px' }}>
+                  ជ្រើសរើសពណ៌ / ម៉ូដ (Select Color / Model){selectedColorName ? `: ${selectedColorName}` : ''}
+                </div>
+                <div className="no-scrollbar" style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '4px' }}>
+                  {uniqueModels.map((model) => {
+                    const isSelected = selectedColorName === model.label;
+                    return (
+                      <button
+                        key={model.label}
+                        type="button"
+                        onClick={() => {
+                          setSelectedColorName(model.label);
+                          if (galleryRef.current) {
+                            galleryRef.current.scrollTo({
+                              left: model.firstIdx * galleryRef.current.offsetWidth,
+                              behavior: 'smooth'
+                            });
+                          }
+                        }}
+                        style={{
+                          position: 'relative',
+                          flexShrink: 0,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '6px',
+                          borderRadius: '14px',
+                          border: isSelected ? '2.5px solid #0f172a' : '1.5px solid #e2e8f0',
+                          backgroundColor: isSelected ? '#f8fafc' : '#ffffff',
+                          cursor: 'pointer',
+                          width: 'clamp(78px, 10vw, 106px)'
+                        }}
+                      >
+                        <img
+                          src={model.url}
+                          alt={model.label}
+                          style={{ width: 'clamp(66px, 8.5vw, 92px)', height: 'clamp(66px, 8.5vw, 92px)', objectFit: 'cover', borderRadius: '10px' }}
+                        />
+                        {model.count > 1 && (
+                          <span style={{
+                            position: 'absolute',
+                            top: '8px',
+                            right: '8px',
+                            backgroundColor: 'rgba(15, 23, 42, 0.78)',
+                            color: '#ffffff',
+                            fontSize: '0.62rem',
+                            fontWeight: '800',
+                            padding: '1px 6px',
+                            borderRadius: '999px'
+                          }}>
+                            +{model.count - 1}
+                          </span>
+                        )}
+                        <span style={{
+                          fontSize: '0.76rem',
+                          fontWeight: isSelected ? '800' : '600',
+                          color: isSelected ? '#0f172a' : '#64748b',
+                          maxWidth: '94px',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {model.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-              <div className="no-scrollbar" style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '4px' }}>
-                {product.images.map((img, idx) => {
-                  const label = img.color || `ម៉ូដទី ${idx + 1}`;
-                  const isSelected = selectedColorName === label;
-                  return (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => {
-                        setSelectedColorName(label);
-                        if (galleryRef.current) {
-                          galleryRef.current.scrollTo({
-                            left: idx * galleryRef.current.offsetWidth,
-                            behavior: 'smooth'
-                          });
-                        }
-                      }}
-                      style={{
-                        flexShrink: 0,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        gap: '6px',
-                        padding: '6px',
-                        borderRadius: '14px',
-                        border: isSelected ? '2.5px solid #0f172a' : '1.5px solid #e2e8f0',
-                        backgroundColor: isSelected ? '#f8fafc' : '#ffffff',
-                        cursor: 'pointer',
-                        width: 'clamp(78px, 10vw, 106px)'
-                      }}
-                    >
-                      <img
-                        src={img.url}
-                        alt={label}
-                        style={{ width: 'clamp(66px, 8.5vw, 92px)', height: 'clamp(66px, 8.5vw, 92px)', objectFit: 'cover', borderRadius: '10px' }}
-                      />
-                      <span style={{
-                        fontSize: '0.76rem',
-                        fontWeight: isSelected ? '800' : '600',
-                        color: isSelected ? '#0f172a' : '#64748b',
-                        maxWidth: '94px',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap'
-                      }}>
-                        {label}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+            );
+          })()}
 
           {product.category === 'Curtain' && (
             <div style={{ padding: '8px 14px 12px', backgroundColor: '#ffffff' }}>
