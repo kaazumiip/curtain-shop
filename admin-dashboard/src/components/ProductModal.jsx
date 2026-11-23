@@ -139,21 +139,26 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
   };
 
   // Upload multiple images at once
-  const handleImageUploadForColor = async (e, colorName) => {
+  const handleImageUploadForColor = async (e, group) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
     setUploading(true);
     try {
+      const targetColor = (group.color || '').trim() || `ម៉ូដទី ${group.groupIdx + 1}`;
+      const existingIdxs = new Set(group.items.map((it) => it.idx));
       const uploaded = [];
       for (const file of files) {
         const data = new FormData();
         data.append('image', file);
         const res = await api.post('/products/upload', data);
-        uploaded.push({ url: res.data.imageUrl, color: colorName || '' });
+        uploaded.push({ url: res.data.imageUrl, color: targetColor });
       }
       setFormData((prev) => ({
         ...prev,
-        images: [...prev.images, ...uploaded]
+        images: [
+          ...prev.images.map((im, i) => (existingIdxs.has(i) ? { ...im, color: targetColor } : im)),
+          ...uploaded
+        ]
       }));
     } catch (err) {
       alert(t('photo_upload_failed'));
@@ -556,9 +561,21 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                             map.get(key).items.push({ img, idx });
                           });
 
-                          return groups.map((group) => (
-                            <div key={group.key} style={{ ...styles.variantRow, flexWrap: 'wrap', gap: '8px' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                          return groups.map((group, groupIdx) => (
+                            <div
+                              key={group.key}
+                              style={{
+                                backgroundColor: '#f8fafc',
+                                border: '1.5px solid #e2e8f0',
+                                borderRadius: '14px',
+                                padding: '12px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '10px'
+                              }}
+                            >
+                              {/* Horizontal Photo Row for this Color/Model */}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                                 {group.items.map(({ img, idx }) => (
                                   <div key={idx} style={{ position: 'relative', display: 'inline-block' }}>
                                     <img
@@ -566,13 +583,14 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                                       alt=""
                                       onClick={() => setPreviewImgIdx(idx)}
                                       style={{
-                                        width: '38px',
-                                        height: '38px',
-                                        borderRadius: '8px',
+                                        width: '56px',
+                                        height: '56px',
+                                        borderRadius: '10px',
                                         objectFit: 'cover',
-                                        border: previewImgIdx === idx ? '2px solid #16a34a' : '1px solid #e5e7eb',
+                                        border: previewImgIdx === idx ? '2.5px solid #16a34a' : '1.5px solid #cbd5e1',
                                         cursor: 'pointer',
-                                        display: 'block'
+                                        display: 'block',
+                                        backgroundColor: '#fff'
                                       }}
                                     />
                                     <button
@@ -581,15 +599,15 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                                       title="លុបរូបនេះ"
                                       style={{
                                         position: 'absolute',
-                                        top: '-5px',
-                                        right: '-5px',
-                                        width: '16px',
-                                        height: '16px',
+                                        top: '-6px',
+                                        right: '-6px',
+                                        width: '18px',
+                                        height: '18px',
                                         borderRadius: '50%',
                                         border: 'none',
                                         backgroundColor: '#ef4444',
                                         color: '#fff',
-                                        fontSize: '0.6rem',
+                                        fontSize: '0.65rem',
                                         fontWeight: '800',
                                         cursor: 'pointer',
                                         display: 'flex',
@@ -602,9 +620,40 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                                     </button>
                                   </div>
                                 ))}
+
+                                {/* Inline + Add More Photos Tile on the Same Horizontal Line */}
+                                <label
+                                  title="បន្ថែមរូបសម្រាប់ពណ៌នេះ"
+                                  style={{
+                                    width: '56px',
+                                    height: '56px',
+                                    borderRadius: '10px',
+                                    border: '1.5px dashed #94a3b8',
+                                    backgroundColor: '#ffffff',
+                                    color: '#475569',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    fontSize: '0.65rem',
+                                    fontWeight: '700'
+                                  }}
+                                >
+                                  <Plus size={16} />
+                                  <input
+                                    type="file"
+                                    multiple
+                                    hidden
+                                    accept="image/*"
+                                    onChange={(e) => handleImageUploadForColor(e, { ...group, groupIdx })}
+                                  />
+                                </label>
                               </div>
+
+                              {/* Color / Model Name Input Below the Photos */}
                               <input
-                                style={styles.variantInput}
+                                style={{ ...styles.variantInput, width: '100%', backgroundColor: '#ffffff' }}
                                 placeholder={t('tag_color_placeholder')}
                                 value={group.color}
                                 onChange={(e) => {
@@ -616,10 +665,6 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                                   }));
                                 }}
                               />
-                              <label style={styles.iconActionBtn} title="បន្ថែមរូបច្រើនទៀតសម្រាប់ពណ៌នេះ (Add more photos for this color)">
-                                <Plus size={14} />
-                                <input type="file" multiple hidden accept="image/*" onChange={(e) => handleImageUploadForColor(e, group.color)} />
-                              </label>
                             </div>
                           ));
                         })()}
