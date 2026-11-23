@@ -296,11 +296,10 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
             const uniqueModels = [];
             const seen = new Set();
             product.images.forEach((img, idx) => {
-              const label = (img.color || '').trim() || `ម៉ូដទី ${idx + 1}`;
+              const label = (img.color || '').trim() || `ម៉ូដទី ${uniqueModels.length + 1}`;
               if (!seen.has(label)) {
                 seen.add(label);
-                const count = product.images.filter((i, k) => ((i.color || '').trim() || `ម៉ូដទី ${k + 1}`) === label).length;
-                uniqueModels.push({ label, url: img.url, firstIdx: idx, count });
+                uniqueModels.push({ label, url: img.url, firstIdx: idx });
               }
             });
             return (
