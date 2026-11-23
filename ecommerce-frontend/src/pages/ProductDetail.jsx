@@ -585,35 +585,38 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
           {(((product.category === 'Curtain' || product.category === 'Sheer Curtain') && !product.isReadyMade) || product.category === 'Valance' || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole')) && (
             <div style={{ marginBottom: '40px' }}>
               {/* Clear Pricing Instruction Callout Banner */}
-              {['Curtain', 'Valance'].includes(product.category) && (
+              {['Curtain', 'Sheer Curtain', 'Valance'].includes(product.category) && (
                 <div style={{
                   backgroundColor: '#f0fdf4',
                   border: '1.5px solid #86efac',
                   borderRadius: '14px',
-                  padding: '14px 16px',
+                  padding: '12px 14px',
                   marginBottom: '16px',
                   display: 'flex',
                   alignItems: 'flex-start',
-                  gap: '12px',
-                  boxShadow: '0 2px 8px rgba(34, 197, 94, 0.08)'
+                  gap: '10px',
+                  boxShadow: '0 2px 8px rgba(34, 197, 94, 0.08)',
+                  width: '100%',
+                  boxSizing: 'border-box'
                 }}>
                   <div style={{
-                    width: '30px',
-                    height: '30px',
+                    width: '28px',
+                    height: '28px',
                     borderRadius: '50%',
                     backgroundColor: '#dcfce7',
                     color: '#15803d',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '1rem',
+                    fontSize: '0.95rem',
                     fontWeight: '900',
-                    flexShrink: 0
+                    flexShrink: 0,
+                    marginTop: '2px'
                   }}>
                     💡
                   </div>
-                  <div style={{ fontSize: '0.82rem', lineHeight: '1.6', color: '#166534' }}>
-                    <strong style={{ display: 'block', fontSize: '0.88rem', marginBottom: '2px', color: '#14532d' }}>
+                  <div style={{ fontSize: '0.85rem', lineHeight: '1.65', color: '#166534', flex: 1, minWidth: 0, wordBreak: 'break-word' }}>
+                    <strong style={{ display: 'block', fontSize: '0.9rem', marginBottom: '4px', color: '#14532d' }}>
                       {language === 'kh' ? 'របៀបគិតតម្លៃកាត់ដេរវាំងនន (Curtain Pricing Guide):' : 'How Curtain Pricing Works:'}
                     </strong>
                     {language === 'kh' ? (
@@ -971,45 +974,48 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
 
 
           {(product.category === 'Curtain' || product.category === 'Sheer Curtain') && !product.isReadyMade && (
-            <div style={{ marginBottom: '40px' }}>
-              <label style={{ fontSize: '0.7rem', fontWeight: '800', display: 'block', marginBottom: '15px' }}>{t('pole_ring_color')}</label>
-              <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+            <div style={{ marginBottom: '36px' }}>
+              <label style={{ fontSize: '0.82rem', fontWeight: '800', display: 'block', marginBottom: '12px', color: '#0f172a' }}>{t('pole_ring_color')}</label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(132px, 1fr))', gap: '10px' }}>
                 {combinedHardwareOptions.map(item => (
                   <button 
                     key={item.name}
+                    type="button"
                     onClick={() => setSelectedPoleColor(item.name)}
                     style={{ 
-                      minWidth: '150px', 
-                      padding: '15px 10px', 
-                      borderRadius: '18px', 
-                      border: selectedPoleColor === item.name ? '2px solid black' : '1px solid #eee', 
-                      background: 'white', 
+                      width: '100%',
+                      minWidth: 0,
+                      padding: '12px 8px', 
+                      borderRadius: '16px', 
+                      border: selectedPoleColor === item.name ? '2.5px solid #0f172a' : '1.5px solid #e2e8f0', 
+                      background: selectedPoleColor === item.name ? '#f8fafc' : '#ffffff', 
                       cursor: 'pointer',
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
-                      gap: '12px',
-                      transition: 'all 0.2s ease'
+                      gap: '8px',
+                      transition: 'all 0.2s ease',
+                      boxSizing: 'border-box'
                     }}
                   >
-                    <div style={{ display: 'flex', gap: '10px' }}>
+                    <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
                       {item.poleImageUrl && (
-                        <img src={item.poleImageUrl} style={{ width: '65px', height: '65px', borderRadius: '12px', objectFit: 'contain', border: '1px solid #eee' }} alt="ដង" title="ដង (Pole)" />
+                        <img src={item.poleImageUrl} style={{ width: '54px', height: '54px', borderRadius: '10px', objectFit: 'contain', border: '1px solid #e2e8f0', backgroundColor: '#fff' }} alt="ដង" title="ដង (Pole)" />
                       )}
                       {item.imageUrl && (
-                        <img src={item.imageUrl} style={{ width: '65px', height: '65px', borderRadius: '12px', objectFit: 'contain', border: '1px solid #eee' }} alt="កង" title="កង (Ring)" />
+                        <img src={item.imageUrl} style={{ width: '54px', height: '54px', borderRadius: '10px', objectFit: 'contain', border: '1px solid #e2e8f0', backgroundColor: '#fff' }} alt="កង" title="កង (Ring)" />
                       )}
                       {!item.imageUrl && !item.poleImageUrl && (
                         <div style={{ 
-                          width: '65px', 
-                          height: '65px', 
+                          width: '54px', 
+                          height: '54px', 
                           borderRadius: '50%', 
                           backgroundColor: item.color || '#eee',
                           border: '1px solid rgba(0,0,0,0.1)'
                         }}></div>
                       )}
                     </div>
-                    <span style={{ fontSize: '0.65rem', fontWeight: selectedPoleColor === item.name ? '800' : '500', marginTop: '4px' }}>{item.name}</span>
+                    <span style={{ fontSize: '0.78rem', fontWeight: selectedPoleColor === item.name ? '800' : '600', color: '#0f172a', textAlign: 'center', lineHeight: '1.3' }}>{item.name}</span>
                   </button>
                 ))}
               </div>
