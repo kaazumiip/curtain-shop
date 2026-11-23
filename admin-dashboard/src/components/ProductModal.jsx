@@ -139,6 +139,29 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
   };
 
   // Upload multiple images at once
+  const handleImageUploadForColor = async (e, colorName) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    setUploading(true);
+    try {
+      const uploaded = [];
+      for (const file of files) {
+        const data = new FormData();
+        data.append('image', file);
+        const res = await api.post('/products/upload', data);
+        uploaded.push({ url: res.data.imageUrl, color: colorName || '' });
+      }
+      setFormData((prev) => ({
+        ...prev,
+        images: [...prev.images, ...uploaded]
+      }));
+    } catch (err) {
+      alert(t('photo_upload_failed'));
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
@@ -542,6 +565,10 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                               value={img.color}
                               onChange={(e) => updateImageColor(idx, e.target.value)}
                             />
+                            <label style={styles.iconActionBtn} title="បន្ថែមរូបច្រើនទៀតសម្រាប់ពណ៌នេះ (Add more photos for this color)">
+                              <Plus size={14} />
+                              <input type="file" multiple hidden accept="image/*" onChange={(e) => handleImageUploadForColor(e, img.color)} />
+                            </label>
                             <label style={styles.iconActionBtn} title="ប្តូររូបភាព">
                               <Upload size={14} />
                               <input type="file" hidden accept="image/*" onChange={(e) => handleSingleImageReplace(e, idx)} />
