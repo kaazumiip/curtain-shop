@@ -543,46 +543,86 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                     </div>
                     <div style={styles.rowInputCol}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        {formData.images?.map((img, idx) => (
-                          <div key={idx} style={styles.variantRow}>
-                            <img
-                              src={img.url}
-                              alt=""
-                              onClick={() => setPreviewImgIdx(idx)}
-                              style={{
-                                width: '34px',
-                                height: '34px',
-                                borderRadius: '50%',
-                                objectFit: 'cover',
-                                border: previewImgIdx === idx ? '2px solid #16a34a' : '1px solid #e5e7eb',
-                                cursor: 'pointer',
-                                flexShrink: 0
-                              }}
-                            />
-                            <input
-                              style={styles.variantInput}
-                              placeholder={t('tag_color_placeholder')}
-                              value={img.color}
-                              onChange={(e) => updateImageColor(idx, e.target.value)}
-                            />
-                            <label style={styles.iconActionBtn} title="បន្ថែមរូបច្រើនទៀតសម្រាប់ពណ៌នេះ (Add more photos for this color)">
-                              <Plus size={14} />
-                              <input type="file" multiple hidden accept="image/*" onChange={(e) => handleImageUploadForColor(e, img.color)} />
-                            </label>
-                            <label style={styles.iconActionBtn} title="ប្តូររូបភាព">
-                              <Upload size={14} />
-                              <input type="file" hidden accept="image/*" onChange={(e) => handleSingleImageReplace(e, idx)} />
-                            </label>
-                            <button
-                              type="button"
-                              onClick={() => removeGalleryImage(idx)}
-                              style={{ ...styles.iconActionBtn, color: '#ef4444' }}
-                              title="លុប"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
-                        ))}
+                        {(() => {
+                          const groups = [];
+                          const map = new Map();
+                          (formData.images || []).forEach((img, idx) => {
+                            const key = (img.color || '').trim() ? `c:${img.color.trim()}` : `u:${idx}`;
+                            if (!map.has(key)) {
+                              const g = { key, color: img.color || '', items: [] };
+                              map.set(key, g);
+                              groups.push(g);
+                            }
+                            map.get(key).items.push({ img, idx });
+                          });
+
+                          return groups.map((group) => (
+                            <div key={group.key} style={{ ...styles.variantRow, flexWrap: 'wrap', gap: '8px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                                {group.items.map(({ img, idx }) => (
+                                  <div key={idx} style={{ position: 'relative', display: 'inline-block' }}>
+                                    <img
+                                      src={img.url}
+                                      alt=""
+                                      onClick={() => setPreviewImgIdx(idx)}
+                                      style={{
+                                        width: '38px',
+                                        height: '38px',
+                                        borderRadius: '8px',
+                                        objectFit: 'cover',
+                                        border: previewImgIdx === idx ? '2px solid #16a34a' : '1px solid #e5e7eb',
+                                        cursor: 'pointer',
+                                        display: 'block'
+                                      }}
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => removeGalleryImage(idx)}
+                                      title="លុបរូបនេះ"
+                                      style={{
+                                        position: 'absolute',
+                                        top: '-5px',
+                                        right: '-5px',
+                                        width: '16px',
+                                        height: '16px',
+                                        borderRadius: '50%',
+                                        border: 'none',
+                                        backgroundColor: '#ef4444',
+                                        color: '#fff',
+                                        fontSize: '0.6rem',
+                                        fontWeight: '800',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        padding: 0
+                                      }}
+                                    >
+                                      ×
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                              <input
+                                style={styles.variantInput}
+                                placeholder={t('tag_color_placeholder')}
+                                value={group.color}
+                                onChange={(e) => {
+                                  const newColor = e.target.value;
+                                  const idxs = new Set(group.items.map((it) => it.idx));
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    images: prev.images.map((im, i) => (idxs.has(i) ? { ...im, color: newColor } : im))
+                                  }));
+                                }}
+                              />
+                              <label style={styles.iconActionBtn} title="បន្ថែមរូបច្រើនទៀតសម្រាប់ពណ៌នេះ (Add more photos for this color)">
+                                <Plus size={14} />
+                                <input type="file" multiple hidden accept="image/*" onChange={(e) => handleImageUploadForColor(e, group.color)} />
+                              </label>
+                            </div>
+                          ));
+                        })()}
 
                         <label style={styles.addVariantLink}>
                           <Plus size={15} />
