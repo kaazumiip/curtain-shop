@@ -179,35 +179,104 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
           flexDirection: 'column',
           gap: '15px'
         }}>
-          {/* Main Display Gallery */}
-          <div 
-            ref={galleryRef}
-            className="no-scrollbar mobile-gallery-height"
-            style={{ 
-              width: '100%',
-              height: '550px',
-              overflowX: 'auto',
-              display: 'flex',
-              scrollSnapType: 'x mandatory',
-              WebkitOverflowScrolling: 'touch',
-              scrollBehavior: 'smooth'
-            }}
-          >
-            {(product.images && product.images.length > 0 ? product.images : [{ url: product.imageUrl || 'https://via.placeholder.com/600x800?text=No+Image', color: '' }]).map((img, idx) => (
-              <img 
-                key={idx}
-                src={img.url} 
-                alt={`${product.name} - ${idx}`} 
-                style={{ 
-                  minWidth: '100%',
-                  height: '100%',
-                  objectFit: 'contain',
-                  scrollSnapAlign: 'start',
-                  transition: 'opacity 0.3s ease',
-                  backgroundColor: '#f9f9f9'
-                }} 
-              />
-            ))}
+          {/* Main Display Gallery with Centered Prev / Next Buttons */}
+          <div style={{ position: 'relative', width: '100%' }}>
+            <div 
+              ref={galleryRef}
+              className="no-scrollbar mobile-gallery-height"
+              style={{ 
+                width: '100%',
+                height: '550px',
+                overflowX: 'auto',
+                display: 'flex',
+                scrollSnapType: 'x mandatory',
+                WebkitOverflowScrolling: 'touch',
+                scrollBehavior: 'smooth'
+              }}
+            >
+              {(product.images && product.images.length > 0 ? product.images : [{ url: product.imageUrl || 'https://via.placeholder.com/600x800?text=No+Image', color: '' }]).map((img, idx) => (
+                <img 
+                  key={idx}
+                  src={img.url} 
+                  alt={`${product.name} - ${idx}`} 
+                  style={{ 
+                    minWidth: '100%',
+                    height: '100%',
+                    objectFit: 'contain',
+                    scrollSnapAlign: 'start',
+                    transition: 'opacity 0.3s ease',
+                    backgroundColor: '#f9f9f9'
+                  }} 
+                />
+              ))}
+            </div>
+
+            {product.images && product.images.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  aria-label="Previous image"
+                  onClick={() => {
+                    if (galleryRef.current) {
+                      galleryRef.current.scrollBy({ left: -galleryRef.current.offsetWidth, behavior: 'smooth' });
+                    }
+                  }}
+                  style={{
+                    position: 'absolute',
+                    left: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    border: '1px solid rgba(15,23,42,0.12)',
+                    backgroundColor: 'rgba(255,255,255,0.9)',
+                    color: '#0f172a',
+                    fontSize: '1.4rem',
+                    fontWeight: '700',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
+                    zIndex: 5
+                  }}
+                >
+                  ‹
+                </button>
+                <button
+                  type="button"
+                  aria-label="Next image"
+                  onClick={() => {
+                    if (galleryRef.current) {
+                      galleryRef.current.scrollBy({ left: galleryRef.current.offsetWidth, behavior: 'smooth' });
+                    }
+                  }}
+                  style={{
+                    position: 'absolute',
+                    right: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    border: '1px solid rgba(15,23,42,0.12)',
+                    backgroundColor: 'rgba(255,255,255,0.9)',
+                    color: '#0f172a',
+                    fontSize: '1.4rem',
+                    fontWeight: '700',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
+                    zIndex: 5
+                  }}
+                >
+                  ›
+                </button>
+              </>
+            )}
           </div>
 
           {/* Indicator Dots */}
