@@ -90,7 +90,11 @@ function Dashboard({ onLogout }) {
     }
   };
 
+  const savingProductRef = React.useRef(false);
+
   const handleSave = async (formData) => {
+    if (savingProductRef.current) return;
+    savingProductRef.current = true;
     try {
       if (editingProduct) {
         const res = await api.put(`/products/${editingProduct._id}`, formData);
@@ -99,13 +103,15 @@ function Dashboard({ onLogout }) {
       } else {
         const res = await api.post('/products', formData);
         const created = res.data;
-        setProducts((prev) => [created, ...prev]);
+        setProducts((prev) => (prev.some((p) => p._id === created._id) ? prev : [created, ...prev]));
       }
       setIsModalOpen(false);
     } catch (err) {
       console.error('Error saving product:', err);
       const msg = err.response?.data?.message || t('check_info_try_again');
       alert(t('failed_save_product') + ': ' + msg);
+    } finally {
+      savingProductRef.current = false;
     }
   };
 
