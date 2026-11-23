@@ -22,7 +22,7 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
   const [customHeight, setCustomHeight] = useState("2.5");
   const [quantity, setQuantity] = useState(1);
   const [windowSizes, setWindowSizes] = useState([
-    { id: 1, label: 'បង្អួចទី ១', width: '1.5', height: '2.5', quantity: 1 }
+    { id: 1, label: 'បង្អួចទី ១', width: '1', height: '2.5', quantity: 1 }
   ]);
   const galleryRef = React.useRef(null);
 
@@ -30,7 +30,7 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
     const nextIdx = windowSizes.length + 1;
     setWindowSizes(prev => [
       ...prev,
-      { id: Date.now(), label: `បង្អួចទី ${nextIdx}`, width: '1.5', height: '2.5', quantity: 1 }
+      { id: Date.now(), label: `បង្អួចទី ${nextIdx}`, width: '1', height: '2.5', quantity: 1 }
     ]);
   };
 
