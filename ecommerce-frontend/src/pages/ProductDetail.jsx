@@ -766,20 +766,9 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
 
                         {!isPole && (
                           <div>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px', flexWrap: 'wrap', gap: '4px' }}>
-                              <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: '700' }}>
-                                {language === 'kh' ? 'កម្ពស់ (ម៉ែត្រ)' : 'Height (m)'}
-                              </span>
-                              {heightVal <= 2.5 ? (
-                                <span style={{ fontSize: '0.65rem', fontWeight: '800', color: '#16a34a', backgroundColor: '#dcfce7', padding: '1px 6px', borderRadius: '4px' }}>
-                                  {language === 'kh' ? 'ឥតគិតថ្លៃ (≤2.5m)' : 'Free (≤2.5m)'}
-                                </span>
-                              ) : (
-                                <span style={{ fontSize: '0.65rem', fontWeight: '800', color: '#b45309', backgroundColor: '#fef3c7', padding: '1px 6px', borderRadius: '4px' }}>
-                                  {language === 'kh' ? `+លើស ${(heightVal - 2.5).toFixed(2)}m` : `+${(heightVal - 2.5).toFixed(2)}m`}
-                                </span>
-                              )}
-                            </div>
+                            <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: '700', display: 'block', marginBottom: '4px' }}>
+                              {language === 'kh' ? 'កម្ពស់ (ម៉ែត្រ)' : 'Height (m)'}
+                            </span>
                             <input
                               type="number"
                               min="0.1"
@@ -799,6 +788,17 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
                                 boxSizing: 'border-box'
                               }}
                             />
+                            <div style={{ marginTop: '5px', textAlign: 'center' }}>
+                              {heightVal <= 2.5 ? (
+                                <span style={{ display: 'inline-block', fontSize: '0.66rem', fontWeight: '800', color: '#16a34a', backgroundColor: '#dcfce7', padding: '2px 7px', borderRadius: '6px' }}>
+                                  {language === 'kh' ? 'ឥតគិតថ្លៃ (≤2.5m)' : 'Free (≤2.5m)'}
+                                </span>
+                              ) : (
+                                <span style={{ display: 'inline-block', fontSize: '0.66rem', fontWeight: '800', color: '#b45309', backgroundColor: '#fef3c7', padding: '2px 7px', borderRadius: '6px' }}>
+                                  {language === 'kh' ? `+លើស ${(heightVal - 2.5).toFixed(2)}m` : `+${(heightVal - 2.5).toFixed(2)}m`}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         )}
 
