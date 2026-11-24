@@ -784,10 +784,10 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                       <div style={styles.rowSub}>{t('price_stock_sub')}</div>
                     </div>
                     <div style={styles.rowInputCol}>
-                      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px', width: '100%' }}>
                         {formData.category !== 'Ready-Made Curtain' && (
                           <>
-                            <div style={{ flex: 1, minWidth: '140px' }}>
+                            <div style={{ minWidth: 0 }}>
                               <label style={styles.miniFieldLabel}>
                                 {(formData.category === 'Curtain' || formData.category === 'Sheer Curtain')
                                   ? 'តម្លៃក្នុង ១ ម៉ែត្រទទឹង ($ / m)'
@@ -797,25 +797,25 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                                 type="number"
                                 step="0.01"
                                 placeholder="0.00"
-                                style={styles.textInput}
+                                style={{ ...styles.textInput, width: '100%' }}
                                 value={formData.price}
                                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                               />
                             </div>
-                            <div style={{ flex: 1, minWidth: '140px' }}>
+                            <div style={{ minWidth: 0 }}>
                               <label style={styles.miniFieldLabel}>តម្លៃដើម មុនបញ្ចុះតម្លៃ ($)</label>
                               <input
                                 type="number"
                                 step="0.01"
                                 placeholder="ទុកទទេបើគ្មានបញ្ចុះតម្លៃ"
-                                style={styles.textInput}
+                                style={{ ...styles.textInput, width: '100%' }}
                                 value={formData.originalPrice || ''}
                                 onChange={(e) => setFormData({ ...formData, originalPrice: e.target.value })}
                               />
                             </div>
                           </>
                         )}
-                        <div style={{ width: '120px' }}>
+                        <div style={{ minWidth: 0 }}>
                           <label style={styles.miniFieldLabel}>{t('stock_quantity')}</label>
                           <input
                             type="number"
@@ -936,39 +936,6 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                       </div>
                     );
                   })()}
-
-                  {/* Ready-Made Curtain Option */}
-                  {formData.category === 'Curtain' && (
-                    <div style={styles.formRow} className="wizard-form-row">
-                      <div style={styles.rowLabelCol}>
-                        <div style={styles.rowTitle}>វាំងននស្រាប់ (Ready-Made Curtain)</div>
-                        <div style={styles.rowSub}>បើកជម្រើសនេះប្រសិនបើវាំងននមានទំហំ និងតម្លៃថេរស្រាប់ (មិនបាច់វាស់ទំហំ)</div>
-                      </div>
-                      <div style={styles.rowInputCol}>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontWeight: '700', fontSize: '0.9rem', color: '#0f172a', marginBottom: formData.isReadyMade ? '12px' : '0' }}>
-                          <input
-                            type="checkbox"
-                            checked={Boolean(formData.isReadyMade)}
-                            onChange={(e) => setFormData({ ...formData, isReadyMade: e.target.checked })}
-                            style={{ width: '18px', height: '18px', accentColor: '#0f172a', cursor: 'pointer' }}
-                          />
-                          <span>Ready-Made Curtain (Fixed Length & Price)</span>
-                        </label>
-                        {formData.isReadyMade && (
-                          <div>
-                            <label style={styles.miniFieldLabel}>ទំហំថេរ (ឧ. 140cm × 260cm)</label>
-                            <input
-                              type="text"
-                              placeholder="e.g. 140cm × 260cm"
-                              value={formData.fixedDimensions || ''}
-                              onChange={(e) => setFormData({ ...formData, fixedDimensions: e.target.value })}
-                              style={styles.input}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
 
                   {/* Row 3: Curtain Hardware (Curtain & Sheer Curtain) */}
                   {(formData.category === 'Curtain' || formData.category === 'Sheer Curtain') && (
