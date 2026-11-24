@@ -376,8 +376,17 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
       return alert('សូមបញ្ចូលតម្លៃផលិតផល!');
     }
     const finalDesc = formData.descriptionKh || formData.description || '';
+    const szOpts = formData.customOptions?.sizeOptions || [];
+    let finalPrice = Number(formData.price) || 0;
+    if (szOpts.length > 0 && (formData.category === 'Ready-Made Curtain' || finalPrice <= 0)) {
+      const validPrices = szOpts.map((s) => Number(s.price) || 0).filter((p) => p > 0);
+      if (validPrices.length > 0) {
+        finalPrice = Math.min(...validPrices);
+      }
+    }
     onSave({
       ...formData,
+      price: finalPrice,
       name: finalName,
       nameKh: finalName,
       description: finalDesc,
