@@ -28,7 +28,11 @@ const ProductCard = ({ product }) => {
     ? Math.min(...sizeOptions.map((s) => Number(s.price) || 0).filter((p) => p > 0), Number(product.price) || Infinity)
     : Number(product.price) || 0;
   const displayPriceValue = Number.isFinite(lowestPrice) ? lowestPrice : (Number(product.price) || 0);
-  const isTailorCurtain = (product.category === 'Curtain' || product.category === 'Sheer Curtain') && !product.isReadyMade;
+  const isPerMeter =
+    ((product.category === 'Curtain' || product.category === 'Sheer Curtain') && !product.isReadyMade) ||
+    product.category === 'Valance' ||
+    product.category === 'Fabric' ||
+    (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole');
 
   const isOutOfStock = Number(product.stock) <= 0;
   const hasDiscount = Number(product.originalPrice) > Number(product.price);
@@ -163,7 +167,7 @@ const ProductCard = ({ product }) => {
               color: hasDiscount ? '#dc2626' : '#000000'
             }}
           >
-            {isTailorCurtain
+            {isPerMeter
               ? `$${displayPriceValue.toFixed(2)} / m`
               : hasMultipleSizes
                 ? `ចាប់ពី $${displayPriceValue.toFixed(2)}`

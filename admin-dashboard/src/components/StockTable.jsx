@@ -50,10 +50,16 @@ const StockTable = ({ products, onEdit, onDelete, onDuplicate, onAddStock }) => 
               <td style={{ color: '#0f172a', fontWeight: '700', fontSize: '1.05rem' }}>
                 {(() => {
                   const szOpts = product.customOptions?.sizeOptions || [];
+                  const isPerMeter =
+                    ['Curtain', 'Sheer Curtain', 'Valance', 'Fabric'].includes(product.category) ||
+                    (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole');
                   if (szOpts.length > 0) {
                     const minP = Math.min(...szOpts.map((s) => Number(s.price) || 0).filter((p) => p > 0));
                     const val = Number.isFinite(minP) ? minP : Number(product.price || 0);
                     return <div>ចាប់ពី ${val.toFixed(2)}</div>;
+                  }
+                  if (isPerMeter) {
+                    return <div>${Number(product.price || 0).toFixed(2)} / m</div>;
                   }
                   return <div>${Number(product.price || 0).toFixed(2)}</div>;
                 })()}
