@@ -906,6 +906,46 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
           )}
 
           {/* Standalone Quantity Selector for non-Curtain products */}
+          {/* Selectable Size & Price Options (Ready-Made Curtain, Bed Sheet, Pillow Case, etc.) */}
+          {product.customOptions?.sizeOptions?.length > 0 && (
+            <div style={{ marginBottom: '26px' }}>
+              <label style={{ fontSize: '0.82rem', fontWeight: '800', display: 'block', marginBottom: '12px', color: '#0f172a' }}>
+                ជ្រើសរើសទំហំ (Select Size)
+              </label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                {product.customOptions.sizeOptions.map((sz, idx) => {
+                  const isSelected = selectedSize?.name === sz.name;
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setSelectedSize(sz)}
+                      style={{
+                        padding: '10px 16px',
+                        borderRadius: '12px',
+                        border: isSelected ? '2px solid #0f172a' : '1.5px solid #cbd5e1',
+                        backgroundColor: isSelected ? '#0f172a' : '#ffffff',
+                        color: isSelected ? '#ffffff' : '#0f172a',
+                        fontWeight: '700',
+                        fontSize: '0.88rem',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        transition: 'all 0.18s ease'
+                      }}
+                    >
+                      <span>{sz.name}</span>
+                      <span style={{ opacity: isSelected ? 0.9 : 0.7, fontWeight: '800' }}>
+                        ${Number(sz.price || 0).toFixed(2)}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {!(((product.category === 'Curtain' || product.category === 'Sheer Curtain') && !product.isReadyMade) || product.category === 'Valance') && !(product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole') && (
             <div style={{ marginBottom: '40px' }}>
               <label style={{ fontSize: '0.7rem', fontWeight: '800', display: 'block', marginBottom: '15px', letterSpacing: '1px', textTransform: 'uppercase' }}>
