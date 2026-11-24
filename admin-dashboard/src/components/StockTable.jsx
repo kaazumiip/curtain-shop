@@ -59,7 +59,7 @@ const StockTable = ({ products, onEdit, onDelete, onDuplicate, onAddStock }) => 
                     return <div>ចាប់ពី ${val.toFixed(2)}</div>;
                   }
                   if (isPerMeter) {
-                    return <div>${Number(product.price || 0).toFixed(2)} / m</div>;
+                    return <div>${Number(product.price || 0).toFixed(2)} / ម៉ែត្រ</div>;
                   }
                   return <div>${Number(product.price || 0).toFixed(2)}</div>;
                 })()}

@@ -168,7 +168,7 @@ const ProductCard = ({ product }) => {
             }}
           >
             {isPerMeter
-              ? `$${displayPriceValue.toFixed(2)} / m`
+              ? `$${displayPriceValue.toFixed(2)} / ម៉ែត្រ`
               : hasMultipleSizes
                 ? `ចាប់ពី $${displayPriceValue.toFixed(2)}`
                 : `$${displayPriceValue.toFixed(2)}`}
