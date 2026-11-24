@@ -776,28 +776,36 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                     </div>
                     <div style={styles.rowInputCol}>
                       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                        <div style={{ flex: 1, minWidth: '140px' }}>
-                          <label style={styles.miniFieldLabel}>{getPriceLabel()} (តម្លៃលក់ $)</label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            placeholder="0.00"
-                            style={styles.textInput}
-                            value={formData.price}
-                            onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                          />
-                        </div>
-                        <div style={{ flex: 1, minWidth: '140px' }}>
-                          <label style={styles.miniFieldLabel}>តម្លៃដើម មុនបញ្ចុះតម្លៃ ($)</label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            placeholder="ទុកទទេបើគ្មានបញ្ចុះតម្លៃ"
-                            style={styles.textInput}
-                            value={formData.originalPrice || ''}
-                            onChange={(e) => setFormData({ ...formData, originalPrice: e.target.value })}
-                          />
-                        </div>
+                        {formData.category !== 'Ready-Made Curtain' && (
+                          <>
+                            <div style={{ flex: 1, minWidth: '140px' }}>
+                              <label style={styles.miniFieldLabel}>
+                                {(formData.category === 'Curtain' || formData.category === 'Sheer Curtain')
+                                  ? 'តម្លៃក្នុង ១ ម៉ែត្រទទឹង ($ / m)'
+                                  : `${getPriceLabel()} (តម្លៃលក់ $)`}
+                              </label>
+                              <input
+                                type="number"
+                                step="0.01"
+                                placeholder="0.00"
+                                style={styles.textInput}
+                                value={formData.price}
+                                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                              />
+                            </div>
+                            <div style={{ flex: 1, minWidth: '140px' }}>
+                              <label style={styles.miniFieldLabel}>តម្លៃដើម មុនបញ្ចុះតម្លៃ ($)</label>
+                              <input
+                                type="number"
+                                step="0.01"
+                                placeholder="ទុកទទេបើគ្មានបញ្ចុះតម្លៃ"
+                                style={styles.textInput}
+                                value={formData.originalPrice || ''}
+                                onChange={(e) => setFormData({ ...formData, originalPrice: e.target.value })}
+                              />
+                            </div>
+                          </>
+                        )}
                         <div style={{ width: '120px' }}>
                           <label style={styles.miniFieldLabel}>{t('stock_quantity')}</label>
                           <input
