@@ -48,7 +48,15 @@ const StockTable = ({ products, onEdit, onDelete, onDuplicate, onAddStock }) => 
                 </div>
               </td>
               <td style={{ color: '#0f172a', fontWeight: '700', fontSize: '1.05rem' }}>
-                <div>${Number(product.price).toFixed(2)}</div>
+                {(() => {
+                  const szOpts = product.customOptions?.sizeOptions || [];
+                  if (szOpts.length > 0) {
+                    const minP = Math.min(...szOpts.map((s) => Number(s.price) || 0).filter((p) => p > 0));
+                    const val = Number.isFinite(minP) ? minP : Number(product.price || 0);
+                    return <div>ចាប់ពី ${val.toFixed(2)}</div>;
+                  }
+                  return <div>${Number(product.price || 0).toFixed(2)}</div>;
+                })()}
                 {Number(product.originalPrice) > Number(product.price) && (
                   <div style={{ fontSize: '0.8rem', color: '#94a3b8', textDecoration: 'line-through', fontWeight: '600' }}>
                     ${Number(product.originalPrice).toFixed(2)}
