@@ -13,6 +13,7 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
   const [loading, setLoading] = useState(!cachedProduct);
   const [isMeasurementOpen, setIsMeasurementOpen] = useState(false);
   const [selectedSize, setSelectedSize] = useState(null);
+  const [isSizeDropdownOpen, setIsSizeDropdownOpen] = useState(false);
   const [selectedColorName, setSelectedColorName] = useState(null);
   const [selectedPoleColor, setSelectedPoleColor] = useState('Gold');
   const [selectedCascadeStyle, setSelectedCascadeStyle] = useState(null);
@@ -906,40 +907,113 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
           )}
 
           {/* Standalone Quantity Selector for non-Curtain products */}
-          {/* Selectable Size & Price Dropdown (Ready-Made Curtain, Bed Sheet, Pillow Case, etc.) */}
-          {product.customOptions?.sizeOptions?.length > 0 && (
-            <div style={{ marginBottom: '26px' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: '800', display: 'block', marginBottom: '10px', color: '#0f172a' }}>
-                ជ្រើសរើសទំហំ (Select Size)
-              </label>
-              <select
-                value={selectedSize?.name || product.customOptions.sizeOptions[0]?.name || ''}
-                onChange={(e) => {
-                  const chosen = product.customOptions.sizeOptions.find((sz) => sz.name === e.target.value);
-                  if (chosen) setSelectedSize(chosen);
-                }}
-                style={{
-                  width: '100%',
-                  maxWidth: '380px',
-                  padding: '13px 16px',
-                  borderRadius: '12px',
-                  border: '1.5px solid #cbd5e1',
-                  backgroundColor: '#ffffff',
-                  color: '#0f172a',
-                  fontSize: '0.95rem',
-                  fontWeight: '700',
-                  cursor: 'pointer',
-                  outline: 'none'
-                }}
-              >
-                {product.customOptions.sizeOptions.map((sz, idx) => (
-                  <option key={idx} value={sz.name}>
-                    {sz.name} — ${Number(sz.price || 0).toFixed(2)}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+          {/* Custom Styled Size & Price Dropdown (Ready-Made Curtain, Bed Sheet, Pillow Case, etc.) */}
+          {product.customOptions?.sizeOptions?.length > 0 && (() => {
+            const currentSize = selectedSize || product.customOptions.sizeOptions[0];
+            return (
+              <div style={{ marginBottom: '26px', position: 'relative', maxWidth: '400px' }}>
+                <label style={{ fontSize: '0.85rem', fontWeight: '800', display: 'block', marginBottom: '10px', color: '#0f172a' }}>
+                  ជ្រើសរើសទំហំ (Select Size)
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setIsSizeDropdownOpen((prev) => !prev)}
+                  style={{
+                    width: '100%',
+                    padding: '13px 16px',
+                    borderRadius: '14px',
+                    border: isSizeDropdownOpen ? '2px solid #0f172a' : '1.5px solid #cbd5e1',
+                    backgroundColor: '#ffffff',
+                    color: '#0f172a',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '12px',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 8px rgba(15, 23, 42, 0.05)'
+                  }}
+                >
+                  <span style={{ fontSize: '0.95rem', fontWeight: '800', color: '#0f172a' }}>
+                    {currentSize?.name}
+                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{
+                      padding: '4px 10px',
+                      borderRadius: '999px',
+                      backgroundColor: '#dcfce7',
+                      color: '#15803d',
+                      fontSize: '0.86rem',
+                      fontWeight: '800'
+                    }}>
+                      ${Number(currentSize?.price || 0).toFixed(2)}
+                    </span>
+                    <span style={{ fontSize: '0.85rem', color: '#64748b', transform: isSizeDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }}>
+                      ▾
+                    </span>
+                  </div>
+                </button>
+
+                {isSizeDropdownOpen && (
+                  <div style={{
+                    position: 'absolute',
+                    top: 'calc(100% + 6px)',
+                    left: 0,
+                    right: 0,
+                    backgroundColor: '#ffffff',
+                    border: '1.5px solid #e2e8f0',
+                    borderRadius: '14px',
+                    boxShadow: '0 14px 32px rgba(15, 23, 42, 0.14)',
+                    padding: '6px',
+                    zIndex: 50,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '4px'
+                  }}>
+                    {product.customOptions.sizeOptions.map((sz, idx) => {
+                      const isSelected = currentSize?.name === sz.name;
+                      return (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => {
+                            setSelectedSize(sz);
+                            setIsSizeDropdownOpen(false);
+                          }}
+                          style={{
+                            width: '100%',
+                            padding: '11px 14px',
+                            borderRadius: '10px',
+                            border: 'none',
+                            backgroundColor: isSelected ? '#f0fdf4' : 'transparent',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '12px',
+                            cursor: 'pointer',
+                            textAlign: 'left'
+                          }}
+                        >
+                          <span style={{ fontSize: '0.92rem', fontWeight: isSelected ? '800' : '600', color: '#0f172a' }}>
+                            {isSelected ? '✓ ' : ''}{sz.name}
+                          </span>
+                          <span style={{
+                            padding: '3px 10px',
+                            borderRadius: '999px',
+                            backgroundColor: isSelected ? '#15803d' : '#f1f5f9',
+                            color: isSelected ? '#ffffff' : '#0f172a',
+                            fontSize: '0.84rem',
+                            fontWeight: '800'
+                          }}>
+                            ${Number(sz.price || 0).toFixed(2)}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {!(((product.category === 'Curtain' || product.category === 'Sheer Curtain') && !product.isReadyMade) || product.category === 'Valance') && !(product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole') && (
             <div style={{ marginBottom: '40px' }}>
