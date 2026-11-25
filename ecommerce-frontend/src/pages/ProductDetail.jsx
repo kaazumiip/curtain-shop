@@ -447,9 +447,11 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
           
           <div style={{ width: '100%', height: '1px', backgroundColor: '#f0f0f0', marginBottom: '30px', marginTop: '30px' }}></div>
           
-          <p style={{ color: '#666', lineHeight: '1.8', marginBottom: '30px', fontSize: '1rem' }}>
-            {(language === 'kh' && product.descriptionKh) ? product.descriptionKh : (product.description || t('default_desc'))}
-          </p>
+          {(product.descriptionKh || product.description) && (
+            <p style={{ color: '#666', lineHeight: '1.8', marginBottom: '30px', fontSize: '1rem' }}>
+              {(language === 'kh' && product.descriptionKh) ? product.descriptionKh : product.description}
+            </p>
+          )}
 
           {/* Color selector is shown at the top under the main product gallery */}
 
