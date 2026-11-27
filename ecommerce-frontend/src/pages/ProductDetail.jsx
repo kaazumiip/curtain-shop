@@ -26,6 +26,7 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
     { id: 1, label: 'បង្អួចទី ១', width: '1', height: '2.5', quantity: 1 }
   ]);
   const galleryRef = React.useRef(null);
+  const colorStripRef = React.useRef(null);
 
   const addWindowSize = () => {
     const nextIdx = windowSizes.length + 1;
@@ -324,10 +325,58 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
             if (uniqueModels.length <= 1 && !product.customOptions?.colorOptions?.length) return null;
             return (
               <div style={{ padding: '10px 14px 14px', backgroundColor: '#ffffff', borderTop: '1px solid #f1f5f9' }}>
-                <div style={{ fontSize: '0.78rem', fontWeight: '800', color: '#334155', marginBottom: '10px' }}>
-                  ជ្រើសរើសពណ៌ / ម៉ូដ (Select Color / Model){selectedColorName ? `: ${selectedColorName}` : ''}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', gap: '8px' }}>
+                  <div style={{ fontSize: '0.78rem', fontWeight: '800', color: '#334155' }}>
+                    ជ្រើសរើសពណ៌ / ម៉ូដ (Select Color / Model){selectedColorName ? `: ${selectedColorName}` : ''}
+                  </div>
+                  {uniqueModels.length > 3 && (
+                    <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+                      <button
+                        type="button"
+                        aria-label="Scroll colors left"
+                        onClick={() => colorStripRef.current?.scrollBy({ left: -220, behavior: 'smooth' })}
+                        style={{
+                          width: '28px',
+                          height: '28px',
+                          borderRadius: '50%',
+                          border: '1px solid #cbd5e1',
+                          backgroundColor: '#ffffff',
+                          color: '#0f172a',
+                          fontSize: '1.1rem',
+                          fontWeight: '700',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        ‹
+                      </button>
+                      <button
+                        type="button"
+                        aria-label="Scroll colors right"
+                        onClick={() => colorStripRef.current?.scrollBy({ left: 220, behavior: 'smooth' })}
+                        style={{
+                          width: '28px',
+                          height: '28px',
+                          borderRadius: '50%',
+                          border: '1px solid #cbd5e1',
+                          backgroundColor: '#ffffff',
+                          color: '#0f172a',
+                          fontSize: '1.1rem',
+                          fontWeight: '700',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        ›
+                      </button>
+                    </div>
+                  )}
                 </div>
-                <div className="no-scrollbar" style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '4px', alignItems: 'center' }}>
+                <div ref={colorStripRef} className="no-scrollbar" style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '4px', alignItems: 'center', scrollBehavior: 'smooth' }}>
                   {uniqueModels.map((model) => {
                     const isSelected = selectedColorName === model.label;
                     if (!model.url) {
