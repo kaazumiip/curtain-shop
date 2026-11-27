@@ -302,13 +302,16 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
 
           {/* Color / Model Selector Strip right under the Product Picture Catalogue (images + text-only colors) */}
           {((product.images && product.images.length > 1) || (product.customOptions?.colorOptions?.length > 0)) && (() => {
+            const generalCount = Array.isArray(product.galleryImages) && product.galleryImages.length > 0
+              ? product.galleryImages.length
+              : (product.imageUrl && !(product.images || []).some((im) => im.url === product.imageUrl) ? 1 : 0);
             const uniqueModels = [];
             const seen = new Set();
             (product.images || []).forEach((img, idx) => {
               const label = (img.color || '').trim() || `ម៉ូដទី ${uniqueModels.length + 1}`;
               if (!seen.has(label)) {
                 seen.add(label);
-                uniqueModels.push({ label, url: img.url, firstIdx: idx });
+                uniqueModels.push({ label, url: img.url, firstIdx: generalCount + idx });
               }
             });
             (product.customOptions?.colorOptions || []).forEach((c) => {
