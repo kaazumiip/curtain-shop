@@ -151,7 +151,7 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
     
     if (((product.category === 'Curtain' || product.category === 'Sheer Curtain') && !product.isReadyMade) || product.category === 'Valance' || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole')) {
       setTotalPrice(totalWindowsSubtotal.toFixed(2));
-    } else if (product.category === 'Fabric') {
+    } else if (product.category === 'Fabric' || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'tassel')) {
       const meters = parseFloat(fabricMeters) || 0;
       setTotalPrice((basePrice * meters * quantity).toFixed(2));
     } else if (selectedSize) {
@@ -516,7 +516,7 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
                 })
               </span>
             )}
-            {product.category === 'Fabric' && (
+            {(product.category === 'Fabric' || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'tassel')) && (
               <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: '600' }}>
                 (${Number(product.price).toFixed(2)} / ម៉ែត្រ)
               </span>
@@ -546,7 +546,7 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
 
           {/* Color selector is shown at the top under the main product gallery */}
 
-          {product.category === 'Fabric' && (
+          {(product.category === 'Fabric' || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'tassel')) && (
             <div style={{ marginBottom: '30px' }}>
               <label style={{ fontSize: '0.75rem', fontWeight: '800', display: 'block', marginBottom: '10px' }}>
                 {language === 'kh' ? 'ចំនួនម៉ែត្រដែលត្រូវការ' : (t('meters_needed') || 'Meters Needed')}
@@ -1266,9 +1266,9 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
                   onAddToCart({
                     ...product,
                     imageUrl: chosenImg?.url || product.imageUrl,
-                    selectedSize: product.category === 'Fabric' ? { name: `${fabricMeters}m × ${quantity} គ្រឿង` } : (selectedSize ? { name: `${selectedSize.name} × ${quantity} គ្រឿង` } : { name: `${quantity} គ្រឿង` }),
+                    selectedSize: (product.category === 'Fabric' || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'tassel')) ? { name: `${fabricMeters}m × ${quantity} គ្រឿង` } : (selectedSize ? { name: `${selectedSize.name} × ${quantity} គ្រឿង` } : { name: `${quantity} គ្រឿង` }),
                     selectedColorName,
-                    fabricMeters: product.category === 'Fabric' ? (parseFloat(fabricMeters) || 0) : null,
+                    fabricMeters: (product.category === 'Fabric' || (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'tassel')) ? (parseFloat(fabricMeters) || 0) : null,
                     quantity: quantity,
                     totalPrice
                   });

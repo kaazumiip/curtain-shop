@@ -52,7 +52,7 @@ const StockTable = ({ products, onEdit, onDelete, onDuplicate, onAddStock }) => 
                   const szOpts = product.customOptions?.sizeOptions || [];
                   const isPerMeter =
                     ['Curtain', 'Sheer Curtain', 'Valance', 'Fabric'].includes(product.category) ||
-                    (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole');
+                    (product.category === 'Accessories' && ['pole', 'tassel'].includes(product.subCategory?.toLowerCase()));
                   if (szOpts.length > 0) {
                     const minP = Math.min(...szOpts.map((s) => Number(s.price) || 0).filter((p) => p > 0));
                     const val = Number.isFinite(minP) ? minP : Number(product.price || 0);

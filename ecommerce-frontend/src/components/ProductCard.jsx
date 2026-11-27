@@ -32,7 +32,7 @@ const ProductCard = ({ product }) => {
     ((product.category === 'Curtain' || product.category === 'Sheer Curtain') && !product.isReadyMade) ||
     product.category === 'Valance' ||
     product.category === 'Fabric' ||
-    (product.category === 'Accessories' && product.subCategory?.toLowerCase() === 'pole');
+    (product.category === 'Accessories' && ['pole', 'tassel'].includes(product.subCategory?.toLowerCase()));
 
   const isOutOfStock = Number(product.stock) <= 0;
   const hasDiscount = Number(product.originalPrice) > Number(product.price);
