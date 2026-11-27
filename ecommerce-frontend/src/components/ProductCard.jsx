@@ -9,8 +9,8 @@ const ProductCard = ({ product }) => {
   const images = (product.images && product.images.length > 0)
     ? product.images
     : (product.imageUrl ? [{ url: product.imageUrl }] : [{ url: 'https://via.placeholder.com/400x530' }]);
-  const displayImage = images[0]?.url;
-  const secondImage = images[1]?.url || displayImage;
+  const displayImage = product.imageUrl || images[0]?.url;
+  const secondImage = (product.imageUrl && images[0]?.url && images[0].url !== product.imageUrl) ? images[0].url : (images[1]?.url || displayImage);
 
   const categoryLabel = product.category === 'Ready-Made Curtain'
     ? 'វាំងននស្រាប់'
