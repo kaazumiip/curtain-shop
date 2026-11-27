@@ -220,7 +220,7 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
               })()}
             </div>
 
-            {product.images && product.images.length > 1 && (
+            {((Array.isArray(product.galleryImages) ? product.galleryImages.length : 0) + (Array.isArray(product.images) ? product.images.length : 0)) > 1 && (
               <>
                 <button
                   type="button"
