@@ -292,32 +292,63 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
             ))}
           </div>
 
-          {/* Color / Model Selector Strip right under the Product Picture Catalogue (grouped by unique color) */}
-          {product.images && product.images.length > 1 && (() => {
+          {/* Color / Model Selector Strip right under the Product Picture Catalogue (images + text-only colors) */}
+          {((product.images && product.images.length > 1) || (product.customOptions?.colorOptions?.length > 0)) && (() => {
             const uniqueModels = [];
             const seen = new Set();
-            product.images.forEach((img, idx) => {
+            (product.images || []).forEach((img, idx) => {
               const label = (img.color || '').trim() || `ម៉ូដទី ${uniqueModels.length + 1}`;
               if (!seen.has(label)) {
                 seen.add(label);
                 uniqueModels.push({ label, url: img.url, firstIdx: idx });
               }
             });
+            (product.customOptions?.colorOptions || []).forEach((c) => {
+              const label = (typeof c === 'string' ? c : c?.name || '').trim();
+              if (label && !seen.has(label)) {
+                seen.add(label);
+                uniqueModels.push({ label, url: null, firstIdx: -1 });
+              }
+            });
+            if (uniqueModels.length <= 1 && !product.customOptions?.colorOptions?.length) return null;
             return (
               <div style={{ padding: '10px 14px 14px', backgroundColor: '#ffffff', borderTop: '1px solid #f1f5f9' }}>
                 <div style={{ fontSize: '0.78rem', fontWeight: '800', color: '#334155', marginBottom: '10px' }}>
                   ជ្រើសរើសពណ៌ / ម៉ូដ (Select Color / Model){selectedColorName ? `: ${selectedColorName}` : ''}
                 </div>
-                <div className="no-scrollbar" style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '4px' }}>
+                <div className="no-scrollbar" style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '4px', alignItems: 'center' }}>
                   {uniqueModels.map((model) => {
                     const isSelected = selectedColorName === model.label;
+                    if (!model.url) {
+                      return (
+                        <button
+                          key={model.label}
+                          type="button"
+                          onClick={() => setSelectedColorName(model.label)}
+                          style={{
+                            flexShrink: 0,
+                            padding: '10px 16px',
+                            borderRadius: '12px',
+                            border: isSelected ? '2.5px solid #0f172a' : '1.5px solid #cbd5e1',
+                            backgroundColor: isSelected ? '#0f172a' : '#ffffff',
+                            color: isSelected ? '#ffffff' : '#0f172a',
+                            fontSize: '0.84rem',
+                            fontWeight: '700',
+                            cursor: 'pointer',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          {model.label}
+                        </button>
+                      );
+                    }
                     return (
                       <button
                         key={model.label}
                         type="button"
                         onClick={() => {
                           setSelectedColorName(model.label);
-                          if (galleryRef.current) {
+                          if (model.firstIdx >= 0 && galleryRef.current) {
                             galleryRef.current.scrollTo({
                               left: model.firstIdx * galleryRef.current.offsetWidth,
                               behavior: 'smooth'

@@ -735,6 +735,93 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                           <span>{uploading ? t('uploading') : t('add_color_variant')}</span>
                           <input type="file" multiple hidden accept="image/*" onChange={handleImageUpload} />
                         </label>
+
+                        {/* Text-Only Color Options (No Image Required) */}
+                        <div style={{ marginTop: '8px', padding: '12px', backgroundColor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                          <div style={{ fontSize: '0.78rem', fontWeight: '700', color: '#334155', marginBottom: '8px' }}>
+                            បន្ថែមពណ៌ដោយគ្មានរូបភាព (Add Color Name Without Image)
+                          </div>
+                          {formData.customOptions?.colorOptions?.length > 0 && (
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '10px' }}>
+                              {formData.customOptions.colorOptions.map((cName, cIdx) => (
+                                <span key={cIdx} style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  padding: '5px 10px',
+                                  borderRadius: '999px',
+                                  backgroundColor: '#ffffff',
+                                  border: '1px solid #cbd5e1',
+                                  fontSize: '0.8rem',
+                                  fontWeight: '700',
+                                  color: '#0f172a'
+                                }}>
+                                  <span>{typeof cName === 'string' ? cName : cName.name}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const next = formData.customOptions.colorOptions.filter((_, i) => i !== cIdx);
+                                      setFormData((prev) => ({
+                                        ...prev,
+                                        customOptions: { ...prev.customOptions, colorOptions: next }
+                                      }));
+                                    }}
+                                    style={{ border: 'none', background: 'none', color: '#ef4444', fontWeight: '800', cursor: 'pointer', padding: 0 }}
+                                  >
+                                    ×
+                                  </button>
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <input
+                              type="text"
+                              placeholder="វាយឈ្មោះពណ៌ (ឧ. ប្រផេះ, ក្រហម, ពណ៌មាស)..."
+                              style={{ ...styles.variantInput, flex: 1, backgroundColor: '#ffffff' }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  const val = e.target.value.trim();
+                                  if (!val) return;
+                                  const existing = formData.customOptions?.colorOptions || [];
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    customOptions: { ...prev.customOptions, colorOptions: [...existing, val] }
+                                  }));
+                                  e.target.value = '';
+                                }
+                              }}
+                              id="text-only-color-input"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const inp = document.getElementById('text-only-color-input');
+                                const val = inp?.value?.trim();
+                                if (!val) return;
+                                const existing = formData.customOptions?.colorOptions || [];
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  customOptions: { ...prev.customOptions, colorOptions: [...existing, val] }
+                                }));
+                                inp.value = '';
+                              }}
+                              style={{
+                                padding: '0 14px',
+                                borderRadius: '10px',
+                                border: 'none',
+                                backgroundColor: '#0f172a',
+                                color: '#ffffff',
+                                fontWeight: '700',
+                                fontSize: '0.82rem',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              + បន្ថែម
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
