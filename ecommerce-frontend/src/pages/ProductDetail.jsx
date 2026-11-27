@@ -195,21 +195,29 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
                 scrollBehavior: 'smooth'
               }}
             >
-              {(product.images && product.images.length > 0 ? product.images : [{ url: product.imageUrl || 'https://via.placeholder.com/600x800?text=No+Image', color: '' }]).map((img, idx) => (
-                <img 
-                  key={idx}
-                  src={img.url} 
-                  alt={`${product.name} - ${idx}`} 
-                  style={{ 
-                    minWidth: '100%',
-                    height: '100%',
-                    objectFit: 'contain',
-                    scrollSnapAlign: 'start',
-                    transition: 'opacity 0.3s ease',
-                    backgroundColor: '#f9f9f9'
-                  }} 
-                />
-              ))}
+              {(() => {
+                const generalImgs = (Array.isArray(product.galleryImages) && product.galleryImages.length > 0
+                  ? product.galleryImages
+                  : (product.imageUrl && !(product.images || []).some((im) => im.url === product.imageUrl) ? [product.imageUrl] : [])
+                ).map((url) => ({ url, color: '' }));
+                const allDisplayImgs = [...generalImgs, ...(product.images || [])];
+                const finalImgs = allDisplayImgs.length > 0 ? allDisplayImgs : [{ url: product.imageUrl || 'https://via.placeholder.com/600x800?text=No+Image', color: '' }];
+                return finalImgs.map((img, idx) => (
+                  <img 
+                    key={idx}
+                    src={img.url} 
+                    alt={`${product.name} - ${idx}`} 
+                    style={{ 
+                      minWidth: '100%',
+                      height: '100%',
+                      objectFit: 'contain',
+                      scrollSnapAlign: 'start',
+                      transition: 'opacity 0.3s ease',
+                      backgroundColor: '#f9f9f9'
+                    }} 
+                  />
+                ));
+              })()}
             </div>
 
             {product.images && product.images.length > 1 && (

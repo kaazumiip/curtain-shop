@@ -557,7 +557,7 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                       <div style={styles.rowSub}>{t('color_variants_sub')}</div>
                     </div>
                     <div style={styles.rowInputCol}>
-                      {/* Dedicated Display Picture (Cover) - Separate from Color Categories */}
+                      {/* Dedicated Display & General Product Photos (Multiple, Separate from Color Categories) */}
                       <div style={{
                         marginBottom: '14px',
                         padding: '12px',
@@ -565,33 +565,18 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                         border: '1.5px dashed #86efac',
                         borderRadius: '14px',
                         display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        gap: '12px',
-                        flexWrap: 'wrap'
+                        flexDirection: 'column',
+                        gap: '10px'
                       }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          {formData.imageUrl ? (
-                            <img
-                              src={formData.imageUrl}
-                              alt="Display"
-                              style={{ width: '58px', height: '58px', borderRadius: '10px', objectFit: 'cover', border: '2px solid #16a34a', backgroundColor: '#fff' }}
-                            />
-                          ) : (
-                            <div style={{ width: '58px', height: '58px', borderRadius: '10px', backgroundColor: '#dcfce7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#15803d', fontSize: '0.7rem', fontWeight: '800', textAlign: 'center' }}>
-                              រូបមុខ
-                            </div>
-                          )}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
                           <div>
                             <div style={{ fontSize: '0.84rem', fontWeight: '800', color: '#14532d' }}>
-                              រូបភាពតំណាង (Display Picture)
+                              រូបភាពផលិតផលទូទៅ / រូបមុខ (Product Photos — No Color Tag)
                             </div>
                             <div style={{ fontSize: '0.72rem', color: '#166534' }}>
-                              ដាក់រូបមុខផលិតផលដាច់ដោយឡែក (មិនចូលក្នុងពណ៌ទេ)
+                              ដាក់រូបច្រើនសន្លឹកបានដោយមិនចូលក្នុងពណ៌/ម៉ូដទេ (រូបទី ១ ជារូបមុខ)
                             </div>
                           </div>
-                        </div>
-                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                           <label style={{
                             padding: '7px 14px',
                             borderRadius: '10px',
@@ -599,22 +584,38 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                             color: '#ffffff',
                             fontSize: '0.78rem',
                             fontWeight: '700',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            whiteSpace: 'nowrap'
                           }}>
-                            {uploading ? '...' : (formData.imageUrl ? 'ប្តូររូបមុខ' : '+ ដាក់រូបមុខ')}
+                            {uploading ? '...' : '+ បន្ថែមរូបផលិតផល'}
                             <input
                               type="file"
+                              multiple
                               hidden
                               accept="image/*"
                               onChange={async (e) => {
-                                const file = e.target.files?.[0];
-                                if (!file) return;
-                                const data = new FormData();
-                                data.append('image', file);
+                                const files = Array.from(e.target.files || []);
+                                if (files.length === 0) return;
                                 try {
                                   setUploading(true);
-                                  const res = await api.post('/products/upload', data);
-                                  setFormData((prev) => ({ ...prev, imageUrl: res.data.imageUrl }));
+                                  const uploadedUrls = [];
+                                  for (const file of files) {
+                                    const data = new FormData();
+                                    data.append('image', file);
+                                    const res = await api.post('/products/upload', data);
+                                    uploadedUrls.push(res.data.imageUrl);
+                                  }
+                                  setFormData((prev) => {
+                                    const existing = Array.isArray(prev.galleryImages)
+                                      ? prev.galleryImages
+                                      : (prev.imageUrl ? [prev.imageUrl] : []);
+                                    const nextGallery = [...existing, ...uploadedUrls];
+                                    return {
+                                      ...prev,
+                                      galleryImages: nextGallery,
+                                      imageUrl: nextGallery[0] || prev.imageUrl
+                                    };
+                                  });
                                 } catch (err) {
                                   alert(t('photo_upload_failed'));
                                 } finally {
@@ -623,16 +624,66 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                               }}
                             />
                           </label>
-                          {formData.imageUrl && (
-                            <button
-                              type="button"
-                              onClick={() => setFormData((prev) => ({ ...prev, imageUrl: '' }))}
-                              style={{ padding: '7px 10px', borderRadius: '10px', border: '1px solid #fecaca', backgroundColor: '#fef2f2', color: '#dc2626', fontSize: '0.75rem', fontWeight: '700', cursor: 'pointer' }}
-                            >
-                              លុប
-                            </button>
-                          )}
                         </div>
+
+                        {(() => {
+                          const gList = Array.isArray(formData.galleryImages) && formData.galleryImages.length > 0
+                            ? formData.galleryImages
+                            : (formData.imageUrl ? [formData.imageUrl] : []);
+                          if (gList.length === 0) return null;
+                          return (
+                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                              {gList.map((url, gIdx) => (
+                                <div key={gIdx} style={{ position: 'relative', display: 'inline-block' }}>
+                                  <img
+                                    src={url}
+                                    alt={`Product ${gIdx + 1}`}
+                                    style={{
+                                      width: '56px',
+                                      height: '56px',
+                                      borderRadius: '10px',
+                                      objectFit: 'cover',
+                                      border: gIdx === 0 ? '2.5px solid #16a34a' : '1.5px solid #bbf7d0',
+                                      backgroundColor: '#fff',
+                                      display: 'block'
+                                    }}
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const next = gList.filter((_, i) => i !== gIdx);
+                                      setFormData((prev) => ({
+                                        ...prev,
+                                        galleryImages: next,
+                                        imageUrl: next[0] || ''
+                                      }));
+                                    }}
+                                    style={{
+                                      position: 'absolute',
+                                      top: '-6px',
+                                      right: '-6px',
+                                      width: '18px',
+                                      height: '18px',
+                                      borderRadius: '50%',
+                                      border: 'none',
+                                      backgroundColor: '#ef4444',
+                                      color: '#fff',
+                                      fontSize: '0.65rem',
+                                      fontWeight: '800',
+                                      cursor: 'pointer',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      padding: 0
+                                    }}
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        })()}
                       </div>
 
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
