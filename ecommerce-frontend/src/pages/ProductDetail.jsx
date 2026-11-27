@@ -297,8 +297,8 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
             const uniqueModels = [];
             const seen = new Set();
             (product.images || []).forEach((img, idx) => {
-              const label = (img.color || '').trim() || `ម៉ូដទី ${uniqueModels.length + 1}`;
-              if (!seen.has(label)) {
+              const label = (img.color || '').trim();
+              if (label && !seen.has(label)) {
                 seen.add(label);
                 uniqueModels.push({ label, url: img.url, firstIdx: idx });
               }
@@ -310,7 +310,7 @@ const ProductDetail = ({ products = [], onAddToCart, favorites, onToggleFavorite
                 uniqueModels.push({ label, url: null, firstIdx: -1 });
               }
             });
-            if (uniqueModels.length <= 1 && !product.customOptions?.colorOptions?.length) return null;
+            if (uniqueModels.length === 0) return null;
             return (
               <div style={{ padding: '10px 14px 14px', backgroundColor: '#ffffff', borderTop: '1px solid #f1f5f9' }}>
                 <div style={{ fontSize: '0.78rem', fontWeight: '800', color: '#334155', marginBottom: '10px' }}>
