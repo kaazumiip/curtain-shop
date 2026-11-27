@@ -597,12 +597,63 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
                                         height: '56px',
                                         borderRadius: '10px',
                                         objectFit: 'cover',
-                                        border: previewImgIdx === idx ? '2.5px solid #16a34a' : '1.5px solid #cbd5e1',
+                                        border: idx === 0 ? '2.5px solid #16a34a' : (previewImgIdx === idx ? '2px solid #0f172a' : '1.5px solid #cbd5e1'),
                                         cursor: 'pointer',
                                         display: 'block',
                                         backgroundColor: '#fff'
                                       }}
                                     />
+                                    {idx === 0 ? (
+                                      <span
+                                        title="រូបភាពតំណាង (Display Picture)"
+                                        style={{
+                                          position: 'absolute',
+                                          bottom: '-6px',
+                                          left: '50%',
+                                          transform: 'translateX(-50%)',
+                                          backgroundColor: '#16a34a',
+                                          color: '#ffffff',
+                                          fontSize: '0.56rem',
+                                          fontWeight: '800',
+                                          padding: '1px 6px',
+                                          borderRadius: '999px',
+                                          whiteSpace: 'nowrap'
+                                        }}
+                                      >
+                                        រូបមុខ
+                                      </span>
+                                    ) : (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setFormData((prev) => {
+                                            const next = [...prev.images];
+                                            const [chosen] = next.splice(idx, 1);
+                                            next.unshift(chosen);
+                                            return { ...prev, images: next, imageUrl: chosen.url };
+                                          });
+                                          setPreviewImgIdx(0);
+                                        }}
+                                        title="ដាក់ជារូបភាពតំណាង (Set as Display Picture)"
+                                        style={{
+                                          position: 'absolute',
+                                          bottom: '-6px',
+                                          left: '50%',
+                                          transform: 'translateX(-50%)',
+                                          backgroundColor: '#0f172a',
+                                          color: '#ffffff',
+                                          border: 'none',
+                                          fontSize: '0.55rem',
+                                          fontWeight: '700',
+                                          padding: '1px 5px',
+                                          borderRadius: '999px',
+                                          cursor: 'pointer',
+                                          whiteSpace: 'nowrap'
+                                        }}
+                                      >
+                                        ដាក់មុខ
+                                      </button>
+                                    )}
                                     <button
                                       type="button"
                                       onClick={() => removeGalleryImage(idx)}
