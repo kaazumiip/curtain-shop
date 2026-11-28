@@ -702,7 +702,7 @@ const ProductModal = ({ product, isOpen, onClose, onSave }) => {
 
                           return groups.map((group, groupIdx) => (
                             <div
-                              key={group.key}
+                              key={group.items[0]?.idx ?? groupIdx}
                               style={{
                                 backgroundColor: '#f8fafc',
                                 border: '1.5px solid #e2e8f0',
